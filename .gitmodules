@@ -1,0 +1,3 @@
+[submodule "evercrypt-sys/hacl-star"]
+	path = evercrypt-sys/hacl-star
+	url = https://github.com/project-everest/hacl-star/

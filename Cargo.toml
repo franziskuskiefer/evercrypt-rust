@@ -1,0 +1,6 @@
+
+[workspace]
+members = [
+    "evercrypt-sys",
+    "evercrypt-rs"
+]

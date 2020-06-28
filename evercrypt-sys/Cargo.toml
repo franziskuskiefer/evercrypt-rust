@@ -1,0 +1,17 @@
+[package]
+name = "evercrypt-sys"
+version = "0.0.1"
+authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
+edition = "2018"
+build = "build.rs"
+categories = ["cryptography", "api-bindings"]
+links = "evercrypt"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libc = { version = "0.2", default-features = false }
+# cc = "1.0"
+
+[build-dependencies]
+bindgen = "0.54"
