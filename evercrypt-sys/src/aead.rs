@@ -12,6 +12,7 @@ pub enum AEADError {
     InvalidInit,
     InvalidCiphertext,
     InvalidIvLen,
+    InvalidAlgorithm,
 }
 
 pub struct AEAD {
@@ -19,7 +20,13 @@ pub struct AEAD {
 }
 
 impl AEAD {
-    pub fn init(alg: AEADCipher, k: &[u8]) -> Result<Self, AEADError> {
+    pub fn init(alg: u8, k: &[u8]) -> Result<Self, AEADError> {
+        let alg = match alg {
+            0 => AEADCipher::Aes128Gcm,
+            1 => AEADCipher::Aes256Gcm,
+            2 => AEADCipher::Chacha20Poly1305,
+            _ => return Err(AEADError::InvalidAlgorithm),
+        };
         unsafe {
             // Make sure this happened.
             EverCrypt_AutoConfig2_init();

@@ -1,3 +1,6 @@
 [submodule "evercrypt-sys/hacl-star"]
 	path = evercrypt-sys/hacl-star
 	url = https://github.com/project-everest/hacl-star/
+[submodule "evercrypt-rs/tests/wycheproof"]
+	path = evercrypt-rs/tests/wycheproof
+	url = https://github.com/google/wycheproof/
