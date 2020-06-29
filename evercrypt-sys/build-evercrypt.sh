@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cwd=$(dirname "$0")
+cwd=$(cd $(dirname $0); pwd -P)
 cd $cwd/hacl-star/dist/gcc-compatible/
 
 ./configure

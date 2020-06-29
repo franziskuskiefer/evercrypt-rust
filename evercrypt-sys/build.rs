@@ -28,6 +28,7 @@ fn main() {
     println!("cargo:rustc-link-search=native={}", lib_dir);
     println!("cargo:rustc-link-lib={}={}", mode, name);
     println!("cargo:rustc-env=DYLD_LIBRARY_PATH={}", lib_dir);
+    println!("cargo:rustc-env=LD_LIBRARY_PATH={}", lib_dir);
     println!("cargo:rustc-link-lib=dylib={}", name);
 
     // HACL/Evercrypt header paths
