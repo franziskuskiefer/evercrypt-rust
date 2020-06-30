@@ -46,6 +46,7 @@ fn main() {
         // Allow function we want to have in
         .whitelist_function("EverCrypt_AutoConfig2_init")
         .whitelist_function("EverCrypt_AEAD_.*")
+        .whitelist_function("EverCrypt_Curve25519_.*")
         .whitelist_var("Sepc_.*")
         .whitelist_var("EverCrypt_.*")
         // Block everything we don't need or define ourselfs.

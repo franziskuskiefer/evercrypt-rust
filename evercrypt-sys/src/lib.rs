@@ -4,3 +4,4 @@
 
 pub mod aead;
 mod evercrypt_bindings;
+pub mod x25519;
