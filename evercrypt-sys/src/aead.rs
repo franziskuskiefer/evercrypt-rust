@@ -130,7 +130,7 @@ mod tests {
             0x59, 0x01, 0x13, 0x1d, 0x07, 0x60, 0xc8, 0x71, 0x59, 0x01, 0xd8, 0x81, 0xfd, 0xfd,
             0x3b, 0xc0,
         ];
-        let cipher = AEAD::init(AEADCipher::Aes128Gcm, &k).unwrap();
+        let cipher = AEAD::init(AEADCipher::Aes128Gcm as u8, &k).unwrap();
         let (ctxt, tag) = cipher.encrypt(&msg, &iv, &aad).unwrap();
         assert_eq!(ctxt_expected[..], ctxt[..]);
         assert_eq!(tag_expected[..], tag[..]);
@@ -157,7 +157,7 @@ mod tests {
             0x9a, 0x4a, 0x25, 0x79, 0x52, 0x93, 0x01, 0xbc, 0xfb, 0x71, 0xc7, 0x8d, 0x40, 0x60,
             0xf5, 0x2c,
         ];
-        let cipher = AEAD::init(AEADCipher::Aes256Gcm, &k).unwrap();
+        let cipher = AEAD::init(AEADCipher::Aes256Gcm as u8, &k).unwrap();
         let (ctxt, tag) = cipher.encrypt(&msg, &iv, &aad).unwrap();
         assert_eq!(ctxt_expected[..], ctxt[..]);
         assert_eq!(tag_expected[..], tag[..]);
@@ -206,7 +206,7 @@ mod tests {
             0x1a, 0xe1, 0x0b, 0x59, 0x4f, 0x09, 0xe2, 0x6a, 0x7e, 0x90, 0x2e, 0xcb, 0xd0, 0x60,
             0x06, 0x91,
         ];
-        let cipher = AEAD::init(AEADCipher::Chacha20Poly1305, &k).unwrap();
+        let cipher = AEAD::init(AEADCipher::Chacha20Poly1305 as u8, &k).unwrap();
         let (ctxt, tag) = cipher.encrypt(&msg, &iv, &aad).unwrap();
         assert_eq!(ctxt_expected[..], ctxt[..]);
         assert_eq!(tag_expected[..], tag[..]);
