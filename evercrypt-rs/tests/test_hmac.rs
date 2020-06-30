@@ -60,10 +60,10 @@ fn test_wycheproof() {
             _ => panic!("Unknown HMAC algorithm {}", tests.algorithm),
         };
         println!("Testing {:?}", algorithm);
-        
+
         let num_tests = tests.numberOfTests;
         let mut tests_run = 0;
-    
+
         for testGroup in tests.testGroups.iter() {
             assert_eq!(testGroup.r#type, "MacTest");
             let _key_size = testGroup.keySize;
@@ -74,7 +74,7 @@ fn test_wycheproof() {
                 let key = hex_str_to_bytes(&test.key);
                 let msg = hex_str_to_bytes(&test.msg);
                 let tag = hex_str_to_bytes(&test.tag);
-    
+
                 let r = hmac(algorithm, &key, &msg, Some(tag_size >> 3));
                 if valid {
                     assert_eq!(r[..], tag[..]);
@@ -86,5 +86,4 @@ fn test_wycheproof() {
         println!("Ran {} out of {} tests.", tests_run, num_tests);
         assert_eq!(num_tests, tests_run);
     }
-
 }
