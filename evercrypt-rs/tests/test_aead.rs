@@ -63,8 +63,8 @@ fn test_wycheproof() {
             assert_eq!(testGroup.r#type, "AeadTest");
             let algorithm = match test_vec.algorithm.as_str() {
                 "AES-GCM" => match testGroup.keySize {
-                    128 => Mode::AesGcm128,
-                    256 => Mode::AesGcm256,
+                    128 => Mode::Aes128Gcm,
+                    256 => Mode::Aes256Gcm,
                     _ => {
                         // not implemented
                         println!("Only AES 128 and 256 are implemented.");

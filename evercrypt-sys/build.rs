@@ -47,8 +47,11 @@ fn main() {
         .whitelist_function("EverCrypt_AutoConfig2_init")
         .whitelist_function("EverCrypt_AEAD_.*")
         .whitelist_function("EverCrypt_Curve25519_.*")
-        .whitelist_var("Sepc_.*")
-        .whitelist_var("EverCrypt_.*")
+        .whitelist_function("EverCrypt_HKDF_.*")
+        .whitelist_function("EverCrypt_HMAC_.*")
+        .whitelist_var("EverCrypt_Error_.*")
+        .whitelist_var("Spec_.*")
+        // .whitelist_var("EverCrypt_.*")
         // Block everything we don't need or define ourselfs.
         .blacklist_type("EverCrypt_AEAD_state_s.*")
         // Generate bindings

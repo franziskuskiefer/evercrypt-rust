@@ -2,6 +2,4 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-pub mod aead;
-mod evercrypt_bindings;
-pub mod x25519;
+pub mod evercrypt_bindings;
