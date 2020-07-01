@@ -47,6 +47,7 @@ fn main() {
         .whitelist_function("EverCrypt_AutoConfig2_init")
         .whitelist_function("EverCrypt_AEAD_.*")
         .whitelist_function("EverCrypt_Curve25519_.*")
+        .whitelist_function("EverCrypt_Ed25519_.*")
         .whitelist_function("EverCrypt_HKDF_.*")
         .whitelist_function("EverCrypt_HMAC_.*")
         .whitelist_function("Hacl_P256_.*")
