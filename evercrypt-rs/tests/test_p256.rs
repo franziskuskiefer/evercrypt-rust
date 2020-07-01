@@ -41,7 +41,7 @@ impl ReadFromFile for P256TestVector {}
 #[test]
 fn test_wycheproof() {
     let tests: P256TestVector =
-        P256TestVector::from_file("/Users/franziskus/repos/evercrypt-rust/evercrypt-rs/tests/wycheproof/testvectors/ecdh_secp256r1_ecpoint_test.json");
+        P256TestVector::from_file("tests/wycheproof/testvectors/ecdh_secp256r1_ecpoint_test.json");
 
     assert_eq!(tests.algorithm, "ECDH");
 
