@@ -24,7 +24,7 @@ jobs:
       run: sudo apt -y install pkg-config
     - if: matrix.os == 'macos-latest'
       run: brew install pkg-config
-    - Setup:
+    - name: Setup
       run: |
         echo ::set-env name=LIB_PATH::$GITHUB_WORKSPACE/evercrypt-sys/hacl-star/dist/gcc-compatible
     - name: Build HACL & evercrypt-rs
