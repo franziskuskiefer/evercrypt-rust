@@ -53,7 +53,6 @@ fn main() {
         .whitelist_function("Hacl_P256_.*")
         .whitelist_var("EverCrypt_Error_.*")
         .whitelist_var("Spec_.*")
-        // .whitelist_var("EverCrypt_.*")
         // Block everything we don't need or define ourselfs.
         .blacklist_type("EverCrypt_AEAD_state_s.*")
         // Generate bindings

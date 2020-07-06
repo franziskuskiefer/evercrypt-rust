@@ -7,3 +7,5 @@ cd $cwd/hacl-star/dist/gcc-compatible/
 make
 
 cd -
+
+cargo build --tests
