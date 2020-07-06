@@ -31,4 +31,7 @@ jobs:
     - name: Build HACL & evercrypt-rs
       run: ./evercrypt-sys/build.sh
     - name: Run tests
-      run: cargo test --verbose
+      run: |
+        echo $LD_LIBRARY_PATH
+        echo $DYLD_LIBRARY_PATH
+        cargo test --verbose
