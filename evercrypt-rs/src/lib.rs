@@ -1,4 +1,5 @@
 pub mod aead;
+pub mod digest;
 pub mod ed25519;
 pub mod hkdf;
 pub mod hmac;
