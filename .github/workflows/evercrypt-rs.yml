@@ -10,7 +10,7 @@ jobs:
     strategy: 
       matrix:
         os:
-          - macos-latest
+          # - macos-latest # AES not available on macos right now
           - ubuntu-latest
           # - windows-latest
 
@@ -27,7 +27,7 @@ jobs:
     - name: Setup
       run: |
         echo ::set-env name=LIB_PATH::$GITHUB_WORKSPACE/evercrypt-sys/hacl-star/dist/gcc-compatible
-    - name: Build HACL & evercrypt-rs
+    - name: Build hacl & evercrypt-sys
       run: ./evercrypt-sys/build.sh
     - name: Run tests
       run: LD_LIBRARY_PATH=$LIB_PATH DYLD_LIBRARY_PATH=$LIB_PATH cargo test --verbose
