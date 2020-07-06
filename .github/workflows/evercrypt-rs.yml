@@ -1,0 +1,33 @@
+name: Build & Test
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy: 
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          # - windows-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - if: matrix.os == 'ubuntu-latest'
+      run: apt update && apt -y install pkg-config
+    - if: matrix.os == 'macos-latest'
+      run: brew install pkg-config
+    - name: Build HACL & evercrypt-rs
+      run: ./evercrypt-sys/build.sh
+    - name: Run tests
+      run: cargo test --verbose
+      env:
+        DYLD_LIBRARY_PATH: ${GITHUB_WORKSPACE}/evercrypt-rust/evercrypt-sys/hacl-star/dist/gcc-compatible
+        LD_LIBRARY_PATH: ${GITHUB_WORKSPACE}/evercrypt-rust/evercrypt-sys/hacl-star/dist/gcc-compatible
