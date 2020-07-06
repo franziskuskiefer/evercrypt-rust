@@ -21,13 +21,14 @@ jobs:
       with:
         submodules: true
     - if: matrix.os == 'ubuntu-latest'
-      run: sudo apt -y install pkg-config
+      run: |
+        sudo apt -y install pkg-config
+        echo "::set-env name=LD_LIBRARY_PATH::$GITHUB_WORKSPACE/evercrypt-rust/evercrypt-sys/hacl-star/dist/gcc-compatible"
     - if: matrix.os == 'macos-latest'
-      run: brew install pkg-config
+      run: |
+        brew install pkg-config
+        echo "::set-env name=DYLD_LIBRARY_PATH::$GITHUB_WORKSPACE/evercrypt-rust/evercrypt-sys/hacl-star/dist/gcc-compatible"
     - name: Build HACL & evercrypt-rs
       run: ./evercrypt-sys/build.sh
     - name: Run tests
       run: cargo test --verbose
-      env:
-        DYLD_LIBRARY_PATH: ${GITHUB_WORKSPACE}/evercrypt-rust/evercrypt-sys/hacl-star/dist/gcc-compatible
-        LD_LIBRARY_PATH: ${GITHUB_WORKSPACE}/evercrypt-rust/evercrypt-sys/hacl-star/dist/gcc-compatible
