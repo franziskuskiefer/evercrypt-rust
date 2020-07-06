@@ -10,7 +10,7 @@ jobs:
     strategy: 
       matrix:
         os:
-          # - macos-latest
+          - macos-latest
           - ubuntu-latest
           # - windows-latest
 
@@ -30,4 +30,4 @@ jobs:
     - name: Build HACL & evercrypt-rs
       run: ./evercrypt-sys/build.sh
     - name: Run tests
-      run: LD_LIBRARY_PATH=$LIB_PATH cargo test --verbose
+      run: LD_LIBRARY_PATH=$LIB_PATH DYLD_LIBRARY_PATH=$LIB_PATH cargo test --verbose
