@@ -46,7 +46,6 @@ fn test_wycheproof() {
     assert_eq!(tests.algorithm, "ECDH");
 
     let num_tests = tests.numberOfTests;
-    let mut skipped_tests = 0;
     let mut tests_run = 0;
 
     for testGroup in tests.testGroups.iter() {
@@ -54,14 +53,9 @@ fn test_wycheproof() {
         assert_eq!(testGroup.r#type, "EcdhEcpointTest");
         assert_eq!(testGroup.encoding, "ecpoint");
         for test in testGroup.tests.iter() {
-            if test.flags.contains(&"CompressedPoint".to_owned()) {
-                skipped_tests += 1;
-                continue;
-            }
-
             println!("Test {:?}: {:?}", test.tcId, test.comment);
 
-            let valid = test.result.eq("valid");
+            let valid = test.result.eq("valid") || test.result.eq("acceptable");
             let public = hex_str_to_bytes(&test.public);
             let private = hex_str_to_bytes(&test.private);
             let shared = hex_str_to_bytes(&test.shared);
@@ -82,9 +76,6 @@ fn test_wycheproof() {
         }
     }
     // Check that we ran all tests.
-    println!(
-        "Ran {} out of {} tests and skipped {}.",
-        tests_run, num_tests, skipped_tests
-    );
-    assert_eq!(num_tests - skipped_tests, tests_run);
+    println!("Ran {} out of {} tests.", tests_run, num_tests);
+    assert_eq!(num_tests, tests_run);
 }

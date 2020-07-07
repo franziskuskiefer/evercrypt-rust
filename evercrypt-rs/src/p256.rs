@@ -29,11 +29,16 @@ pub fn p256_dh(p: &[u8], s: &[u8]) -> Result<[u8; 64], Error> {
 
     // Parse the public uncompressed key.
     let mut public = vec![0u8; 64];
-    let success = unsafe {
+    let uncompressed_point = unsafe {
         Hacl_P256_decompression_not_compressed_form(p.as_ptr() as _, public.as_mut_ptr())
     };
-    if !success {
-        return Err(Error::CompressedPoint);
+    let compressed_point = if !uncompressed_point {
+        unsafe {
+            Hacl_P256_decompression_compressed_form(p.as_ptr() as _, public.as_mut_ptr())
+        }
+    } else { false };
+    if !uncompressed_point && !compressed_point {
+        return Err(Error::InvalidPoint);
     }
 
     // Cut the scalar to 32 byte and prepend with 0s if necessary.
