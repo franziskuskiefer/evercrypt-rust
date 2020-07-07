@@ -58,37 +58,11 @@ fn test_wycheproof() {
                 skipped_tests += 1;
                 continue;
             }
-            if test.comment.eq("point with coordinate x = 0")
-                || test
-                    .comment
-                    .eq("point with coordinate x = 0 in left to right addition chain")
-                || test
-                    .comment
-                    .eq("point with coordinate x = 0 in right to left addition chain")
-                || test.comment.eq(
-                    "point with coordinate x = 0 in precomputation or right to left addition chain",
-                )
-                || test.comment.eq("point with coordinate y = 1")
-                || test
-                    .comment
-                    .eq("point with coordinate y = 1 in left to right addition chain")
-                || test
-                    .comment
-                    .eq("point with coordinate y = 1 in right to left addition chain")
-                || test.comment.eq(
-                    "point with coordinate y = 1 in precomputation or right to left addition chain",
-                )
-                || test.comment.eq("edge case private key")
-            {
-                println!("These tests currently fail.");
-                skipped_tests += 1;
-                continue;
-            }
-            // We can't handle compressed points.
-            let valid = test.result.eq("valid");
+
             println!("Test {:?}: {:?}", test.tcId, test.comment);
-            let pk_start = if valid { 2 } else { 0 };
-            let public = hex_str_to_bytes(&test.public[pk_start..]);
+
+            let valid = test.result.eq("valid");
+            let public = hex_str_to_bytes(&test.public);
             let private = hex_str_to_bytes(&test.private);
             let shared = hex_str_to_bytes(&test.shared);
 
