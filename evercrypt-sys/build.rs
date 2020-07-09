@@ -55,6 +55,7 @@ fn main() {
         .whitelist_var("EverCrypt_Error_.*")
         .whitelist_var("Spec_.*")
         // Block everything we don't need or define ourselfs.
+        .blacklist_type("Hacl_Streaming_.*")
         .blacklist_type("EverCrypt_AEAD_state_s.*")
         // Generate bindings
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))

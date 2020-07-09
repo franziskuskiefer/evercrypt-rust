@@ -27,7 +27,7 @@ pub fn p256_dh(p: &[u8], s: &[u8]) -> Result<[u8; 64], Error> {
         return Err(Error::InvalidScalar);
     }
 
-    // Parse the public uncompressed key.
+    // Parse the public key.
     let mut public = vec![0u8; 64];
     let uncompressed_point = unsafe {
         Hacl_P256_decompression_not_compressed_form(p.as_ptr() as _, public.as_mut_ptr())
