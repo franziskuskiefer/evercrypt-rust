@@ -29,5 +29,11 @@ jobs:
         echo ::set-env name=LIB_PATH::$GITHUB_WORKSPACE/evercrypt-sys/hacl-star/dist/gcc-compatible
     - name: Build hacl & evercrypt-sys
       run: ./evercrypt-sys/build.sh
-    - name: Run tests
-      run: LD_LIBRARY_PATH=$LIB_PATH DYLD_LIBRARY_PATH=$LIB_PATH cargo test --verbose --features "rust-crypto-aes"
+    - name: Run evercrypt-sys tests
+      run: |
+        cd evercrypt-sys
+        LD_LIBRARY_PATH=$LIB_PATH DYLD_LIBRARY_PATH=$LIB_PATH cargo test --verbose
+    - name: Run evercrypt-rs tests
+      run: |
+        cd evercrypt-rs
+        LD_LIBRARY_PATH=$LIB_PATH DYLD_LIBRARY_PATH=$LIB_PATH cargo test --verbose --features "rust-crypto-aes"
