@@ -44,7 +44,7 @@ fn main() {
         // Set inlcude paths for HACL/Evercrypt headers
         .clang_args(hacl_includes.iter())
         // Allow function we want to have in
-        .whitelist_function("EverCrypt_AutoConfig2_init")
+        .whitelist_function("EverCrypt_AutoConfig2_.*")
         .whitelist_function("EverCrypt_AEAD_.*")
         .whitelist_function("EverCrypt_Curve25519_.*")
         .whitelist_function("EverCrypt_Ed25519_.*")

@@ -115,6 +115,14 @@ fn test_wycheproof() {
                     assert_ne!(tag, exp_tag);
                 }
                 assert_eq!(ctxt, exp_cipher);
+                let msg_decrypted = match cipher.decrypt(&ctxt, &tag, &nonce, &aad) {
+                    Ok(m) => m,
+                    Err(_) => {
+                        assert!(!valid);
+                        msg.clone()
+                    },
+                };
+                assert_eq!(msg, msg_decrypted);
                 *tests_run += 1;
             }
         }

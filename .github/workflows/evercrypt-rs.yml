@@ -10,7 +10,7 @@ jobs:
     strategy: 
       matrix:
         os:
-          # - macos-latest # AES not available on macos right now
+          - macos-latest # AES not available on macos right now
           - ubuntu-latest
           # - windows-latest
 
@@ -30,4 +30,4 @@ jobs:
     - name: Build hacl & evercrypt-sys
       run: ./evercrypt-sys/build.sh
     - name: Run tests
-      run: LD_LIBRARY_PATH=$LIB_PATH DYLD_LIBRARY_PATH=$LIB_PATH cargo test --verbose
+      run: LD_LIBRARY_PATH=$LIB_PATH DYLD_LIBRARY_PATH=$LIB_PATH cargo test --verbose --features "rust-crypto-aes"
