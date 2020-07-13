@@ -14,12 +14,6 @@ jobs:
           - macos-latest
           - ubuntu-latest
           # - windows-latest
-        features:
-          - rust-crypto
-          - ""
-        exclude:
-          - os: macos-latest
-            features: ""
 
     runs-on: ${{ matrix.os }}
 
@@ -33,9 +27,16 @@ jobs:
       run: brew install pkg-config
     - name: Build
       run: cargo build --verbose
-    - name: Test
-      run: cargo test --verbose
-    - name: Test (highl-level lib)
+    - name: Test evercrypt-sys
+      run: |
+        cd evercrypt-sys
+        cargo test --verbose
+    - if: matrix.os == 'ubuntu-latest'
+      name: Test evercrypt-rs
       run: |
         cd evercrypt-rs
-        cargo test --verbose --features ${{ matrix.features }}
+        cargo test --verbose
+    - name: Test (rust-crypto-aes)
+      run: |
+        cd evercrypt-rs
+        cargo test --verbose --features rust-crypto-aes
