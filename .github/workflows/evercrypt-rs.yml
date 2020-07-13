@@ -10,7 +10,7 @@ jobs:
     strategy: 
       matrix:
         os:
-          - macos-latest # AES not available on macos right now
+          - macos-latest
           - ubuntu-latest
           # - windows-latest
 
