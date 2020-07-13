@@ -1,12 +1,58 @@
 extern crate bindgen;
 
-use std::{env, path::PathBuf};
+use std::{env, fs, path::Path, path::PathBuf, process::Command};
+
+#[cfg(windows)]
+fn build_hacl() {
+    unimplemented!();
+}
+
+#[cfg(not(windows))]
+fn build_hacl(lib_dir: &Path) {
+    // Run configure
+    // XXX: Do we need to configure anything here?
+    let mut configure_cmd = Command::new(
+        fs::canonicalize(lib_dir.join("configure")).expect("Failed to find configure script!"),
+    );
+    let configure_status = configure_cmd
+        .current_dir(lib_dir)
+        .status()
+        .expect("Failed to run configure");
+    if !configure_status.success() {
+        panic!("Failed to run configure.")
+    }
+
+    // Run make
+    let mut make_cmd = Command::new("make");
+    let make_status = make_cmd
+        .current_dir(lib_dir)
+        .arg("-j")
+        .env("DISABLE_OCAML_BINDINGS", "1")
+        .status()
+        .expect("Failed to run make");
+    if !make_status.success() {
+        panic!("Failed to run make.")
+    }
+}
+
+fn copy_evercrypt_lib(src: &str, dst: &Path) {
+    println!("copy to {:?}", dst);
+    Command::new("cp")
+        .arg(src)
+        .arg(dst)
+        .status()
+        .expect("Failed to copy evercrypt library");
+}
 
 fn main() {
     // Get ENV variables
     let home_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let llvm_dir =
         env::var("LLVM_DIR").unwrap_or("/usr/local/Cellar/llvm/10.0.0_3/bin/".to_string());
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let profile = env::var("PROFILE").unwrap();
+    let target = env::var("CARGO_TARGET_DIR").unwrap_or("target".to_string());
+    let target_path = Path::new(&home_dir).join("..").join(&target).join(&profile);
 
     // Set HACL/Evercrypt paths
     let hacl_dir = home_dir + "/hacl-star";
@@ -38,6 +84,12 @@ fn main() {
         "-Ihacl-star/dist/kremlin/kremlib/dist/minimal",
     ];
 
+    // Build hacl/evercrypt
+    build_hacl(Path::new(&lib_dir));
+
+    // Copy evercrypt library to the target directory.
+    copy_evercrypt_lib(&(lib_dir + "/libevercrypt.so"), &target_path);
+
     let bindings = bindgen::Builder::default()
         // Header to wrap HACL/Evercrypt headers
         .header("wrapper.h")
@@ -62,7 +114,7 @@ fn main() {
         .generate()
         .expect("Unable to generate bindings");
 
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_path = PathBuf::from(out_dir);
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");

@@ -24,16 +24,11 @@ jobs:
       run: sudo apt -y install pkg-config
     - if: matrix.os == 'macos-latest'
       run: brew install pkg-config
-    - name: Setup
-      run: |
-        echo ::set-env name=LIB_PATH::$GITHUB_WORKSPACE/evercrypt-sys/hacl-star/dist/gcc-compatible
-    - name: Build hacl & evercrypt-sys
-      run: ./evercrypt-sys/build.sh
-    - name: Run evercrypt-sys tests
-      run: |
-        cd evercrypt-sys
-        LD_LIBRARY_PATH=$LIB_PATH DYLD_LIBRARY_PATH=$LIB_PATH cargo test --verbose
-    - name: Run evercrypt-rs tests
+    - name: Build
+      run: cargo build --verbose
+    - name: Test
+      run: cargo test --verbose
+    - name: Tests (rust-crypto enabled)
       run: |
         cd evercrypt-rs
-        LD_LIBRARY_PATH=$LIB_PATH DYLD_LIBRARY_PATH=$LIB_PATH cargo test --verbose --features "rust-crypto-aes"
+        cargo test --verbose --features "rust-crypto-aes"
