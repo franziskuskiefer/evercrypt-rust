@@ -5,6 +5,8 @@ pub enum Error {
     InvalidPoint,
 }
 
+// TODO: enforce length of inputs
+
 /// Return base * s
 pub fn x25519_base(s: &[u8]) -> [u8; 32] {
     let mut out = [0u8; 32];

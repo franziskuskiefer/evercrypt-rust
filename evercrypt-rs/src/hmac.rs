@@ -10,7 +10,7 @@ pub enum Mode {
     Sha512 = Spec_Hash_Definitions_SHA2_512 as isize,
 }
 
-pub(crate) fn get_tag_size(mode: Mode) -> usize {
+pub fn get_tag_size(mode: Mode) -> usize {
     match mode {
         Mode::Sha1 => 20,
         Mode::Sha256 => 32,
