@@ -35,7 +35,7 @@ fn build_hacl(lib_dir: &Path) {
     }
 }
 
-fn copy_evercrypt_lib(src: &str, dst: &Path) {
+fn copy_evercrypt_lib(src: &Path, dst: &Path) {
     println!("copy to {:?}", dst);
     Command::new("cp")
         .arg(src)
@@ -52,12 +52,12 @@ fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let profile = env::var("PROFILE").unwrap();
     let target = env::var("CARGO_TARGET_DIR").unwrap_or("target".to_string());
+
     let target_path = Path::new(&home_dir).join("..").join(&target).join(&profile);
 
     // Set HACL/Evercrypt paths
-    let hacl_dir = home_dir + "/hacl-star";
-    let lib_dir = hacl_dir.clone() + "/dist/gcc-compatible";
-    let _kremlin_dir = hacl_dir.clone() + "/dist/kremlin";
+    let hacl_dir = Path::new(&home_dir).join("hacl-star");
+    let gcc_lib_dir = hacl_dir.join("dist").join("gcc-compatible");
 
     // Set library name and type
     let mode = "dylib";
@@ -71,10 +71,19 @@ fn main() {
     println!("cargo:rerun-if-changed=wrapper.h");
 
     // Set up rustc link environment
-    println!("cargo:rustc-link-search=native={}", lib_dir);
+    println!(
+        "cargo:rustc-link-search=native={}",
+        gcc_lib_dir.to_str().unwrap()
+    );
     println!("cargo:rustc-link-lib={}={}", mode, name);
-    println!("cargo:rustc-env=DYLD_LIBRARY_PATH={}", lib_dir);
-    println!("cargo:rustc-env=LD_LIBRARY_PATH={}", lib_dir);
+    println!(
+        "cargo:rustc-env=DYLD_LIBRARY_PATH={}",
+        gcc_lib_dir.to_str().unwrap()
+    );
+    println!(
+        "cargo:rustc-env=LD_LIBRARY_PATH={}",
+        gcc_lib_dir.to_str().unwrap()
+    );
     println!("cargo:rustc-link-lib=dylib={}", name);
 
     // HACL/Evercrypt header paths
@@ -85,10 +94,10 @@ fn main() {
     ];
 
     // Build hacl/evercrypt
-    build_hacl(Path::new(&lib_dir));
+    build_hacl(&gcc_lib_dir);
 
     // Copy evercrypt library to the target directory.
-    copy_evercrypt_lib(&(lib_dir + "/libevercrypt.so"), &target_path);
+    copy_evercrypt_lib(&gcc_lib_dir.join("libevercrypt.so"), &target_path);
 
     let bindings = bindgen::Builder::default()
         // Header to wrap HACL/Evercrypt headers

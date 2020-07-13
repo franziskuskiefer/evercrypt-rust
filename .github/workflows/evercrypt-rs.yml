@@ -8,11 +8,18 @@ env:
 jobs:
   build:
     strategy: 
+      fail-fast: false
       matrix:
         os:
           - macos-latest
           - ubuntu-latest
           # - windows-latest
+        features:
+          - rust-crypto
+          - ""
+        exclude:
+          - os: macos-latest
+            features: rust-crypto
 
     runs-on: ${{ matrix.os }}
 
@@ -28,7 +35,7 @@ jobs:
       run: cargo build --verbose
     - name: Test
       run: cargo test --verbose
-    - name: Tests (rust-crypto enabled)
+    - name: Test (highl-level lib)
       run: |
         cd evercrypt-rs
-        cargo test --verbose --features "rust-crypto-aes"
+        cargo test --verbose --features ${{ matrix.features }}
