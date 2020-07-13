@@ -60,7 +60,7 @@ fn main() {
     let gcc_lib_dir = hacl_dir.join("dist").join("gcc-compatible");
 
     // Set library name and type
-    let mode = "dylib";
+    let mode = "static";
     let name = "evercrypt";
 
     // Set LLVM path
@@ -84,7 +84,6 @@ fn main() {
         "cargo:rustc-env=LD_LIBRARY_PATH={}",
         gcc_lib_dir.to_str().unwrap()
     );
-    println!("cargo:rustc-link-lib=dylib={}", name);
 
     // HACL/Evercrypt header paths
     let hacl_includes = vec![
