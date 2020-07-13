@@ -19,7 +19,7 @@ jobs:
           - ""
         exclude:
           - os: macos-latest
-            features: rust-crypto
+            features: ""
 
     runs-on: ${{ matrix.os }}
 
