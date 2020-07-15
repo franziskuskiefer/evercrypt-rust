@@ -209,12 +209,14 @@ fn criterion_x25519(c: &mut Criterion) {
 }
 
 fn criterion_p256(c: &mut Criterion) {
-    use evercrypt::p256::{p256_dh, p256_dh_base};
+    use evercrypt::digest::Mode;
+    use evercrypt::p256::{p256_dh, p256_dh_base, p256_ecdsa_sign, p256_ecdsa_verify};
 
     const PK1_HEX: &str = "0462d5bd3372af75fe85a040715d0f502428e07046868b0bfdfa61d731afe44f26ac333a93a9e70a81cd5a95b5bf8d13990eb741c8c38872b4a07d275a014e30cf";
     const SK1_HEX: &str = "0612465c89a023ab17855b0a6bcebfd3febb53aef84138647b5352e02c10c346";
     const _PK2_HEX: &str = "04bd07bd4326cdcabf42905efa4559a30e68cb215d40c9afb60ce02d4fda617579b927b5cba02d24fb9aafe1d429351e48bae9dd92d7bc7be15e5b8a30a86be13d";
     const SK2_HEX: &str = "00809c461d8b39163537ff8f5ef5b977e4cdb980e70e38a7ee0b37cc876729e9ff";
+    const NONCE: &str = "A6E3C57DD01ABE90086538398355DD4C3B17AA873382B0F24D6129493D8AAD60";
 
     c.bench_function("P256 base", |b| {
         let sk1 = hex_to_bytes(SK1_HEX);
@@ -228,6 +230,99 @@ fn criterion_p256(c: &mut Criterion) {
         b.iter(|| {
             let _zz = p256_dh(&pk1, &sk2).unwrap();
         });
+    });
+
+    c.bench_function("P256 ECDSA Sign SHA-256", |b| {
+        let sk1 = hex_to_bytes(SK1_HEX);
+        let nonce = hex_to_bytes(NONCE);
+        b.iter_batched(
+            || {
+                let data = randombytes(1_000);
+                data
+            },
+            |data| {
+                let _sig = p256_ecdsa_sign(Mode::Sha256, &data, &sk1, &nonce).unwrap();
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    c.bench_function("P256 ECDSA Verify SHA-256", |b| {
+        let pk1 = hex_to_bytes(PK1_HEX);
+        let sk1 = hex_to_bytes(SK1_HEX);
+        let nonce = hex_to_bytes(NONCE);
+        b.iter_batched(
+            || {
+                let data = randombytes(1_000);
+                let sig = p256_ecdsa_sign(Mode::Sha256, &data, &sk1, &nonce).unwrap();
+                (data, sig)
+            },
+            |(data, sig)| {
+                let _valid = p256_ecdsa_verify(Mode::Sha256, &data, &pk1, &sig).unwrap();
+            },
+            BatchSize::SmallInput,
+        );
+    });
+
+    c.bench_function("P256 ECDSA Sign SHA-384", |b| {
+        let sk1 = hex_to_bytes(SK1_HEX);
+        let nonce = hex_to_bytes(NONCE);
+        b.iter_batched(
+            || {
+                let data = randombytes(1_000);
+                data
+            },
+            |data| {
+                let _sig = p256_ecdsa_sign(Mode::Sha384, &data, &sk1, &nonce).unwrap();
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    c.bench_function("P256 ECDSA Verify SHA-384", |b| {
+        let pk1 = hex_to_bytes(PK1_HEX);
+        let sk1 = hex_to_bytes(SK1_HEX);
+        let nonce = hex_to_bytes(NONCE);
+        b.iter_batched(
+            || {
+                let data = randombytes(1_000);
+                let sig = p256_ecdsa_sign(Mode::Sha384, &data, &sk1, &nonce).unwrap();
+                (data, sig)
+            },
+            |(data, sig)| {
+                let _valid = p256_ecdsa_verify(Mode::Sha384, &data, &pk1, &sig).unwrap();
+            },
+            BatchSize::SmallInput,
+        );
+    });
+
+    c.bench_function("P256 ECDSA Sign SHA-512", |b| {
+        let sk1 = hex_to_bytes(SK1_HEX);
+        let nonce = hex_to_bytes(NONCE);
+        b.iter_batched(
+            || {
+                let data = randombytes(1_000);
+                data
+            },
+            |data| {
+                let _sig = p256_ecdsa_sign(Mode::Sha512, &data, &sk1, &nonce).unwrap();
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    c.bench_function("P256 ECDSA Verify SHA-512", |b| {
+        let pk1 = hex_to_bytes(PK1_HEX);
+        let sk1 = hex_to_bytes(SK1_HEX);
+        let nonce = hex_to_bytes(NONCE);
+        b.iter_batched(
+            || {
+                let data = randombytes(1_000);
+                let sig = p256_ecdsa_sign(Mode::Sha512, &data, &sk1, &nonce).unwrap();
+                (data, sig)
+            },
+            |(data, sig)| {
+                let _valid = p256_ecdsa_verify(Mode::Sha512, &data, &pk1, &sig).unwrap();
+            },
+            BatchSize::SmallInput,
+        );
     });
 }
 
