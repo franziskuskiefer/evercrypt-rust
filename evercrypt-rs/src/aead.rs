@@ -44,6 +44,7 @@ pub enum Error {
 pub struct Aead<'a> {
     c_state: Option<*mut EverCrypt_AEAD_state_s>,
     op_mode: OpMode,
+    #[allow(dead_code)] // key is only used when using rust-crypto
     key: &'a [u8],
 }
 
