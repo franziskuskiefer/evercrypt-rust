@@ -17,7 +17,10 @@ fn test_sha() {
         0xc2, 0x83, 0x42, 0x4e,
     ];
     assert_eq!(d, expected_digest_256);
-    assert_eq!(Digest::hash(Mode::Sha512, data)[..], expected_digest_512[..]);
+    assert_eq!(
+        Digest::hash(Mode::Sha512, data)[..],
+        expected_digest_512[..]
+    );
 
     let mut digest = Digest::new(Mode::Sha256);
     assert!(digest.update(data).is_ok());
@@ -37,4 +40,3 @@ fn test_sha() {
     assert!(digest.finish().is_err());
     assert!(digest.update(&[]).is_err());
 }
-

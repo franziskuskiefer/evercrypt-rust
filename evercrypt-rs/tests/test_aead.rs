@@ -120,7 +120,7 @@ fn test_wycheproof() {
                     Err(_) => {
                         assert!(!valid);
                         msg.clone()
-                    },
+                    }
                 };
                 assert_eq!(msg, msg_decrypted);
                 *tests_run += 1;
