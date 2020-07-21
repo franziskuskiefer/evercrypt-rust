@@ -3,6 +3,7 @@ use test_util::*;
 
 use evercrypt::digest::Mode;
 use evercrypt::p256::{p256_ecdsa_sign, p256_ecdsa_verify, EcdsaSignature, Error};
+use evercrypt::signature::{Mode as SignatureMode, Signature};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -139,6 +140,14 @@ fn test_wycheproof() {
                 Ok(r) => {
                     assert!(valid);
                     assert!(r);
+                    assert!(Signature::verify(
+                        SignatureMode::P256,
+                        Some(hash),
+                        &pk,
+                        &signature.raw(),
+                        &msg,
+                    )
+                    .unwrap());
                 }
                 Err(e) => {
                     println!("Error case");
@@ -171,7 +180,23 @@ fn test_self() {
     let msg = b"sample";
 
     let sig = p256_ecdsa_sign(Mode::Sha256, &msg[..], &sk, &nonce).unwrap();
+    let sig_ = Signature::sign(
+        SignatureMode::P256,
+        Some(Mode::Sha256),
+        &sk,
+        &msg[..],
+        Some(&nonce),
+    );
+    assert_eq!(&sig.raw()[..], &sig_.unwrap()[..]);
     let verified = p256_ecdsa_verify(Mode::Sha256, &msg[..], &pk, &sig).unwrap();
+    let verified_ = Signature::verify(
+        SignatureMode::P256,
+        Some(Mode::Sha256),
+        &pk,
+        &sig.raw(),
+        &msg[..],
+    );
+    assert_eq!(verified, verified_.unwrap());
     assert!(verified);
 
     let sig = p256_ecdsa_sign(Mode::Sha384, &msg[..], &sk, &nonce).unwrap();

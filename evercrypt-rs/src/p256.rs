@@ -125,7 +125,7 @@ impl EcdsaSignature {
         for (i, &b) in self.r.iter().enumerate() {
             out[i] = b;
         }
-        for (i, &b) in self.r.iter().enumerate() {
+        for (i, &b) in self.s.iter().enumerate() {
             out[i + 32] = b;
         }
         out

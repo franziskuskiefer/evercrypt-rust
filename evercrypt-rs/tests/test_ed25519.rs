@@ -2,6 +2,7 @@ mod test_util;
 use test_util::*;
 
 use evercrypt::ed25519::{ed25519_sign, ed25519_sk2pk, ed25519_verify};
+use evercrypt::signature::{Mode, Signature};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -76,10 +77,14 @@ fn test_wycheproof() {
             let sig = hex_str_to_bytes(&test.sig);
 
             let my_sig = ed25519_sign(&sk, &msg);
+            let my_sig_ = Signature::sign(Mode::Ed25519, None, &sk, &msg, None);
+            assert_eq!(&my_sig[..], &my_sig_.unwrap()[..]);
             if valid {
                 assert_eq!(&my_sig[..], &sig[..]);
             }
             let sig_verified = ed25519_verify(&pk, &sig, &msg);
+            let sig_verified_ = Signature::verify(Mode::Ed25519, None, &pk, &sig, &msg);
+            assert_eq!(sig_verified, sig_verified_.unwrap());
             if valid {
                 assert!(sig_verified);
             }
