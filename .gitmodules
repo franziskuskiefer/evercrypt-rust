@@ -4,6 +4,3 @@
 [submodule "evercrypt-rs/tests/wycheproof"]
 	path = evercrypt-rs/tests/wycheproof
 	url = https://github.com/google/wycheproof.git
-[submodule "evercrypt-sys/kremlin"]
-	path = evercrypt-sys/kremlin
-	url = https://github.com/FStarLang/kremlin.git
