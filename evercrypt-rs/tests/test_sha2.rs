@@ -1,9 +1,9 @@
-use evercrypt::digest::{Digest, Mode};
+use evercrypt::digest::{self, Digest, Mode};
 
 #[test]
 fn test_sha() {
     let data = b"evercrypt-rust bindings";
-    let d = Digest::hash(Mode::Sha256, data);
+    let d = digest::hash(Mode::Sha256, data);
     let expected_digest_256 = [
         0xa5, 0x35, 0xf2, 0x6a, 0xff, 0xbc, 0x1f, 0x08, 0x73, 0xdb, 0x15, 0x15, 0x9d, 0xce, 0xbf,
         0x25, 0x99, 0x64, 0xbe, 0x42, 0xde, 0xa8, 0x4d, 0x29, 0x00, 0x38, 0x4b, 0xee, 0x15, 0x09,
@@ -18,7 +18,7 @@ fn test_sha() {
     ];
     assert_eq!(d, expected_digest_256);
     assert_eq!(
-        Digest::hash(Mode::Sha512, data)[..],
+        digest::hash(Mode::Sha512, data)[..],
         expected_digest_512[..]
     );
 

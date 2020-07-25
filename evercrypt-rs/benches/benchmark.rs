@@ -24,12 +24,12 @@ pub fn hex_to_bytes(hex: &str) -> Vec<u8> {
 }
 
 fn criterion_digest(c: &mut Criterion) {
-    use evercrypt::digest::{Digest, Mode};
+    use evercrypt::digest::{self, Mode};
     c.bench_function("SHA1", |b| {
         b.iter_batched(
             || randombytes(1_000),
             |data| {
-                let _d = Digest::hash(Mode::Sha1, &data);
+                let _d = digest::hash(Mode::Sha1, &data);
             },
             BatchSize::SmallInput,
         )
@@ -38,7 +38,7 @@ fn criterion_digest(c: &mut Criterion) {
         b.iter_batched(
             || randombytes(1_000),
             |data| {
-                let _d = Digest::hash(Mode::Sha224, &data);
+                let _d = digest::hash(Mode::Sha224, &data);
             },
             BatchSize::SmallInput,
         )
@@ -47,7 +47,7 @@ fn criterion_digest(c: &mut Criterion) {
         b.iter_batched(
             || randombytes(1_000),
             |data| {
-                let _d = Digest::hash(Mode::Sha256, &data);
+                let _d = digest::hash(Mode::Sha256, &data);
             },
             BatchSize::SmallInput,
         )
@@ -56,7 +56,7 @@ fn criterion_digest(c: &mut Criterion) {
         b.iter_batched(
             || randombytes(1_000),
             |data| {
-                let _d = Digest::hash(Mode::Sha384, &data);
+                let _d = digest::hash(Mode::Sha384, &data);
             },
             BatchSize::SmallInput,
         )
@@ -65,7 +65,7 @@ fn criterion_digest(c: &mut Criterion) {
         b.iter_batched(
             || randombytes(1_000),
             |data| {
-                let _d = Digest::hash(Mode::Sha512, &data);
+                let _d = digest::hash(Mode::Sha512, &data);
             },
             BatchSize::SmallInput,
         )
