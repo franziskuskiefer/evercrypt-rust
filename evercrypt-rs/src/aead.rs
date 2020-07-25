@@ -12,7 +12,7 @@ enum OpMode {
     RustCryptoAes256 = 2,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode {
     Aes128Gcm = Spec_Agile_AEAD_AES128_GCM as isize,
     Aes256Gcm = Spec_Agile_AEAD_AES256_GCM as isize,

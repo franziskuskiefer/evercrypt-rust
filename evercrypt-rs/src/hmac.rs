@@ -1,6 +1,6 @@
 use evercrypt_sys::evercrypt_bindings::*;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Mode {
     Sha1 = Spec_Hash_Definitions_SHA1 as isize,
     // Not implemented

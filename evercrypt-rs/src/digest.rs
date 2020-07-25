@@ -5,7 +5,7 @@ pub enum Error {
     InvalidStateFinished,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Mode {
     Sha1 = Spec_Hash_Definitions_SHA1 as isize,
     Sha224 = Spec_Hash_Definitions_SHA2_224 as isize,
