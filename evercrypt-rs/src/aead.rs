@@ -58,6 +58,9 @@
 use evercrypt_sys::evercrypt_bindings::*;
 
 #[cfg(feature = "rust-crypto-aes")]
+use crate::util::*;
+
+#[cfg(feature = "rust-crypto-aes")]
 use aes_gcm::aead::{Aead as RcAead, NewAead, Payload};
 #[cfg(feature = "rust-crypto-aes")]
 use aes_gcm::{Aes128Gcm, Aes256Gcm};
@@ -196,18 +199,17 @@ impl<'a> Aead<'a> {
     // Only available if the feature is enabled.
     #[cfg(feature = "rust-crypto-aes")]
     fn encrypt_rs(&self, msg: &[u8], iv: &Nonce, aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
-        let ctxt_tag =
-            match self.op_mode {
-                OpMode::RustCryptoAes128 => Aes128Gcm::new(self.key.into())
-                    .encrypt(iv.into(), Payload { msg: msg, aad: aad }),
-                OpMode::RustCryptoAes256 => Aes256Gcm::new(self.key.into())
-                    .encrypt(iv.into(), Payload { msg: msg, aad: aad }),
-                _ => return Err(Error::UnsupportedConfig),
-            };
+        let ctxt_tag = match self.op_mode {
+            OpMode::RustCryptoAes128 => Aes128Gcm::new(self.key.into())
+                .encrypt((&iv[..]).into(), Payload { msg: msg, aad: aad }),
+            OpMode::RustCryptoAes256 => Aes256Gcm::new(self.key.into())
+                .encrypt((&iv[..]).into(), Payload { msg: msg, aad: aad }),
+            _ => return Err(Error::UnsupportedConfig),
+        };
         match ctxt_tag {
             Ok(c) => {
                 let (ctxt, tag) = c.split_at(c.len() - 16);
-                Ok((ctxt.to_owned(), tag.to_owned()))
+                Ok((ctxt.to_owned(), clone_into_array(&tag)))
             }
             Err(_) => Err(Error::Encrypting),
         }
@@ -222,14 +224,14 @@ impl<'a> Aead<'a> {
         p_in.extend(tag);
         let msg = match self.op_mode {
             OpMode::RustCryptoAes128 => Aes128Gcm::new(self.key.into()).decrypt(
-                iv.into(),
+                (&iv[..]).into(),
                 Payload {
                     msg: &p_in[..],
                     aad: aad,
                 },
             ),
             OpMode::RustCryptoAes256 => Aes256Gcm::new(self.key.into()).decrypt(
-                iv.into(),
+                (&iv[..]).into(),
                 Payload {
                     msg: &p_in[..],
                     aad: aad,
