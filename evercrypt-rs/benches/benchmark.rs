@@ -5,7 +5,17 @@ extern crate rand;
 
 use criterion::{BatchSize, Criterion};
 
-pub fn randombytes(n: usize) -> Vec<u8> {
+fn clone_into_array<A, T>(slice: &[T]) -> A
+where
+    A: Default + AsMut<[T]>,
+    T: Clone,
+{
+    let mut a = Default::default();
+    A::as_mut(&mut a).clone_from_slice(slice);
+    a
+}
+
+fn randombytes(n: usize) -> Vec<u8> {
     use rand::rngs::OsRng;
     use rand::RngCore;
 
@@ -14,7 +24,12 @@ pub fn randombytes(n: usize) -> Vec<u8> {
     bytes
 }
 
-pub fn hex_to_bytes(hex: &str) -> Vec<u8> {
+fn random_nonce<A: Default + AsMut<[u8]>>(n: usize) -> A {
+    let b = randombytes(n);
+    clone_into_array(&b)
+}
+
+fn hex_to_bytes(hex: &str) -> Vec<u8> {
     let mut bytes = Vec::new();
     for i in 0..(hex.len() / 2) {
         let b = u8::from_str_radix(&hex[2 * i..2 * i + 2], 16).unwrap();
@@ -79,7 +94,7 @@ fn criterion_aead(c: &mut Criterion) {
         let key = &randombytes(16);
         b.iter_batched(
             || {
-                let nonce = randombytes(12);
+                let nonce = random_nonce(12);
                 let data = randombytes(1_000);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Aes128Gcm, key).unwrap();
@@ -95,7 +110,7 @@ fn criterion_aead(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let key = randombytes(16);
-                let nonce = randombytes(12);
+                let nonce = random_nonce(12);
                 let data = randombytes(1_000);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Aes128Gcm, &key).unwrap();
@@ -114,7 +129,7 @@ fn criterion_aead(c: &mut Criterion) {
         let key = &randombytes(32);
         b.iter_batched(
             || {
-                let nonce = randombytes(12);
+                let nonce = random_nonce(12);
                 let data = randombytes(1_000);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Aes256Gcm, key).unwrap();
@@ -130,7 +145,7 @@ fn criterion_aead(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let key = randombytes(32);
-                let nonce = randombytes(12);
+                let nonce = random_nonce(12);
                 let data = randombytes(1_000);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Aes256Gcm, &key).unwrap();
@@ -149,7 +164,7 @@ fn criterion_aead(c: &mut Criterion) {
         let key = &randombytes(32);
         b.iter_batched(
             || {
-                let nonce = randombytes(12);
+                let nonce = random_nonce(12);
                 let data = randombytes(1_000);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Chacha20Poly1305, key).unwrap();
@@ -165,7 +180,7 @@ fn criterion_aead(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let key = randombytes(32);
-                let nonce = randombytes(12);
+                let nonce = random_nonce(12);
                 let data = randombytes(1_000);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Chacha20Poly1305, &key).unwrap();

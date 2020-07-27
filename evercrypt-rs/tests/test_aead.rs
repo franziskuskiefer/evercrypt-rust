@@ -1,7 +1,7 @@
 mod test_util;
 use test_util::*;
 
-use evercrypt::aead::{Aead, Error, Mode};
+use evercrypt::aead::{Aead, Error, Mode, Nonce, Tag};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -82,17 +82,26 @@ fn test_wycheproof() {
 
             for test in testGroup.tests.iter() {
                 let valid = test.result.eq("valid");
+                if invalid_iv {
+                    // AEAD requires input of a 12-byte nonce.
+                    let result = std::panic::catch_unwind(|| {
+                        let _nonce: Nonce = hex_str_to_array(&test.iv);
+                    });
+                    assert!(result.is_err());
+                    *skipped_tests += 1;
+                    continue;
+                }
                 let invalid_iv = if test.comment == "invalid nonce size" || invalid_iv {
                     true
                 } else {
                     false
                 };
                 println!("Test {:?}: {:?}", test.tcId, test.comment);
-                let nonce = hex_str_to_bytes(&test.iv);
+                let nonce: Nonce = hex_str_to_array(&test.iv);
                 let msg = hex_str_to_bytes(&test.msg);
                 let aad = hex_str_to_bytes(&test.aad);
                 let exp_cipher = hex_str_to_bytes(&test.ct);
-                let exp_tag = hex_str_to_bytes(&test.tag);
+                let exp_tag: Tag = hex_str_to_array(&test.tag);
                 let key = hex_str_to_bytes(&test.key);
 
                 let cipher = Aead::new(algorithm, &key).unwrap();

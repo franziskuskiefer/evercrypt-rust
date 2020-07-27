@@ -120,10 +120,14 @@ pub struct Aead<'a> {
     key: &'a [u8],
 }
 
-type Ciphertext = Vec<u8>;
-type Tag = Vec<u8>;
-type Nonce = [u8]; // TODO: fix to length 12
-type Aad = [u8];
+/// Ciphertexts are byte vectors.
+pub type Ciphertext = Vec<u8>;
+/// Tags are 16-byte arrays.
+pub type Tag = [u8; 16];
+/// Nonces are 12-byte arrays.
+pub type Nonce = [u8; 12];
+/// Associated data are byte arrays.
+pub type Aad = [u8];
 
 // Check hardware support for HACL* AES implementation.
 fn hacl_aes_available() -> bool {
@@ -267,7 +271,7 @@ impl<'a> Aead<'a> {
         match self.op_mode {
             OpMode::Hacl => {
                 let mut ctxt = vec![0u8; msg.len()];
-                let mut tag = vec![0u8; 16];
+                let mut tag = [0u8; 16];
                 unsafe {
                     EverCrypt_AEAD_encrypt(
                         self.c_state.unwrap(),
