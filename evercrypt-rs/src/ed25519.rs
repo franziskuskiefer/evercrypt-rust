@@ -5,7 +5,14 @@ pub enum Error {
     InvalidPoint,
 }
 
-pub fn ed25519_sign(sk: &[u8], msg: &[u8]) -> [u8; 64] {
+/// Points are 32 byte arrays.
+pub type Point = [u8; 32];
+/// Scalars are 32 byte arrays.
+pub type Scalar = [u8; 32];
+/// Signatures are 64 byte arrays.
+pub type Signature = [u8; 64];
+
+pub fn ed25519_sign(sk: &Scalar, msg: &[u8]) -> Signature {
     let mut out = [0u8; 64];
     unsafe {
         EverCrypt_Ed25519_sign(
@@ -18,10 +25,7 @@ pub fn ed25519_sign(sk: &[u8], msg: &[u8]) -> [u8; 64] {
     out
 }
 
-pub fn ed25519_verify(pk: &[u8], signature: &[u8], msg: &[u8]) -> bool {
-    if signature.len() == 0 || pk.len() != 32 {
-        return false;
-    }
+pub fn ed25519_verify(pk: &Point, signature: &Signature, msg: &[u8]) -> bool {
     unsafe {
         EverCrypt_Ed25519_verify(
             pk.as_ptr() as _,
@@ -32,7 +36,7 @@ pub fn ed25519_verify(pk: &[u8], signature: &[u8], msg: &[u8]) -> bool {
     }
 }
 
-pub fn ed25519_sk2pk(sk: &[u8]) -> [u8; 32] {
+pub fn ed25519_sk2pk(sk: &Scalar) -> Point {
     let mut out = [0u8; 32];
     unsafe {
         EverCrypt_Ed25519_secret_to_public(out.as_mut_ptr(), sk.as_ptr() as _);

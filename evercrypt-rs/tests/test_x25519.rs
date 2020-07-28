@@ -1,7 +1,7 @@
 mod test_util;
 use test_util::*;
 
-use evercrypt::x25519::{x25519, Error};
+use evercrypt::x25519::{x25519, Error, Point, Scalar};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -94,9 +94,9 @@ fn test_wycheproof() {
                 _ => valid,
             };
             println!("Test {:?}: {:?}", test.tcId, test.comment);
-            let public = hex_str_to_bytes(&test.public);
-            let private = hex_str_to_bytes(&test.private);
-            let shared = hex_str_to_bytes(&test.shared);
+            let public: Point = hex_str_to_array(&test.public);
+            let private: Scalar = hex_str_to_array(&test.private);
+            let shared: Point = hex_str_to_array(&test.shared);
 
             match x25519(&public, &private) {
                 Ok(r) => {

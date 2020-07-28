@@ -56,13 +56,20 @@ pub enum Mode {
 }
 
 /// Derive the ECDH shared secret.
-/// Returns `Ok(p**s)` on the provided curve (`mode`) or an error.
+/// Returns `Ok(p * s)` on the provided curve (`mode`) or an error.
 pub fn derive(mode: Mode, p: &[u8], s: &[u8]) -> Result<Vec<u8>, Error> {
     match mode {
-        Mode::X25519 => match x25519::x25519(p, s) {
-            Ok(r) => Ok(r.to_vec()),
-            Err(_) => Err(Error::InvalidPoint),
-        },
+        Mode::X25519 => {
+            let mut point = [0u8; 32];
+            point.clone_from_slice(p);
+            let mut scalar = [0u8; 32];
+            scalar.clone_from_slice(s);
+
+            match x25519::x25519(&point, &scalar) {
+                Ok(r) => Ok(r.to_vec()),
+                Err(_) => Err(Error::InvalidPoint),
+            }
+        }
         Mode::P256 => match p256::p256_dh(p, s) {
             Ok(r) => Ok(r.to_vec()),
             Err(_) => Err(Error::InvalidPoint),
@@ -70,10 +77,15 @@ pub fn derive(mode: Mode, p: &[u8], s: &[u8]) -> Result<Vec<u8>, Error> {
     }
 }
 
-/// Returns `Ok(base_point**s)` on the provided curve (`mode`) or an error.
+/// Returns `Ok(base_point * s)` on the provided curve (`mode`) or an error.
 pub fn derive_base(mode: Mode, s: &[u8]) -> Result<Vec<u8>, Error> {
     match mode {
-        Mode::X25519 => Ok(x25519::x25519_base(s).to_vec()),
+        Mode::X25519 => {
+            let mut scalar = [0u8; 32];
+            scalar.clone_from_slice(s);
+
+            Ok(x25519::x25519_base(&scalar).to_vec())
+        },
         Mode::P256 => match p256::p256_dh_base(s) {
             Ok(r) => Ok(r.to_vec()),
             Err(_) => Err(Error::InvalidPoint),

@@ -200,7 +200,7 @@ fn criterion_x25519(c: &mut Criterion) {
     use evercrypt::x25519::{x25519, x25519_base};
     c.bench_function("X25519 base", |b| {
         b.iter_batched(
-            || randombytes(32),
+            || clone_into_array(&randombytes(32)),
             |sk| {
                 let _pk = x25519_base(&sk);
             },
@@ -210,9 +210,9 @@ fn criterion_x25519(c: &mut Criterion) {
     c.bench_function("X25519 DH", |b| {
         b.iter_batched(
             || {
-                let sk1 = randombytes(32);
+                let sk1 = clone_into_array(&randombytes(32));
                 let pk1 = x25519_base(&sk1);
-                let sk2 = randombytes(32);
+                let sk2 = clone_into_array(&randombytes(32));
                 (pk1, sk2)
             },
             |(pk1, sk2)| {
@@ -345,7 +345,7 @@ fn criterion_ed25519(c: &mut Criterion) {
     use evercrypt::ed25519::{ed25519_sign, ed25519_sk2pk, ed25519_verify};
     c.bench_function("ed25519 key gen", |b| {
         b.iter_batched(
-            || randombytes(32),
+            || clone_into_array(&randombytes(32)),
             |sk| {
                 let _pk = ed25519_sk2pk(&sk);
             },
@@ -355,7 +355,7 @@ fn criterion_ed25519(c: &mut Criterion) {
     c.bench_function("ed25519 sign", |b| {
         b.iter_batched(
             || {
-                let sk = randombytes(32);
+                let sk = clone_into_array(&randombytes(32));
                 let data = randombytes(1_000);
                 (sk, data)
             },
@@ -368,7 +368,7 @@ fn criterion_ed25519(c: &mut Criterion) {
     c.bench_function("ed25519 verify", |b| {
         b.iter_batched(
             || {
-                let sk = randombytes(32);
+                let sk = clone_into_array(&randombytes(32));
                 let pk = ed25519_sk2pk(&sk);
                 let data = randombytes(1_000);
                 let sig = ed25519_sign(&pk, &data);

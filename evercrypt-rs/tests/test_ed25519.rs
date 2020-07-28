@@ -1,8 +1,8 @@
 mod test_util;
 use test_util::*;
 
-use evercrypt::ed25519::{ed25519_sign, ed25519_sk2pk, ed25519_verify};
-use evercrypt::signature::{Mode, Signature};
+use evercrypt::ed25519::{ed25519_sign, ed25519_sk2pk, ed25519_verify, Point, Scalar, Signature};
+use evercrypt::signature::{self, Mode};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -65,8 +65,8 @@ fn test_wycheproof() {
         assert_eq!(testGroup.r#type, "EddsaVerify");
         assert_eq!(testGroup.key.keySize, 255);
 
-        let pk = hex_str_to_bytes(&testGroup.key.pk);
-        let sk = hex_str_to_bytes(&testGroup.key.sk);
+        let pk: Point = hex_str_to_array(&testGroup.key.pk);
+        let sk: Scalar = hex_str_to_array(&testGroup.key.sk);
 
         let my_pk = ed25519_sk2pk(&sk);
         assert_eq!(&pk[..], &my_pk[..]);
@@ -74,16 +74,23 @@ fn test_wycheproof() {
             let valid = test.result.eq("valid");
             println!("Test {:?}: {:?}", test.tcId, test.comment);
             let msg = hex_str_to_bytes(&test.msg);
-            let sig = hex_str_to_bytes(&test.sig);
+            let sig = hex_str_to_bytes(&test.sig); // Can't use to_array because it's too large
+            if sig.len() != 64 {
+                assert!(!valid);
+                tests_run += 1;
+                continue;
+            }
+            let mut signature = [0u8; 64];
+            signature.clone_from_slice(&sig);
 
             let my_sig = ed25519_sign(&sk, &msg);
-            let my_sig_ = Signature::sign(Mode::Ed25519, None, &sk, &msg, None);
+            let my_sig_ = signature::sign(Mode::Ed25519, None, &sk, &msg, None);
             assert_eq!(&my_sig[..], &my_sig_.unwrap()[..]);
             if valid {
-                assert_eq!(&my_sig[..], &sig[..]);
+                assert_eq!(&my_sig[..], &signature[..]);
             }
-            let sig_verified = ed25519_verify(&pk, &sig, &msg);
-            let sig_verified_ = Signature::verify(Mode::Ed25519, None, &pk, &sig, &msg);
+            let sig_verified = ed25519_verify(&pk, &signature, &msg);
+            let sig_verified_ = signature::verify(Mode::Ed25519, None, &pk, &sig, &msg);
             assert_eq!(sig_verified, sig_verified_.unwrap());
             if valid {
                 assert!(sig_verified);

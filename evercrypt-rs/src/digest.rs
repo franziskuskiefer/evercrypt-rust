@@ -70,6 +70,12 @@
 //!
 //! assert_eq!(&digest_256[..], &expected_digest_256[..]);
 //! assert_eq!(&digest_512[..], &expected_digest_512[..]);
+//!
+//! let digest_256 = digest::sha256(data);
+//! let digest_512 = digest::sha512(data);
+//!
+//! assert_eq!(&digest_256[..], &expected_digest_256[..]);
+//! assert_eq!(&digest_512[..], &expected_digest_512[..]);
 //! ```
 
 use evercrypt_sys::evercrypt_bindings::*;
@@ -192,3 +198,29 @@ pub fn hash(alg: Mode, data: &[u8]) -> Vec<u8> {
     }
     out
 }
+
+// Single-shot API with array returns.
+
+macro_rules! define_plain_digest {
+    ($name:ident, $version:expr, $l:literal) => {
+        /// Single-shot API with a fixed length output.
+        pub fn $name(data: &[u8]) -> [u8; $l] {
+            let mut out = [0u8; $l];
+            unsafe {
+                EverCrypt_Hash_hash(
+                    $version.into(),
+                    out.as_mut_ptr(),
+                    data.as_ptr() as _,
+                    data.len() as u32,
+                );
+            }
+            out
+        }
+    };
+}
+
+define_plain_digest!(sha1, Mode::Sha1, 20);
+define_plain_digest!(sha224, Mode::Sha224, 28);
+define_plain_digest!(sha256, Mode::Sha256, 32);
+define_plain_digest!(sha384, Mode::Sha384, 48);
+define_plain_digest!(sha512, Mode::Sha512, 64);
