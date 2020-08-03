@@ -1,7 +1,7 @@
 mod test_util;
 use test_util::*;
 
-use evercrypt::ed25519::{self, Point, Scalar, Signature};
+use evercrypt::ed25519::{self, Point, Scalar};
 use evercrypt::signature::{self, Mode};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -83,13 +83,13 @@ fn test_wycheproof() {
             let mut signature = [0u8; 64];
             signature.clone_from_slice(&sig);
 
-            let my_sig = ed25519::sign(&sk, &msg);
+            let my_sig = ed25519::eddsa_sign(&sk, &msg);
             let my_sig_ = signature::sign(Mode::Ed25519, None, &sk, &msg, None);
             assert_eq!(&my_sig[..], &my_sig_.unwrap()[..]);
             if valid {
                 assert_eq!(&my_sig[..], &signature[..]);
             }
-            let sig_verified = ed25519::verify(&pk, &signature, &msg);
+            let sig_verified = ed25519::eddsa_verify(&pk, &signature, &msg);
             let sig_verified_ = signature::verify(Mode::Ed25519, None, &pk, &sig, &msg);
             assert_eq!(sig_verified, sig_verified_.unwrap());
             if valid {

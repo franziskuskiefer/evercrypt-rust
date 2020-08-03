@@ -82,30 +82,41 @@ pub fn dh(p: &[u8], s: &[u8]) -> Result<[u8; 64], Error> {
     }
 }
 
+/// Nonces are 32 byte arrays.
+pub type Nonce = [u8; 32];
+/// Scalars are 32 byte arrays.
+pub type Scalar = [u8; 32];
+
 /// An ECDSA signature holding `r` and `s`.
 #[derive(Clone, Copy, Debug)]
-pub struct EcdsaSignature {
+pub struct Signature {
     r: [u8; 32],
     s: [u8; 32],
 }
 
-impl EcdsaSignature {
-    pub fn new(r: &[u8], s: &[u8]) -> Result<Self, Error> {
-        if r.len() != 32 || s.len() != 32 {
-            return Err(Error::InvalidSignature);
+/// Convert bytes to signatures and vice versa.
+impl Signature {
+    /// Build a new signature from `r` and `s`.
+    pub fn new(r: &[u8; 32], s: &[u8; 32]) -> Self {
+        Self {
+            r: r.clone(),
+            s: s.clone(),
         }
-
-        let mut r_array = [0u8; 32];
-        r_array.clone_from_slice(r);
-        let mut s_array = [0u8; 32];
-        s_array.clone_from_slice(s);
-
-        Ok(Self {
-            r: r_array,
-            s: s_array,
-        })
     }
-    pub fn from_bytes(combined: &[u8]) -> Result<Self, Error> {
+
+    /// Generate a new signature from a byte array holding `r||s`.
+    pub fn from_bytes(combined: &[u8; 64]) -> Self {
+        let mut r = [0u8; 32];
+        r.clone_from_slice(&combined[..32]);
+        let mut s = [0u8; 32];
+        s.clone_from_slice(&combined[32..]);
+
+        Self { r: r, s: s }
+    }
+
+    /// Unsafe version of `from_bytes` taking a slice.
+    /// This function can fail when the slice has the wrong length.
+    pub(crate) fn from_byte_slice(combined: &[u8]) -> Result<Self, Error> {
         if combined.len() != 64 {
             return Err(Error::InvalidSignature);
         }
@@ -117,9 +128,9 @@ impl EcdsaSignature {
 
         Ok(Self { r: r, s: s })
     }
-    pub fn from_arrays(r: [u8; 32], s: [u8; 32]) -> Self {
-        Self { r: r, s: s }
-    }
+
+    /// Get the raw signature bytes.
+    /// Returns a 64 byte array containing `r||s`.
     pub fn raw(&self) -> [u8; 64] {
         let mut out = [0u8; 64];
         for (i, &b) in self.r.iter().enumerate() {
@@ -132,13 +143,8 @@ impl EcdsaSignature {
     }
 }
 
-/// Sign `msg` with `sk` and `nonce` using `hash`.
-pub fn ecdsa_sign(
-    hash: Mode,
-    msg: &[u8],
-    sk: &[u8],
-    nonce: &[u8],
-) -> Result<EcdsaSignature, Error> {
+/// Sign `msg` with `sk` and `nonce` using `hash` with EcDSA on P256.
+pub fn ecdsa_sign(hash: Mode, msg: &[u8], sk: &Scalar, nonce: &Nonce) -> Result<Signature, Error> {
     let private = validate_sk(sk)?;
 
     let mut signature = [0u8; 64];
@@ -181,15 +187,16 @@ pub fn ecdsa_sign(
     r.clone_from_slice(&signature[..32]);
     let mut s = [0u8; 32];
     s.clone_from_slice(&signature[32..]);
-    Ok(EcdsaSignature { r: r, s: s })
+    Ok(Signature { r: r, s: s })
 }
 
-/// Verify `signature` on `msg` with `pk` using `hash`.
+/// Verify EcDSA `signature` over P256 on `msg` with `pk` using `hash`.
+/// Note that the public key `pk` must be a compressed or uncompressed point.
 pub fn ecdsa_verify(
     hash: Mode,
     msg: &[u8],
     pk: &[u8],
-    signature: &EcdsaSignature,
+    signature: &Signature,
 ) -> Result<bool, Error> {
     let public = validate_pk(pk)?;
     match hash {

@@ -14,10 +14,10 @@
 //! let my_pk = ed25519::sk2pk(&private);
 //! assert_eq!(&public[..], &my_pk[..]);
 //!
-//! let signature = ed25519::sign(&private, &msg);
+//! let signature = ed25519::eddsa_sign(&private, &msg);
 //! assert_eq!(expected_result[..], signature[..]);
 //!
-//! let result = ed25519::verify(&public, &signature, &msg);
+//! let result = ed25519::eddsa_verify(&public, &signature, &msg);
 //! assert!(result);
 //! ```
 
@@ -37,7 +37,7 @@ pub type Signature = [u8; 64];
 
 /// Sign message `msg` with secret key `sk`.
 /// Returns a `Signature`.
-pub fn sign(sk: &Scalar, msg: &[u8]) -> Signature {
+pub fn eddsa_sign(sk: &Scalar, msg: &[u8]) -> Signature {
     let mut out = [0u8; 64];
     unsafe {
         EverCrypt_Ed25519_sign(
@@ -52,7 +52,7 @@ pub fn sign(sk: &Scalar, msg: &[u8]) -> Signature {
 
 /// Verify signature `signature` on message `msg` with public key `pk`.
 /// Returns `true` if the signature is valid and `false` otherwise.
-pub fn verify(pk: &Point, signature: &Signature, msg: &[u8]) -> bool {
+pub fn eddsa_verify(pk: &Point, signature: &Signature, msg: &[u8]) -> bool {
     unsafe {
         EverCrypt_Ed25519_verify(
             pk.as_ptr() as _,

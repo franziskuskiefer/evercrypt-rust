@@ -197,7 +197,7 @@ fn criterion_aead(c: &mut Criterion) {
 }
 
 fn criterion_x25519(c: &mut Criterion) {
-    use evercrypt::x25519::{x25519, x25519_base};
+    use evercrypt::prelude::*;
     c.bench_function("X25519 base", |b| {
         b.iter_batched(
             || clone_into_array(&randombytes(32)),
@@ -223,9 +223,73 @@ fn criterion_x25519(c: &mut Criterion) {
     });
 }
 
+macro_rules! p256_signature_bench {
+    ($c:expr, $name_sign:literal, $name_verify:literal, $name_sign_gen:literal, $name_verify_gen:literal, $sm:expr, $m:expr) => {
+        $c.bench_function($name_sign, |b| {
+            let sk1 = clone_into_array(&hex_to_bytes(SK1_HEX));
+            let nonce = clone_into_array(&hex_to_bytes(NONCE));
+            b.iter_batched(
+                || {
+                    let data = randombytes(1_000);
+                    data
+                },
+                |data| {
+                    let _sig = p256::ecdsa_sign($m, &data, &sk1, &nonce).unwrap();
+                },
+                BatchSize::SmallInput,
+            );
+        });
+        $c.bench_function($name_verify, |b| {
+            let pk1 = hex_to_bytes(PK1_HEX);
+            let sk1 = clone_into_array(&hex_to_bytes(SK1_HEX));
+            let nonce = clone_into_array(&hex_to_bytes(NONCE));
+            b.iter_batched(
+                || {
+                    let data = randombytes(1_000);
+                    let sig = p256::ecdsa_sign($m, &data, &sk1, &nonce).unwrap();
+                    (data, sig)
+                },
+                |(data, sig)| {
+                    let _valid = p256::ecdsa_verify($m, &data, &pk1, &sig).unwrap();
+                },
+                BatchSize::SmallInput,
+            );
+        });
+        $c.bench_function($name_sign_gen, |b| {
+            let sk1 = hex_to_bytes(SK1_HEX);
+            let nonce = hex_to_bytes(NONCE);
+            b.iter_batched(
+                || {
+                    let data = randombytes(1_000);
+                    data
+                },
+                |data| {
+                    let _sig = signature::sign($sm, Some($m), &sk1, &data, Some(&nonce)).unwrap();
+                },
+                BatchSize::SmallInput,
+            );
+        });
+        $c.bench_function($name_verify_gen, |b| {
+            let pk1 = hex_to_bytes(PK1_HEX);
+            let sk1 = hex_to_bytes(SK1_HEX);
+            let nonce = hex_to_bytes(NONCE);
+            b.iter_batched(
+                || {
+                    let data = randombytes(1_000);
+                    let sig = signature::sign($sm, Some($m), &sk1, &data, Some(&nonce)).unwrap();
+                    (data, sig)
+                },
+                |(data, sig)| {
+                    let _valid = signature::verify($sm, Some($m), &pk1, &sig, &data).unwrap();
+                },
+                BatchSize::SmallInput,
+            );
+        });
+    };
+}
+
 fn criterion_p256(c: &mut Criterion) {
-    use evercrypt::digest::Mode;
-    use evercrypt::p256::{p256_dh, p256_dh_base, p256_ecdsa_sign, p256_ecdsa_verify};
+    use evercrypt::prelude::*;
 
     const PK1_HEX: &str = "0462d5bd3372af75fe85a040715d0f502428e07046868b0bfdfa61d731afe44f26ac333a93a9e70a81cd5a95b5bf8d13990eb741c8c38872b4a07d275a014e30cf";
     const SK1_HEX: &str = "0612465c89a023ab17855b0a6bcebfd3febb53aef84138647b5352e02c10c346";
@@ -236,109 +300,59 @@ fn criterion_p256(c: &mut Criterion) {
     c.bench_function("P256 base", |b| {
         let sk1 = hex_to_bytes(SK1_HEX);
         b.iter(|| {
-            let _pk = p256_dh_base(&sk1).unwrap();
+            let _pk = p256::dh_base(&sk1).unwrap();
         });
     });
     c.bench_function("P256 DH", |b| {
         let pk1 = hex_to_bytes(PK1_HEX);
         let sk2 = hex_to_bytes(SK2_HEX);
         b.iter(|| {
-            let _zz = p256_dh(&pk1, &sk2).unwrap();
+            let _zz = p256::dh(&pk1, &sk2).unwrap();
+        });
+    });
+    c.bench_function("P256 base Agile", |b| {
+        let sk1 = hex_to_bytes(SK1_HEX);
+        b.iter(|| {
+            let _pk = ecdh::derive_base(EcdhMode::P256, &sk1).unwrap();
+        });
+    });
+    c.bench_function("P256 DH Agile", |b| {
+        let pk1 = hex_to_bytes(PK1_HEX);
+        let sk2 = hex_to_bytes(SK2_HEX);
+        b.iter(|| {
+            let _zz = ecdh::derive(EcdhMode::P256, &pk1, &sk2).unwrap();
         });
     });
 
-    c.bench_function("P256 ECDSA Sign SHA-256", |b| {
-        let sk1 = hex_to_bytes(SK1_HEX);
-        let nonce = hex_to_bytes(NONCE);
-        b.iter_batched(
-            || {
-                let data = randombytes(1_000);
-                data
-            },
-            |data| {
-                let _sig = p256_ecdsa_sign(Mode::Sha256, &data, &sk1, &nonce).unwrap();
-            },
-            BatchSize::SmallInput,
-        );
-    });
-    c.bench_function("P256 ECDSA Verify SHA-256", |b| {
-        let pk1 = hex_to_bytes(PK1_HEX);
-        let sk1 = hex_to_bytes(SK1_HEX);
-        let nonce = hex_to_bytes(NONCE);
-        b.iter_batched(
-            || {
-                let data = randombytes(1_000);
-                let sig = p256_ecdsa_sign(Mode::Sha256, &data, &sk1, &nonce).unwrap();
-                (data, sig)
-            },
-            |(data, sig)| {
-                let _valid = p256_ecdsa_verify(Mode::Sha256, &data, &pk1, &sig).unwrap();
-            },
-            BatchSize::SmallInput,
-        );
-    });
+    p256_signature_bench!(
+        c,
+        "P256 ECDSA Sign SHA-256",
+        "P256 ECDSA Verify SHA-256",
+        "P256 ECDSA Sign Agile SHA-256",
+        "P256 ECDSA Verify Agile SHA-256",
+        SignatureMode::P256,
+        DigestMode::Sha256
+    );
 
-    c.bench_function("P256 ECDSA Sign SHA-384", |b| {
-        let sk1 = hex_to_bytes(SK1_HEX);
-        let nonce = hex_to_bytes(NONCE);
-        b.iter_batched(
-            || {
-                let data = randombytes(1_000);
-                data
-            },
-            |data| {
-                let _sig = p256_ecdsa_sign(Mode::Sha384, &data, &sk1, &nonce).unwrap();
-            },
-            BatchSize::SmallInput,
-        );
-    });
-    c.bench_function("P256 ECDSA Verify SHA-384", |b| {
-        let pk1 = hex_to_bytes(PK1_HEX);
-        let sk1 = hex_to_bytes(SK1_HEX);
-        let nonce = hex_to_bytes(NONCE);
-        b.iter_batched(
-            || {
-                let data = randombytes(1_000);
-                let sig = p256_ecdsa_sign(Mode::Sha384, &data, &sk1, &nonce).unwrap();
-                (data, sig)
-            },
-            |(data, sig)| {
-                let _valid = p256_ecdsa_verify(Mode::Sha384, &data, &pk1, &sig).unwrap();
-            },
-            BatchSize::SmallInput,
-        );
-    });
+    p256_signature_bench!(
+        c,
+        "P256 ECDSA Sign SHA-384",
+        "P256 ECDSA Verify SHA-384",
+        "P256 ECDSA Sign Agile SHA-384",
+        "P256 ECDSA Verify Agile SHA-384",
+        SignatureMode::P256,
+        DigestMode::Sha384
+    );
 
-    c.bench_function("P256 ECDSA Sign SHA-512", |b| {
-        let sk1 = hex_to_bytes(SK1_HEX);
-        let nonce = hex_to_bytes(NONCE);
-        b.iter_batched(
-            || {
-                let data = randombytes(1_000);
-                data
-            },
-            |data| {
-                let _sig = p256_ecdsa_sign(Mode::Sha512, &data, &sk1, &nonce).unwrap();
-            },
-            BatchSize::SmallInput,
-        );
-    });
-    c.bench_function("P256 ECDSA Verify SHA-512", |b| {
-        let pk1 = hex_to_bytes(PK1_HEX);
-        let sk1 = hex_to_bytes(SK1_HEX);
-        let nonce = hex_to_bytes(NONCE);
-        b.iter_batched(
-            || {
-                let data = randombytes(1_000);
-                let sig = p256_ecdsa_sign(Mode::Sha512, &data, &sk1, &nonce).unwrap();
-                (data, sig)
-            },
-            |(data, sig)| {
-                let _valid = p256_ecdsa_verify(Mode::Sha512, &data, &pk1, &sig).unwrap();
-            },
-            BatchSize::SmallInput,
-        );
-    });
+    p256_signature_bench!(
+        c,
+        "P256 ECDSA Sign SHA-512",
+        "P256 ECDSA Verify SHA-512",
+        "P256 ECDSA Sign Agile SHA-512",
+        "P256 ECDSA Verify Agile SHA-512",
+        SignatureMode::P256,
+        DigestMode::Sha512
+    );
 }
 
 fn criterion_ed25519(c: &mut Criterion) {
@@ -360,7 +374,7 @@ fn criterion_ed25519(c: &mut Criterion) {
                 (sk, data)
             },
             |(sk, data)| {
-                let _sig = ed25519::sign(&sk, &data);
+                let _sig = ed25519::eddsa_sign(&sk, &data);
             },
             BatchSize::SmallInput,
         )
@@ -371,11 +385,11 @@ fn criterion_ed25519(c: &mut Criterion) {
                 let sk = clone_into_array(&randombytes(32));
                 let pk = ed25519::sk2pk(&sk);
                 let data = randombytes(1_000);
-                let sig = ed25519::sign(&pk, &data);
+                let sig = ed25519::eddsa_sign(&pk, &data);
                 (pk, data, sig)
             },
             |(pk, data, sig)| {
-                let _valid = ed25519::verify(&pk, &sig, &data);
+                let _valid = ed25519::eddsa_verify(&pk, &sig, &data);
             },
             BatchSize::SmallInput,
         )

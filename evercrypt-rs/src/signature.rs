@@ -1,6 +1,6 @@
 use crate::digest;
 use crate::ed25519;
-use crate::p256::{self, EcdsaSignature};
+use crate::p256;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -32,7 +32,7 @@ pub fn sign(
             let mut key = [0u8; 32];
             key.clone_from_slice(sk);
 
-            Ok(ed25519::sign(&key, msg).to_vec())
+            Ok(ed25519::eddsa_sign(&key, msg).to_vec())
         },
         Mode::P256 => {
             let nonce = match nonce {
@@ -43,7 +43,11 @@ pub fn sign(
                 Some(h) => h,
                 None => return Err(Error::HashAlgorithmMissing),
             };
-            match p256::ecdsa_sign(hash, msg, sk, nonce) {
+            let mut key = [0u8; 32];
+            key.clone_from_slice(sk);
+            let mut n = [0u8; 32];
+            n.clone_from_slice(nonce);
+            match p256::ecdsa_sign(hash, msg, &key, &n) {
                 Ok(r) => Ok(r.raw().to_vec()),
                 Err(_) => Err(Error::InvalidPoint),
             }
@@ -65,14 +69,14 @@ pub fn verify(
             let mut sig = [0u8; 64];
             sig.clone_from_slice(signature);
 
-            Ok(ed25519::verify(&key, &sig, msg))
+            Ok(ed25519::eddsa_verify(&key, &sig, msg))
         },
         Mode::P256 => {
             let hash = match hash {
                 Some(h) => h,
                 None => return Err(Error::HashAlgorithmMissing),
             };
-            let sig = match EcdsaSignature::from_bytes(signature) {
+            let sig = match p256::Signature::from_byte_slice(signature) {
                 Ok(s) => s,
                 Err(_) => return Err(Error::InvalidSignature),
             };

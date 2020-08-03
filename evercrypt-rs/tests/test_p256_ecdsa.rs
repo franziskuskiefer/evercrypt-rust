@@ -2,7 +2,7 @@ mod test_util;
 use test_util::*;
 
 use evercrypt::digest::Mode;
-use evercrypt::p256::{self, EcdsaSignature, Error};
+use evercrypt::p256::{self, Error};
 use evercrypt::signature::{Mode as SignatureMode, self};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -61,7 +61,7 @@ fn make_fixed_length(b: &[u8]) -> [u8; 32] {
 }
 
 // A very simple ASN1 parser for ecdsa signatures.
-fn decode_signature(sig: &[u8]) -> EcdsaSignature {
+fn decode_signature(sig: &[u8]) -> p256::Signature {
     let mut index = 0;
     let (seq, seq_len) = (sig[index], sig[index + 1] as usize);
     assert_eq!(0x30, seq);
@@ -83,7 +83,7 @@ fn decode_signature(sig: &[u8]) -> EcdsaSignature {
     index += y_int_len;
     assert_eq!(sig.len(), index);
 
-    EcdsaSignature::from_arrays(make_fixed_length(r), make_fixed_length(s))
+    p256::Signature::new(&make_fixed_length(r), &make_fixed_length(s))
 }
 
 #[allow(non_snake_case)]
@@ -175,8 +175,8 @@ fn test_self() {
     const NONCE: &str = "A6E3C57DD01ABE90086538398355DD4C3B17AA873382B0F24D6129493D8AAD60";
 
     let pk = hex_str_to_bytes(PK_HEX);
-    let sk = hex_str_to_bytes(SK_HEX);
-    let nonce = hex_str_to_bytes(NONCE);
+    let sk = hex_str_to_array(SK_HEX);
+    let nonce = hex_str_to_array(NONCE);
     let msg = b"sample";
 
     let sig = p256::ecdsa_sign(Mode::Sha256, &msg[..], &sk, &nonce).unwrap();
