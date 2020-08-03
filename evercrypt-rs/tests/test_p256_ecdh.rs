@@ -2,7 +2,7 @@ mod test_util;
 use test_util::*;
 
 use evercrypt::ecdh::{self, Mode};
-use evercrypt::p256::{p256_dh, Error};
+use evercrypt::p256::{self, Error};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -61,7 +61,7 @@ fn test_wycheproof() {
             let private = hex_str_to_bytes(&test.private);
             let shared = hex_str_to_bytes(&test.shared);
 
-            let result = p256_dh(&public, &private);
+            let result = p256::dh(&public, &private);
             let result_ = ecdh::derive(Mode::P256, &public, &private);
             match result {
                 Ok(r) => {

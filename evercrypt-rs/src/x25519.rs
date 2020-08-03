@@ -11,7 +11,7 @@ pub type Point = [u8; 32];
 pub type Scalar = [u8; 32];
 
 /// Return base * s
-pub fn x25519_base(s: &Scalar) -> Point {
+pub fn dh_base(s: &Scalar) -> Point {
     let mut out = [0u8; 32];
     unsafe {
         EverCrypt_Curve25519_secret_to_public(out.as_mut_ptr(), s.as_ptr() as _);
@@ -20,7 +20,7 @@ pub fn x25519_base(s: &Scalar) -> Point {
 }
 
 /// Return p * s
-pub fn x25519(p: &Point, s: &Scalar) -> Result<Point, Error> {
+pub fn dh(p: &Point, s: &Scalar) -> Result<Point, Error> {
     let mut out = [0u8; 32];
     let r =
         unsafe { EverCrypt_Curve25519_ecdh(out.as_mut_ptr(), s.as_ptr() as _, p.as_ptr() as _) };

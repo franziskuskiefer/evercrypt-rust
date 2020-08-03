@@ -50,7 +50,7 @@ fn validate_sk(sk: &[u8]) -> Result<[u8; 32], Error> {
 }
 
 /// Return base * s
-pub fn p256_dh_base(s: &[u8]) -> Result<[u8; 64], Error> {
+pub fn dh_base(s: &[u8]) -> Result<[u8; 64], Error> {
     let private = validate_sk(s)?;
 
     let mut out = [0u8; 64];
@@ -63,7 +63,7 @@ pub fn p256_dh_base(s: &[u8]) -> Result<[u8; 64], Error> {
 }
 
 /// Return p * s
-pub fn p256_dh(p: &[u8], s: &[u8]) -> Result<[u8; 64], Error> {
+pub fn dh(p: &[u8], s: &[u8]) -> Result<[u8; 64], Error> {
     let public = validate_pk(p)?;
     let private = validate_sk(s)?;
 
@@ -133,7 +133,7 @@ impl EcdsaSignature {
 }
 
 /// Sign `msg` with `sk` and `nonce` using `hash`.
-pub fn p256_ecdsa_sign(
+pub fn ecdsa_sign(
     hash: Mode,
     msg: &[u8],
     sk: &[u8],
@@ -185,7 +185,7 @@ pub fn p256_ecdsa_sign(
 }
 
 /// Verify `signature` on `msg` with `pk` using `hash`.
-pub fn p256_ecdsa_verify(
+pub fn ecdsa_verify(
     hash: Mode,
     msg: &[u8],
     pk: &[u8],

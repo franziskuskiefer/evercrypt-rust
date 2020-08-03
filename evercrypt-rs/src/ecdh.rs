@@ -65,12 +65,12 @@ pub fn derive(mode: Mode, p: &[u8], s: &[u8]) -> Result<Vec<u8>, Error> {
             let mut scalar = [0u8; 32];
             scalar.clone_from_slice(s);
 
-            match x25519::x25519(&point, &scalar) {
+            match x25519::dh(&point, &scalar) {
                 Ok(r) => Ok(r.to_vec()),
                 Err(_) => Err(Error::InvalidPoint),
             }
         }
-        Mode::P256 => match p256::p256_dh(p, s) {
+        Mode::P256 => match p256::dh(p, s) {
             Ok(r) => Ok(r.to_vec()),
             Err(_) => Err(Error::InvalidPoint),
         },
@@ -84,9 +84,9 @@ pub fn derive_base(mode: Mode, s: &[u8]) -> Result<Vec<u8>, Error> {
             let mut scalar = [0u8; 32];
             scalar.clone_from_slice(s);
 
-            Ok(x25519::x25519_base(&scalar).to_vec())
+            Ok(x25519::dh_base(&scalar).to_vec())
         },
-        Mode::P256 => match p256::p256_dh_base(s) {
+        Mode::P256 => match p256::dh_base(s) {
             Ok(r) => Ok(r.to_vec()),
             Err(_) => Err(Error::InvalidPoint),
         },

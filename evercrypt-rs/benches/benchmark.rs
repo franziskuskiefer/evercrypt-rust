@@ -342,12 +342,12 @@ fn criterion_p256(c: &mut Criterion) {
 }
 
 fn criterion_ed25519(c: &mut Criterion) {
-    use evercrypt::ed25519::{ed25519_sign, ed25519_sk2pk, ed25519_verify};
+    use evercrypt::ed25519;
     c.bench_function("ed25519 key gen", |b| {
         b.iter_batched(
             || clone_into_array(&randombytes(32)),
             |sk| {
-                let _pk = ed25519_sk2pk(&sk);
+                let _pk = ed25519::sk2pk(&sk);
             },
             BatchSize::SmallInput,
         )
@@ -360,7 +360,7 @@ fn criterion_ed25519(c: &mut Criterion) {
                 (sk, data)
             },
             |(sk, data)| {
-                let _sig = ed25519_sign(&sk, &data);
+                let _sig = ed25519::sign(&sk, &data);
             },
             BatchSize::SmallInput,
         )
@@ -369,13 +369,13 @@ fn criterion_ed25519(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let sk = clone_into_array(&randombytes(32));
-                let pk = ed25519_sk2pk(&sk);
+                let pk = ed25519::sk2pk(&sk);
                 let data = randombytes(1_000);
-                let sig = ed25519_sign(&pk, &data);
+                let sig = ed25519::sign(&pk, &data);
                 (pk, data, sig)
             },
             |(pk, data, sig)| {
-                let _valid = ed25519_verify(&pk, &sig, &data);
+                let _valid = ed25519::verify(&pk, &sig, &data);
             },
             BatchSize::SmallInput,
         )
