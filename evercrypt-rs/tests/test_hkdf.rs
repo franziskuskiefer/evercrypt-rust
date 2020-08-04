@@ -1,8 +1,7 @@
 mod test_util;
 use test_util::*;
 
-use evercrypt::hkdf::{hkdf, hkdf_expand, hkdf_extract};
-use evercrypt::hmac::Mode;
+use evercrypt::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -55,10 +54,10 @@ fn test_wycheproof() {
 
     for tests in test_vectors.iter() {
         let algorithm = match tests.algorithm.as_str() {
-            "HKDF-SHA-1" => Mode::Sha1,
-            "HKDF-SHA-256" => Mode::Sha256,
-            "HKDF-SHA-384" => Mode::Sha384,
-            "HKDF-SHA-512" => Mode::Sha512,
+            "HKDF-SHA-1" => HmacMode::Sha1,
+            "HKDF-SHA-256" => HmacMode::Sha256,
+            "HKDF-SHA-384" => HmacMode::Sha384,
+            "HKDF-SHA-512" => HmacMode::Sha512,
             _ => panic!("Unknown HKDF algorithm {}", tests.algorithm),
         };
         println!("Testing {:?}", algorithm);

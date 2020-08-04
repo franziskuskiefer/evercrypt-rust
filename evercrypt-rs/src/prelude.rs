@@ -12,6 +12,7 @@ pub use crate::ed25519::{
     Error as Ed25519Error, Point as Ed25519Point, Scalar as Ed25519Scalar,
     Signature as Ed25519Signature,
 };
+pub use crate::hkdf::{self, expand as hkdf_expand, extract as hkdf_extract, hkdf};
 pub use crate::hmac::{get_tag_size, hmac, Mode as HmacMode};
 pub use crate::p256::{
     self, dh as p256, dh_base as p256_base, ecdsa_sign as p256_sign, ecdsa_verify as p256_verify,

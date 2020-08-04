@@ -438,35 +438,34 @@ fn criterion_hmac(c: &mut Criterion) {
 }
 
 fn criterion_hkdf(c: &mut Criterion) {
-    use evercrypt::hkdf::{hkdf, hkdf_expand, hkdf_extract};
-    use evercrypt::hmac::Mode;
+    use evercrypt::prelude::*;
 
     c.bench_function("HKDF extract SHA1", |b| {
         let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
         let salt = hex_to_bytes("000102030405060708090a0b0c");
         b.iter(|| {
-            let _prk = hkdf_extract(Mode::Sha1, &salt, &ikm);
+            let _prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
         });
     });
     c.bench_function("HKDF extract SHA256", |b| {
         let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
         let salt = hex_to_bytes("000102030405060708090a0b0c");
         b.iter(|| {
-            let _prk = hkdf_extract(Mode::Sha256, &salt, &ikm);
+            let _prk = hkdf_extract(HmacMode::Sha256, &salt, &ikm);
         });
     });
     c.bench_function("HKDF extract SHA384", |b| {
         let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
         let salt = hex_to_bytes("000102030405060708090a0b0c");
         b.iter(|| {
-            let _prk = hkdf_extract(Mode::Sha384, &salt, &ikm);
+            let _prk = hkdf_extract(HmacMode::Sha384, &salt, &ikm);
         });
     });
     c.bench_function("HKDF extract SHA512", |b| {
         let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
         let salt = hex_to_bytes("000102030405060708090a0b0c");
         b.iter(|| {
-            let _prk = hkdf_extract(Mode::Sha512, &salt, &ikm);
+            let _prk = hkdf_extract(HmacMode::Sha512, &salt, &ikm);
         });
     });
 
@@ -476,12 +475,12 @@ fn criterion_hkdf(c: &mut Criterion) {
                 let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
                 let salt = hex_to_bytes("000102030405060708090a0b0c");
                 let len = 32;
-                let prk = hkdf_extract(Mode::Sha1, &salt, &ikm);
+                let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
                 let data = randombytes(1_000);
                 (len, prk, data)
             },
             |(len, prk, data)| {
-                let _okm = hkdf_expand(Mode::Sha1, &prk, &data, len);
+                let _okm = hkdf_expand(HmacMode::Sha1, &prk, &data, len);
             },
             BatchSize::SmallInput,
         )
@@ -492,12 +491,12 @@ fn criterion_hkdf(c: &mut Criterion) {
                 let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
                 let salt = hex_to_bytes("000102030405060708090a0b0c");
                 let len = 32;
-                let prk = hkdf_extract(Mode::Sha1, &salt, &ikm);
+                let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
                 let data = randombytes(1_000);
                 (len, prk, data)
             },
             |(len, prk, data)| {
-                let _okm = hkdf_expand(Mode::Sha256, &prk, &data, len);
+                let _okm = hkdf_expand(HmacMode::Sha256, &prk, &data, len);
             },
             BatchSize::SmallInput,
         )
@@ -508,12 +507,12 @@ fn criterion_hkdf(c: &mut Criterion) {
                 let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
                 let salt = hex_to_bytes("000102030405060708090a0b0c");
                 let len = 32;
-                let prk = hkdf_extract(Mode::Sha1, &salt, &ikm);
+                let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
                 let data = randombytes(1_000);
                 (len, prk, data)
             },
             |(len, prk, data)| {
-                let _okm = hkdf_expand(Mode::Sha384, &prk, &data, len);
+                let _okm = hkdf_expand(HmacMode::Sha384, &prk, &data, len);
             },
             BatchSize::SmallInput,
         )
@@ -524,12 +523,12 @@ fn criterion_hkdf(c: &mut Criterion) {
                 let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
                 let salt = hex_to_bytes("000102030405060708090a0b0c");
                 let len = 32;
-                let prk = hkdf_extract(Mode::Sha1, &salt, &ikm);
+                let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
                 let data = randombytes(1_000);
                 (len, prk, data)
             },
             |(len, prk, data)| {
-                let _okm = hkdf_expand(Mode::Sha512, &prk, &data, len);
+                let _okm = hkdf_expand(HmacMode::Sha512, &prk, &data, len);
             },
             BatchSize::SmallInput,
         )
@@ -545,7 +544,7 @@ fn criterion_hkdf(c: &mut Criterion) {
                 (ikm, salt, len, data)
             },
             |(ikm, salt, len, data)| {
-                let _hkdf = hkdf(Mode::Sha1, &salt, &ikm, &data, len);
+                let _hkdf = hkdf(HmacMode::Sha1, &salt, &ikm, &data, len);
             },
             BatchSize::SmallInput,
         )
@@ -560,7 +559,7 @@ fn criterion_hkdf(c: &mut Criterion) {
                 (ikm, salt, len, data)
             },
             |(ikm, salt, len, data)| {
-                let _hkdf = hkdf(Mode::Sha256, &salt, &ikm, &data, len);
+                let _hkdf = hkdf(HmacMode::Sha256, &salt, &ikm, &data, len);
             },
             BatchSize::SmallInput,
         )
@@ -575,7 +574,7 @@ fn criterion_hkdf(c: &mut Criterion) {
                 (ikm, salt, len, data)
             },
             |(ikm, salt, len, data)| {
-                let _hkdf = hkdf(Mode::Sha384, &salt, &ikm, &data, len);
+                let _hkdf = hkdf(HmacMode::Sha384, &salt, &ikm, &data, len);
             },
             BatchSize::SmallInput,
         )
@@ -590,7 +589,7 @@ fn criterion_hkdf(c: &mut Criterion) {
                 (ikm, salt, len, data)
             },
             |(ikm, salt, len, data)| {
-                let _hkdf = hkdf(Mode::Sha512, &salt, &ikm, &data, len);
+                let _hkdf = hkdf(HmacMode::Sha512, &salt, &ikm, &data, len);
             },
             BatchSize::SmallInput,
         )
