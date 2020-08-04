@@ -44,3 +44,7 @@ jobs:
         run: |
           cd evercrypt-rs
           cargo bench --verbose --features rust-crypto-aes
+      - name: Benchmark (force-rust-crypto-aes)
+        run: |
+          cd evercrypt-rs
+          cargo bench --verbose --features rust-crypto-aes --features force-rust-crypto-aes

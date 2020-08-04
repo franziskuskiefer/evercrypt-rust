@@ -11,6 +11,7 @@ default = ["random"]
 # HACL doesn't support AES on all platforms yet.
 # We therefore pull in the RustCrypto AES-GCM implementation here as a feature.
 rust-crypto-aes = ["aes-gcm"]
+force-rust-crypto-aes = []
 random = ["rand"]
 
 [dependencies]

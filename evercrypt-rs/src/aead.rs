@@ -143,6 +143,10 @@ pub type Aad = [u8];
 
 // Check hardware support for HACL* AES implementation.
 fn hacl_aes_available() -> bool {
+    if cfg!(feature = "force-rust-crypto-aes") {
+        // With this config we force using the fallback AES implementation.
+        return false;
+    }
     unsafe {
         EverCrypt_AutoConfig2_has_pclmulqdq()
             && EverCrypt_AutoConfig2_has_avx()
@@ -218,7 +222,7 @@ impl<'a> Aead<'a> {
                 Ok(Self {
                     mode: alg,
                     c_state: None,
-                    op_mode: OpMode::RustCryptoAes128,
+                    op_mode: op_mode.unwrap(),
                     key: k,
                 })
             }
