@@ -103,6 +103,14 @@ impl From<Mode> for Spec_Agile_AEAD_alg {
     }
 }
 
+fn key_size(mode: &Mode) -> usize {
+    match mode {
+        Mode::Aes128Gcm => 16,
+        Mode::Aes256Gcm => 32,
+        Mode::Chacha20Poly1305 => 32,
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Error {
     InvalidInit = 0,
@@ -117,6 +125,7 @@ pub enum Error {
 /// The Aead struct allows to re-use a key without having to initialize it
 /// every time.
 pub struct Aead<'a> {
+    mode: Mode,
     c_state: Option<*mut EverCrypt_AEAD_state_s>,
     op_mode: OpMode,
     #[allow(dead_code)] // key is only used when using rust-crypto
@@ -150,6 +159,25 @@ fn alg_is_aes(alg: Mode) -> bool {
     }
 }
 
+fn get_op_mode(alg: Mode) -> Result<OpMode, Error> {
+    match alg {
+        Mode::Aes128Gcm | Mode::Aes256Gcm => {
+            if hacl_aes_available() {
+                Ok(OpMode::Hacl)
+            } else if cfg!(feature = "rust-crypto-aes") {
+                match alg {
+                    Mode::Aes128Gcm => Ok(OpMode::RustCryptoAes128),
+                    Mode::Aes256Gcm => Ok(OpMode::RustCryptoAes256),
+                    _ => panic!("Unreachable"),
+                }
+            } else {
+                Err(Error::InvalidAlgorithm)
+            }
+        }
+        Mode::Chacha20Poly1305 => Ok(OpMode::Hacl),
+    }
+}
+
 impl<'a> Aead<'a> {
     /// Create a new Aead cipher with the given Mode `alg` and key `k`.
     /// If the algorithm is not supported or the state generation fails, this
@@ -159,40 +187,55 @@ impl<'a> Aead<'a> {
             // Make sure this happened.
             EverCrypt_AutoConfig2_init();
         }
-        if hacl_aes_available() || !alg_is_aes(alg) {
-            let state = unsafe {
-                let mut state_ptr: *mut EverCrypt_AEAD_state_s = std::ptr::null_mut();
-                let e =
-                    EverCrypt_AEAD_create_in(alg.into(), &mut state_ptr, k.to_vec().as_mut_ptr());
-                if e != 0 {
-                    return Err(Error::InvalidInit);
+        let op_mode = get_op_mode(alg);
+        match op_mode {
+            Ok(OpMode::Hacl) => {
+                let state = unsafe {
+                    let mut state_ptr: *mut EverCrypt_AEAD_state_s = std::ptr::null_mut();
+                    let e = EverCrypt_AEAD_create_in(
+                        alg.into(),
+                        &mut state_ptr,
+                        k.to_vec().as_mut_ptr(),
+                    );
+                    if e != 0 {
+                        return Err(Error::InvalidInit);
+                    }
+                    state_ptr
+                };
+                Ok(Self {
+                    mode: alg,
+                    c_state: Some(state),
+                    op_mode: OpMode::Hacl,
+                    key: k,
+                })
+            }
+            Ok(OpMode::RustCryptoAes128) | Ok(OpMode::RustCryptoAes256) => {
+                if !cfg!(feature = "rust-crypto-aes") {
+                    return Err(Error::UnsupportedConfig);
                 }
-                state_ptr
-            };
-            Ok(Self {
-                c_state: Some(state),
-                op_mode: OpMode::Hacl,
-                key: k,
-            })
-        } else if cfg!(feature = "rust-crypto-aes") {
-            // Fall back to software AES GCM implemented in RustCrypto
-            debug_assert!(alg_is_aes(alg));
-            match alg {
-                Mode::Aes128Gcm => Ok(Self {
+                // Fall back to software AES GCM implemented in RustCrypto
+                debug_assert!(alg_is_aes(alg));
+                Ok(Self {
+                    mode: alg,
                     c_state: None,
                     op_mode: OpMode::RustCryptoAes128,
                     key: k,
-                }),
-                Mode::Aes256Gcm => Ok(Self {
-                    c_state: None,
-                    op_mode: OpMode::RustCryptoAes256,
-                    key: k,
-                }),
-                _ => panic!("This can't happen. We must only get in here if you want AES."),
+                })
             }
-        } else {
-            Err(Error::UnsupportedConfig)
+            _ => Err(Error::UnsupportedConfig),
         }
+    }
+
+    /// Generate a random key.
+    #[cfg(feature = "random")]
+    pub fn key_gen(alg: Mode) -> Vec<u8> {
+        key_gen(alg)
+    }
+
+    /// Generate a nonce.
+    #[cfg(feature = "random")]
+    pub fn nonce_gen(&self) -> Nonce {
+        nonce_gen(self.mode)
     }
 
     // Encryption using RustCrytpo AES.
@@ -360,4 +403,16 @@ pub fn decrypt(
 ) -> Result<Vec<u8>, Error> {
     let cipher = Aead::new(alg, k)?;
     cipher.decrypt(ctxt, tag, iv, aad)
+}
+
+/// Generate a random key.
+#[cfg(feature = "random")]
+pub fn key_gen(alg: Mode) -> Vec<u8> {
+    crate::rand_util::get_random_vec(key_size(&alg))
+}
+
+/// Generate a nonce.
+#[cfg(feature = "random")]
+pub fn nonce_gen(_alg: Mode) -> Nonce {
+    crate::rand_util::get_random_array()
 }

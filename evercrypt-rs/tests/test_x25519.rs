@@ -115,3 +115,17 @@ fn test_wycheproof() {
     println!("Ran {} out of {} tests.", tests_run, num_tests);
     assert_eq!(num_tests, tests_run);
 }
+
+#[cfg(feature = "random")]
+#[test]
+fn key_gen_self_test() {
+    let sk_a = x25519::key_gen();
+    let pk_a = x25519::dh_base(&sk_a);
+
+    let sk_b = x25519::key_gen();
+    let pk_b = x25519::dh_base(&sk_b);
+
+    let shared_a = x25519::dh(&pk_b, &sk_a);
+    let shared_b = x25519::dh(&pk_a, &sk_b);
+    assert_eq!(shared_a, shared_b);
+}

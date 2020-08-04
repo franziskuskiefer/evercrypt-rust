@@ -1,7 +1,7 @@
 mod test_util;
 use test_util::*;
 
-use evercrypt::aead::{Aead, Error, Mode, Nonce, Tag};
+use evercrypt::aead::{self, Aead, Error, Mode, Nonce, Tag};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -142,4 +142,30 @@ fn test_wycheproof() {
         tests_run, num_tests, skipped_tests
     );
     assert_eq!(num_tests - skipped_tests, tests_run);
+}
+
+#[cfg(feature = "random")]
+#[test]
+fn key_gen_self_test() {
+    fn run(algorithm: Mode) {
+        let msg = b"Evercrypt rulez";
+        let aad = b"associated data";
+        let key = aead::key_gen(algorithm);
+        let nonce = aead::nonce_gen(algorithm);
+        let cipher = Aead::new(algorithm, &key).unwrap();
+        let (ctxt, tag) = match cipher.encrypt(msg, &nonce, aad) {
+            Ok(v) => v,
+            Err(e) => {
+                panic!("Encrypt failed unexpectedly {:?}", e);
+            }
+        };
+        let msg_decrypted = match cipher.decrypt(&ctxt, &tag, &nonce, aad) {
+            Ok(m) => m,
+            Err(_) => msg.to_vec(),
+        };
+        assert_eq!(msg[..], msg_decrypted[..]);
+    }
+    run(Mode::Aes128Gcm);
+    run(Mode::Aes256Gcm);
+    run(Mode::Chacha20Poly1305);
 }

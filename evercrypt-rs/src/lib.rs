@@ -10,4 +10,7 @@ pub mod x25519;
 
 mod util;
 
+#[cfg(feature = "random")]
+pub mod rand_util;
+
 pub mod prelude;

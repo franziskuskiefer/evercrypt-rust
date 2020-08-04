@@ -7,14 +7,16 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = []
+default = ["random"]
 # HACL doesn't support AES on all platforms yet.
 # We therefore pull in the RustCrypto AES-GCM implementation here as a feature.
 rust-crypto-aes = ["aes-gcm"]
+random = ["rand"]
 
 [dependencies]
 evercrypt-sys = { path = "../evercrypt-sys" }
 aes-gcm = { version = "0.6", optional = true }
+rand = { version = "0.7", optional = true }
 
 [dev-dependencies]
 serde_json = "1.0"
