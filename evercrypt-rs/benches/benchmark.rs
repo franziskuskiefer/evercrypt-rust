@@ -224,7 +224,8 @@ fn criterion_x25519(c: &mut Criterion) {
 }
 
 macro_rules! p256_signature_bench {
-    ($c:expr, $name_sign:literal, $name_verify:literal, $name_sign_gen:literal, $name_verify_gen:literal, $sm:expr, $m:expr) => {
+    ($c:expr, $name_sign:literal, $name_verify:literal, $name_sign_gen:literal,
+        $name_verify_gen:literal, $sm:expr, $m:expr) => {
         $c.bench_function($name_sign, |b| {
             let sk1 = clone_into_array(&hex_to_bytes(SK1_HEX));
             let nonce = clone_into_array(&hex_to_bytes(NONCE));
@@ -440,160 +441,76 @@ fn criterion_hmac(c: &mut Criterion) {
 fn criterion_hkdf(c: &mut Criterion) {
     use evercrypt::prelude::*;
 
-    c.bench_function("HKDF extract SHA1", |b| {
-        let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-        let salt = hex_to_bytes("000102030405060708090a0b0c");
-        b.iter(|| {
-            let _prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
-        });
-    });
-    c.bench_function("HKDF extract SHA256", |b| {
-        let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-        let salt = hex_to_bytes("000102030405060708090a0b0c");
-        b.iter(|| {
-            let _prk = hkdf_extract(HmacMode::Sha256, &salt, &ikm);
-        });
-    });
-    c.bench_function("HKDF extract SHA384", |b| {
-        let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-        let salt = hex_to_bytes("000102030405060708090a0b0c");
-        b.iter(|| {
-            let _prk = hkdf_extract(HmacMode::Sha384, &salt, &ikm);
-        });
-    });
-    c.bench_function("HKDF extract SHA512", |b| {
-        let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-        let salt = hex_to_bytes("000102030405060708090a0b0c");
-        b.iter(|| {
-            let _prk = hkdf_extract(HmacMode::Sha512, &salt, &ikm);
-        });
-    });
+    macro_rules! hkdf_expand_bench {
+        ($c:expr, $name_expand:literal, $name_extract:literal, $m:expr) => {
+            c.bench_function($name_expand, |b| {
+                b.iter_batched(
+                    || {
+                        let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+                        let salt = hex_to_bytes("000102030405060708090a0b0c");
+                        let len = 32;
+                        let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
+                        let data = randombytes(1_000);
+                        (len, prk, data)
+                    },
+                    |(len, prk, data)| {
+                        let _okm = hkdf_expand($m, &prk, &data, len);
+                    },
+                    BatchSize::SmallInput,
+                )
+            });
+            c.bench_function($name_extract, |b| {
+                let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+                let salt = hex_to_bytes("000102030405060708090a0b0c");
+                b.iter(|| {
+                    let _prk = hkdf_extract($m, &salt, &ikm);
+                });
+            });
+        };
+    }
+    hkdf_expand_bench!(c, "HKDF Expand SHA1", "HKDF Extract SHA1", HmacMode::Sha1);
+    hkdf_expand_bench!(
+        c,
+        "HKDF Expand SHA256",
+        "HKDF Extract SHA256",
+        HmacMode::Sha256
+    );
+    hkdf_expand_bench!(
+        c,
+        "HKDF Expand SHA384",
+        "HKDF Extract SHA384",
+        HmacMode::Sha384
+    );
+    hkdf_expand_bench!(
+        c,
+        "HKDF Expand SHA512",
+        "HKDF Extract SHA512",
+        HmacMode::Sha512
+    );
 
-    c.bench_function("HKDF expand SHA1", |b| {
-        b.iter_batched(
-            || {
-                let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-                let salt = hex_to_bytes("000102030405060708090a0b0c");
-                let len = 32;
-                let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
-                let data = randombytes(1_000);
-                (len, prk, data)
-            },
-            |(len, prk, data)| {
-                let _okm = hkdf_expand(HmacMode::Sha1, &prk, &data, len);
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    c.bench_function("HKDF expand SHA256", |b| {
-        b.iter_batched(
-            || {
-                let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-                let salt = hex_to_bytes("000102030405060708090a0b0c");
-                let len = 32;
-                let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
-                let data = randombytes(1_000);
-                (len, prk, data)
-            },
-            |(len, prk, data)| {
-                let _okm = hkdf_expand(HmacMode::Sha256, &prk, &data, len);
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    c.bench_function("HKDF expand SHA384", |b| {
-        b.iter_batched(
-            || {
-                let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-                let salt = hex_to_bytes("000102030405060708090a0b0c");
-                let len = 32;
-                let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
-                let data = randombytes(1_000);
-                (len, prk, data)
-            },
-            |(len, prk, data)| {
-                let _okm = hkdf_expand(HmacMode::Sha384, &prk, &data, len);
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    c.bench_function("HKDF expand SHA512", |b| {
-        b.iter_batched(
-            || {
-                let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-                let salt = hex_to_bytes("000102030405060708090a0b0c");
-                let len = 32;
-                let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
-                let data = randombytes(1_000);
-                (len, prk, data)
-            },
-            |(len, prk, data)| {
-                let _okm = hkdf_expand(HmacMode::Sha512, &prk, &data, len);
-            },
-            BatchSize::SmallInput,
-        )
-    });
-
-    c.bench_function("HKDF SHA1", |b| {
-        b.iter_batched(
-            || {
-                let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-                let salt = hex_to_bytes("000102030405060708090a0b0c");
-                let len = 32;
-                let data = randombytes(1_000);
-                (ikm, salt, len, data)
-            },
-            |(ikm, salt, len, data)| {
-                let _hkdf = hkdf(HmacMode::Sha1, &salt, &ikm, &data, len);
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    c.bench_function("HKDF SHA256", |b| {
-        b.iter_batched(
-            || {
-                let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-                let salt = hex_to_bytes("000102030405060708090a0b0c");
-                let len = 32;
-                let data = randombytes(1_000);
-                (ikm, salt, len, data)
-            },
-            |(ikm, salt, len, data)| {
-                let _hkdf = hkdf(HmacMode::Sha256, &salt, &ikm, &data, len);
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    c.bench_function("HKDF SHA384", |b| {
-        b.iter_batched(
-            || {
-                let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-                let salt = hex_to_bytes("000102030405060708090a0b0c");
-                let len = 32;
-                let data = randombytes(1_000);
-                (ikm, salt, len, data)
-            },
-            |(ikm, salt, len, data)| {
-                let _hkdf = hkdf(HmacMode::Sha384, &salt, &ikm, &data, len);
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    c.bench_function("HKDF SHA512", |b| {
-        b.iter_batched(
-            || {
-                let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
-                let salt = hex_to_bytes("000102030405060708090a0b0c");
-                let len = 32;
-                let data = randombytes(1_000);
-                (ikm, salt, len, data)
-            },
-            |(ikm, salt, len, data)| {
-                let _hkdf = hkdf(HmacMode::Sha512, &salt, &ikm, &data, len);
-            },
-            BatchSize::SmallInput,
-        )
-    });
+    macro_rules! hkdf_bench {
+        ($c:expr, $name:literal, $m:expr) => {
+            c.bench_function($name, |b| {
+                b.iter_batched(
+                    || {
+                        let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+                        let salt = hex_to_bytes("000102030405060708090a0b0c");
+                        let len = 32;
+                        let data = randombytes(1_000);
+                        (ikm, salt, len, data)
+                    },
+                    |(ikm, salt, len, data)| {
+                        let _hkdf = hkdf($m, &salt, &ikm, &data, len);
+                    },
+                    BatchSize::SmallInput,
+                )
+            });
+        };
+    }
+    hkdf_bench!(c, "HKDF SHA1", HmacMode::Sha1);
+    hkdf_bench!(c, "HKDF SHA256", HmacMode::Sha256);
+    hkdf_bench!(c, "HKDF SHA384", HmacMode::Sha384);
+    hkdf_bench!(c, "HKDF SHA512", HmacMode::Sha512);
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
