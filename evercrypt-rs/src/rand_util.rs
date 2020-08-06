@@ -3,16 +3,19 @@
 //! secure alternative.
 //! 
 
-use rand::{self, Rng, AsByteSliceMut};
+use rand::{self, AsByteSliceMut};
+use rand_core::{OsRng, RngCore};
 
 /// Generate a random byte vector of length `len`.
-pub(crate) fn get_random_vec(len: usize) -> Vec<u8> {
-    (0..len).map(|_| rand::random::<u8>()).collect()
+pub fn get_random_vec(len: usize) -> Vec<u8> {
+    let mut out = vec![0u8; len];
+    OsRng.fill_bytes(out.as_byte_slice_mut());
+    out
 }
 
 /// Generate a random array.
-pub(crate) fn get_random_array<A: Default + AsByteSliceMut>() -> A {
+pub fn get_random_array<A: Default + AsByteSliceMut>() -> A {
     let mut out = A::default();
-    rand::thread_rng().fill(&mut out);
+    OsRng.fill_bytes(out.as_byte_slice_mut());
     out
 }

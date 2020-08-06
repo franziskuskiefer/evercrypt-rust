@@ -18,6 +18,7 @@ pub use crate::p256::{
     self, dh as p256, dh_base as p256_base, ecdsa_sign as p256_sign, ecdsa_verify as p256_verify,
     Error as P256Error, Nonce as P256Nonce, Scalar as P256Scalar, Signature as EcdsaSignature,
 };
+pub use crate::rand_util::{get_random_array, get_random_vec};
 pub use crate::signature::{self, sign, verify, Error as SignatureError, Mode as SignatureMode};
 pub use crate::x25519::{
     self, dh as x25519, dh_base as x25519_base, Error as X25519Error, Point as X25519Point,

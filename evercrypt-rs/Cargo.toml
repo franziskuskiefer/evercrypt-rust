@@ -11,13 +11,14 @@ default = ["random"]
 # HACL doesn't support AES on all platforms yet.
 # We therefore pull in the RustCrypto AES-GCM implementation here as a feature.
 rust-crypto-aes = ["aes-gcm"]
-force-rust-crypto-aes = []
-random = ["rand"]
+force-rust-crypto-aes = ["rust-crypto-aes"]
+random = ["rand", "rand_core"]
 
 [dependencies]
 evercrypt-sys = { path = "../evercrypt-sys" }
 aes-gcm = { version = "0.6", optional = true }
 rand = { version = "0.7", optional = true }
+rand_core = { version = "0.5", optional = true }
 
 [dev-dependencies]
 serde_json = "1.0"
