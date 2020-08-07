@@ -1,7 +1,7 @@
 //! Utilities that provide randomness.
 //! Note that this currently uses the rand crate and should be moved to a more
 //! secure alternative.
-//! 
+//!
 
 use rand::{self, AsByteSliceMut};
 use rand_core::{OsRng, RngCore};

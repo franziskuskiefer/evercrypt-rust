@@ -3,7 +3,7 @@ use test_util::*;
 
 use evercrypt::digest::Mode;
 use evercrypt::p256::{self, Error};
-use evercrypt::signature::{Mode as SignatureMode, self};
+use evercrypt::signature::{self, Mode as SignatureMode};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]

@@ -85,10 +85,20 @@ pub fn derive_base(mode: Mode, s: &[u8]) -> Result<Vec<u8>, Error> {
             scalar.clone_from_slice(s);
 
             Ok(x25519::dh_base(&scalar).to_vec())
-        },
+        }
         Mode::P256 => match p256::dh_base(s) {
             Ok(r) => Ok(r.to_vec()),
             Err(_) => Err(Error::InvalidPoint),
         },
+    }
+}
+
+/// Generate a random `Scalar` on the given curve.
+/// **NOTE:** note implemented for P256 right now.
+#[cfg(feature = "random")]
+pub fn key_gen(mode: Mode) -> Vec<u8> {
+    match mode {
+        Mode::X25519 => crate::rand_util::get_random_array::<x25519::Scalar>().to_vec(),
+        Mode::P256 => panic!("Key generation for P256 is not supported in Evercrypt right now."),
     }
 }

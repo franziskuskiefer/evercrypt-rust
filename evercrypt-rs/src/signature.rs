@@ -33,7 +33,7 @@ pub fn sign(
             key.clone_from_slice(sk);
 
             Ok(ed25519::eddsa_sign(&key, msg).to_vec())
-        },
+        }
         Mode::P256 => {
             let nonce = match nonce {
                 Some(n) => n,
@@ -70,7 +70,7 @@ pub fn verify(
             sig.clone_from_slice(signature);
 
             Ok(ed25519::eddsa_verify(&key, &sig, msg))
-        },
+        }
         Mode::P256 => {
             let hash = match hash {
                 Some(h) => h,

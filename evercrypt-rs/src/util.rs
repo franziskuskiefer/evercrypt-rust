@@ -1,4 +1,3 @@
-
 #[allow(dead_code)]
 pub(crate) fn clone_into_array<A, T>(slice: &[T]) -> A
 where

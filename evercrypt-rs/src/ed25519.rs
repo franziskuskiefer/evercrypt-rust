@@ -19,6 +19,11 @@
 //!
 //! let result = ed25519::eddsa_verify(&public, &signature, &msg);
 //! assert!(result);
+//!
+//! let sk = ed25519::key_gen();
+//! let pk = ed25519::sk2pk(&sk);
+//! let signature = ed25519::eddsa_sign(&sk, &msg);
+//! assert!(ed25519::eddsa_verify(&pk, &signature, &msg));
 //! ```
 
 use evercrypt_sys::evercrypt_bindings::*;
@@ -70,4 +75,10 @@ pub fn sk2pk(sk: &Scalar) -> Point {
         EverCrypt_Ed25519_secret_to_public(out.as_mut_ptr(), sk.as_ptr() as _);
     }
     out
+}
+
+/// Generate a random `Scalar`.
+#[cfg(feature = "random")]
+pub fn key_gen() -> Scalar {
+    crate::rand_util::get_random_array()
 }
