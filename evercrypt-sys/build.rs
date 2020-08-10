@@ -45,6 +45,9 @@ fn copy_evercrypt_lib(src: &Path, dst: &Path) {
 }
 
 fn main() {
+    // Set re-run trigger
+    println!("cargo:rerun-if-changed=wrapper.h");
+
     // Get ENV variables
     let home_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let llvm_dir =
@@ -52,7 +55,7 @@ fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let profile = env::var("PROFILE").unwrap();
     let target = env::var("CARGO_TARGET_DIR").unwrap_or("target".to_string());
-
+    let rebuild_hacl = env::var("REBUILD_HACL").unwrap_or_default();
     let target_path = Path::new(&home_dir).join("..").join(&target).join(&profile);
 
     // Set HACL/Evercrypt paths
@@ -66,9 +69,6 @@ fn main() {
     // Set LLVM path
     let llvm_config = llvm_dir + "llvm-config";
     println!("cargo:rustc-env=LLVM_CONFIG_PATH={}", llvm_config);
-
-    // Set re-run trigger
-    println!("cargo:rerun-if-changed=wrapper.h");
 
     // Set up rustc link environment
     println!(
@@ -93,7 +93,9 @@ fn main() {
     ];
 
     // Build hacl/evercrypt
-    build_hacl(&gcc_lib_dir);
+    if !rebuild_hacl.is_empty() {
+        build_hacl(&gcc_lib_dir);
+    }
 
     // Copy evercrypt library to the target directory.
     copy_evercrypt_lib(&gcc_lib_dir.join("libevercrypt.so"), &target_path);
