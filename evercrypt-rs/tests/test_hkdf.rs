@@ -69,7 +69,7 @@ fn test_wycheproof() {
             assert_eq!(testGroup.r#type, "HkdfTest");
             let _key_size = testGroup.keySize;
             for test in testGroup.tests.iter() {
-                let valid = test.result.eq("valid");
+                let _valid = test.result.eq("valid");
                 println!("Test {:?}: {:?}", test.tcId, test.comment);
                 let ikm = hex_str_to_bytes(&test.ikm);
                 let salt = hex_str_to_bytes(&test.salt);
@@ -84,14 +84,8 @@ fn test_wycheproof() {
                 let prk = hkdf_extract(algorithm, &salt, &ikm);
                 let r_expand = hkdf_expand(algorithm, &prk, &info, size);
 
-                if valid {
-                    assert_eq!(r[..], okm[..]);
-                    assert_eq!(r_expand[..], okm[..]);
-                } else {
-                    // okm is empty in this case
-                    assert_eq!(r[..], okm[..]);
-                    assert_eq!(r_expand[..], okm[..]);
-                }
+                assert_eq!(r[..], okm[..]);
+                assert_eq!(r_expand[..], okm[..]);
 
                 tests_run += 1;
             }
