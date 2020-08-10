@@ -6,12 +6,12 @@ edition = "2018"
 build = "build.rs"
 categories = ["cryptography", "api-bindings"]
 links = "evercrypt"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MPL-2.0"
+documentation = "https://docs.rs/evercrypt-sys"
+description = "FFI binding to HACL/Evercrypt"
 
 [dependencies]
 libc = { version = "0.2", default-features = false }
-# cc = "1.0"
 
 [build-dependencies]
 bindgen = "0.54"
