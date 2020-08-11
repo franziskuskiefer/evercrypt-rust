@@ -2,15 +2,17 @@ extern crate bindgen;
 
 use std::{env, fs, path::Path, path::PathBuf, process::Command};
 
+// TODO: add ARM builds
+
 #[cfg(windows)]
 fn build_hacl() {
-    unimplemented!();
+    // TODO: add Windows builds
+    panic!("Windows builds are not supported yet. Sorry!");
 }
 
 #[cfg(not(windows))]
-fn build_hacl(lib_dir: &Path) {
+fn build_hacl(lib_dir: &Path, dest_dir: &Path) {
     // Run configure
-    // XXX: Do we need to configure anything here?
     let mut configure_cmd = Command::new(
         fs::canonicalize(lib_dir.join("configure")).expect("Failed to find configure script!"),
     );
@@ -31,8 +33,11 @@ fn build_hacl(lib_dir: &Path) {
         .status()
         .expect("Failed to run make");
     if !make_status.success() {
-        panic!("Failed to run make.")
+        panic!("Failed to run make.");
     }
+
+    // Copy evercrypt library to the target directory.
+    copy_evercrypt_lib(&lib_dir.join("libevercrypt.so"), &dest_dir);
 }
 
 fn copy_evercrypt_lib(src: &Path, dst: &Path) {
@@ -53,9 +58,10 @@ fn main() {
     let llvm_dir =
         env::var("LLVM_DIR").unwrap_or("/usr/local/Cellar/llvm/10.0.0_3/bin/".to_string());
     let out_dir = env::var("OUT_DIR").unwrap();
+    let out_path = Path::new(&out_dir);
     let profile = env::var("PROFILE").unwrap();
     let target = env::var("CARGO_TARGET_DIR").unwrap_or("target".to_string());
-    let target_path = Path::new(&home_dir).join("..").join(&target).join(&profile);
+    let _target_path = Path::new(&home_dir).join("..").join(&target).join(&profile);
 
     // Set HACL/Evercrypt paths
     let hacl_dir = Path::new(&home_dir).join("hacl-star");
@@ -92,10 +98,7 @@ fn main() {
     ];
 
     // Build hacl/evercrypt
-    build_hacl(&gcc_lib_dir);
-
-    // Copy evercrypt library to the target directory.
-    copy_evercrypt_lib(&gcc_lib_dir.join("libevercrypt.so"), &target_path);
+    build_hacl(&gcc_lib_dir, &out_path);
 
     let bindings = bindgen::Builder::default()
         // Header to wrap HACL/Evercrypt headers
