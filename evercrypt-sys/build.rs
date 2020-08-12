@@ -11,7 +11,7 @@ fn build_hacl() {
 }
 
 #[cfg(not(windows))]
-fn build_hacl(lib_dir: &Path, dest_dir: &Path) {
+fn build_hacl(lib_dir: &Path) {
     // Run configure
     let mut configure_cmd = Command::new(
         fs::canonicalize(lib_dir.join("configure")).expect("Failed to find configure script!"),
@@ -35,18 +35,28 @@ fn build_hacl(lib_dir: &Path, dest_dir: &Path) {
     if !make_status.success() {
         panic!("Failed to run make.");
     }
-
-    // Copy evercrypt library to the target directory.
-    copy_evercrypt_lib(&lib_dir.join("libevercrypt.so"), &dest_dir);
 }
 
-fn copy_evercrypt_lib(src: &Path, dst: &Path) {
-    println!("copy to {:?}", dst);
-    Command::new("cp")
-        .arg(src)
-        .arg(dst)
+#[allow(dead_code)]
+fn llvm_path() {
+    let llvm_dir =
+        env::var("LLVM_DIR").unwrap_or("/usr/local/Cellar/llvm/10.0.0_3/bin/".to_string());
+
+    // Set LLVM path
+    let llvm_config = llvm_dir + "llvm-config";
+    println!("cargo:rustc-env=LLVM_CONFIG_PATH={}", llvm_config);
+}
+
+fn copy_hacl_to_out(out_dir: &Path) {
+    let cp_status = Command::new("cp")
+        .arg("-r")
+        .arg("hacl-star")
+        .arg(out_dir)
         .status()
-        .expect("Failed to copy evercrypt library");
+        .expect("Failed to copy hacl-star to out_dir.");
+    if !cp_status.success() {
+        panic!("Failed to copy hacl-star to out_dir.")
+    }
 }
 
 fn main() {
@@ -55,8 +65,6 @@ fn main() {
 
     // Get ENV variables
     let home_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let llvm_dir =
-        env::var("LLVM_DIR").unwrap_or("/usr/local/Cellar/llvm/10.0.0_3/bin/".to_string());
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_path = Path::new(&out_dir);
     let profile = env::var("PROFILE").unwrap();
@@ -64,16 +72,19 @@ fn main() {
     let _target_path = Path::new(&home_dir).join("..").join(&target).join(&profile);
 
     // Set HACL/Evercrypt paths
-    let hacl_dir = Path::new(&home_dir).join("hacl-star");
-    let gcc_lib_dir = hacl_dir.join("dist").join("gcc-compatible");
+    let hacl_dir = Path::new(&out_dir).join("hacl-star");
+    let hacl_src_dir = if cfg!(not(windows)) {
+        "gcc-compatible"
+    } else if cfg!(windows) {
+        "msvc-compatible"
+    } else {
+        panic!("I can't build on this platform yet :(");
+    };
+    let gcc_lib_dir = hacl_dir.join("dist").join(hacl_src_dir);
 
     // Set library name and type
     let mode = "static";
     let name = "evercrypt";
-
-    // Set LLVM path
-    let llvm_config = llvm_dir + "llvm-config";
-    println!("cargo:rustc-env=LLVM_CONFIG_PATH={}", llvm_config);
 
     // Set up rustc link environment
     println!(
@@ -98,7 +109,8 @@ fn main() {
     ];
 
     // Build hacl/evercrypt
-    build_hacl(&gcc_lib_dir, &out_path);
+    copy_hacl_to_out(&out_path);
+    build_hacl(&gcc_lib_dir);
 
     let bindings = bindgen::Builder::default()
         // Header to wrap HACL/Evercrypt headers
