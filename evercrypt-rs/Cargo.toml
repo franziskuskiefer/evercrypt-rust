@@ -1,10 +1,11 @@
 [package]
 name = "evercrypt"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MPL-2.0"
+documentation = "https://docs.rs/evercrypt"
+description = "Crypto library using formally verified code from HACL/Evercrypt"
 
 [features]
 default = ["random"]

@@ -11,6 +11,10 @@ Please bring your own randomness if you want to be safe.
 Evecrypt currently implements AES only for x64 CPUs with a certain set of CPU instructions.
 To provide AES for other platforms the Evercrypt crate uses the [RustCrypto](https://github.com/RustCrypto/) AES implementation when using `--features rust-crypto-aes`.
 
+## Platforms
+Currently only Linux x64 and MacOS are supported.
+Windows and ARM builds are on the To Do list and should be supported in future.
+
 ## Benchmarks
 To run benchmarks use `cargo bench`.
 
