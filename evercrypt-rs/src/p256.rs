@@ -13,7 +13,7 @@ pub enum Error {
 }
 
 fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
-    if pk.len() == 0 {
+    if pk.is_empty() {
         return Err(Error::InvalidPoint);
     }
 
@@ -36,7 +36,7 @@ fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
 }
 
 fn validate_sk(sk: &[u8]) -> Result<[u8; 32], Error> {
-    if sk.len() == 0 {
+    if sk.is_empty() {
         return Err(Error::InvalidScalar);
     }
 
@@ -98,10 +98,7 @@ pub struct Signature {
 impl Signature {
     /// Build a new signature from `r` and `s`.
     pub fn new(r: &[u8; 32], s: &[u8; 32]) -> Self {
-        Self {
-            r: r.clone(),
-            s: s.clone(),
-        }
+        Self { r: *r, s: *s }
     }
 
     /// Generate a new signature from a byte array holding `r||s`.
@@ -111,7 +108,7 @@ impl Signature {
         let mut s = [0u8; 32];
         s.clone_from_slice(&combined[32..]);
 
-        Self { r: r, s: s }
+        Self { r, s }
     }
 
     /// Unsafe version of `from_bytes` taking a slice.
@@ -126,7 +123,7 @@ impl Signature {
         let mut s = [0u8; 32];
         s.clone_from_slice(&combined[32..]);
 
-        Ok(Self { r: r, s: s })
+        Ok(Self { r, s })
     }
 
     /// Get the raw signature bytes.
@@ -187,7 +184,7 @@ pub fn ecdsa_sign(hash: Mode, msg: &[u8], sk: &Scalar, nonce: &Nonce) -> Result<
     r.clone_from_slice(&signature[..32]);
     let mut s = [0u8; 32];
     s.clone_from_slice(&signature[32..]);
-    Ok(Signature { r: r, s: s })
+    Ok(Signature { r, s })
 }
 
 /// Verify EcDSA `signature` over P256 on `msg` with `pk` using `hash`.
@@ -229,4 +226,8 @@ pub fn ecdsa_verify(
         },
         _ => Err(Error::InvalidConfig),
     }
+}
+
+pub fn random_nonce() -> Nonce {
+    crate::rand_util::get_random_array()
 }

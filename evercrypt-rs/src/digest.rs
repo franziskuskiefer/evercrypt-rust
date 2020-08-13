@@ -147,7 +147,7 @@ impl Digest {
         Self {
             mode: alg,
             finished: false,
-            c_state: c_state,
+            c_state,
         }
     }
 
