@@ -103,7 +103,7 @@ impl From<Mode> for Spec_Agile_AEAD_alg {
     }
 }
 
-fn key_size(mode: &Mode) -> usize {
+pub fn key_size(mode: &Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 16,
         Mode::Aes256Gcm => 32,
