@@ -19,7 +19,7 @@ pub use crate::hkdf::{self, expand as hkdf_expand, extract as hkdf_extract, hkdf
 pub use crate::hmac::{get_tag_size, hmac, Mode as HmacMode};
 pub use crate::p256::{
     self, dh as p256, dh_base as p256_base, ecdsa_sign as p256_sign, ecdsa_verify as p256_verify,
-    random_nonce, Error as P256Error, Nonce as P256Nonce, Scalar as P256Scalar,
+    random_nonce as p256_ecdsa_random_nonce, Error as P256Error, Nonce as P256Nonce, Scalar as P256Scalar,
     Signature as EcdsaSignature,
 };
 pub use crate::rand_util::{get_random_array, get_random_vec};

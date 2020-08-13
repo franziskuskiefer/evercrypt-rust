@@ -172,11 +172,10 @@ fn test_self() {
     // From https://tools.ietf.org/html/rfc6979#appendix-A.2.5
     const PK_HEX: &str = "0460FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB67903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
     const SK_HEX: &str = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
-    const NONCE: &str = "A6E3C57DD01ABE90086538398355DD4C3B17AA873382B0F24D6129493D8AAD60";
 
     let pk = hex_str_to_bytes(PK_HEX);
     let sk = hex_str_to_array(SK_HEX);
-    let nonce = hex_str_to_array(NONCE);
+    let nonce = p256::random_nonce();
     let msg = b"sample";
 
     let sig = p256::ecdsa_sign(Mode::Sha256, &msg[..], &sk, &nonce).unwrap();

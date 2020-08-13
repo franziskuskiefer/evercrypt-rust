@@ -25,7 +25,7 @@ pub fn sign(
     hash: Option<digest::Mode>,
     sk: &[u8],
     msg: &[u8],
-    nonce: Option<&[u8]>,
+    nonce: Option<&p256::Nonce>,
 ) -> Result<Vec<u8>, Error> {
     match mode {
         Mode::Ed25519 => {
@@ -45,9 +45,7 @@ pub fn sign(
             };
             let mut key = [0u8; 32];
             key.clone_from_slice(sk);
-            let mut n = [0u8; 32];
-            n.clone_from_slice(nonce);
-            match p256::ecdsa_sign(hash, msg, &key, &n) {
+            match p256::ecdsa_sign(hash, msg, &key, nonce) {
                 Ok(r) => Ok(r.raw().to_vec()),
                 Err(_) => Err(Error::InvalidPoint),
             }
