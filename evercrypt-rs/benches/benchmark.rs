@@ -258,7 +258,7 @@ macro_rules! p256_signature_bench {
         });
         $c.bench_function($name_sign_gen, |b| {
             let sk1 = hex_to_bytes(SK1_HEX);
-            let nonce = hex_to_bytes(NONCE);
+            let nonce = clone_into_array(&hex_to_bytes(NONCE));
             b.iter_batched(
                 || {
                     let data = randombytes(1_000);
@@ -273,7 +273,7 @@ macro_rules! p256_signature_bench {
         $c.bench_function($name_verify_gen, |b| {
             let pk1 = hex_to_bytes(PK1_HEX);
             let sk1 = hex_to_bytes(SK1_HEX);
-            let nonce = hex_to_bytes(NONCE);
+            let nonce = clone_into_array(&hex_to_bytes(NONCE));
             b.iter_batched(
                 || {
                     let data = randombytes(1_000);
