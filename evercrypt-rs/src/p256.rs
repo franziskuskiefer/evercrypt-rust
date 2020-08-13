@@ -35,7 +35,7 @@ fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
     Ok(public)
 }
 
-fn validate_sk(sk: &[u8]) -> Result<[u8; 32], Error> {
+fn validate_sk(sk: &[u8]) -> Result<Scalar, Error> {
     if sk.is_empty() {
         return Err(Error::InvalidScalar);
     }
@@ -45,6 +45,8 @@ fn validate_sk(sk: &[u8]) -> Result<[u8; 32], Error> {
     for i in 0..sk_len {
         private[31 - i] = sk[sk.len() - 1 - i];
     }
+
+    // FIXME: Make sure the key is in range  [1, p-1]
 
     Ok(private)
 }
@@ -230,4 +232,14 @@ pub fn ecdsa_verify(
 
 pub fn random_nonce() -> Nonce {
     crate::rand_util::get_random_array()
+}
+
+pub fn key_gen() -> Scalar {
+    loop {
+        let out: Scalar = crate::rand_util::get_random_array();
+        match validate_sk(&out) {
+            Ok(v) => return v,
+            Err(_) => continue,
+        }
+    }
 }

@@ -17,7 +17,28 @@ pub enum Mode {
     P256,
 }
 
-pub struct Signature {}
+/// Generate a new key pair for the given `mode`.
+pub fn key_gen(mode: Mode) -> Result<(Vec<u8>, Vec<u8>), Error> {
+    match mode {
+        Mode::Ed25519 => {
+            let sk = ed25519::key_gen();
+            let pk = ed25519::sk2pk(&sk);
+            Ok((sk.to_vec(), pk.to_vec()))
+        }
+        Mode::P256 => {
+            let sk = p256::key_gen();
+            let pk = match p256::dh_base(&sk) {
+                Ok(k) => {
+                    let mut pk = vec![0x04];
+                    pk.extend_from_slice(&k);
+                    pk
+                }
+                Err(_) => return Err(Error::InvalidPoint),
+            };
+            Ok((sk.to_vec(), pk))
+        }
+    }
+}
 
 // TODO: unnecessary conversions for P256
 pub fn sign(
