@@ -94,11 +94,11 @@ pub fn derive_base(mode: Mode, s: &[u8]) -> Result<Vec<u8>, Error> {
 }
 
 /// Generate a random `Scalar` on the given curve.
-/// **NOTE:** note implemented for P256 right now.
+/// **NOTE:** P256 implementation is insecure!
 #[cfg(feature = "random")]
 pub fn key_gen(mode: Mode) -> Vec<u8> {
     match mode {
-        Mode::X25519 => crate::rand_util::get_random_array::<x25519::Scalar>().to_vec(),
-        Mode::P256 => panic!("Key generation for P256 is not supported in Evercrypt right now."),
+        Mode::X25519 => x25519::key_gen().to_vec(),
+        Mode::P256 => p256::key_gen().to_vec(),
     }
 }
