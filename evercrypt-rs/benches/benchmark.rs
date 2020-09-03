@@ -123,6 +123,24 @@ fn criterion_digest(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
+    c.bench_function("SHAKE 128", |b| {
+        b.iter_batched(
+            || randombytes(PAYLOAD_SIZE),
+            |data| {
+                let _d = digest::shake128(&data, 64);
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    c.bench_function("SHAKE 256", |b| {
+        b.iter_batched(
+            || randombytes(PAYLOAD_SIZE),
+            |data| {
+                let _d = digest::shake256(&data, 64);
+            },
+            BatchSize::SmallInput,
+        )
+    });
 }
 
 fn criterion_aead(c: &mut Criterion) {
