@@ -147,6 +147,7 @@ fn main() {
         .whitelist_function("EverCrypt_HKDF_.*")
         .whitelist_function("EverCrypt_HMAC_.*")
         .whitelist_function("Hacl_P256_.*")
+        .whitelist_function("Hacl_SHA3_.*")
         .whitelist_var("EverCrypt_Error_.*")
         .whitelist_var("Spec_.*")
         // Block everything we don't need or define ourselfs.

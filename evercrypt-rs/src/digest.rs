@@ -24,7 +24,7 @@
 //!
 //! let data = b"evercrypt-rust bindings";
 //!
-//! let mut digest_256 = Digest::new(Mode::Sha256);
+//! let mut digest_256 = Digest::new(Mode::Sha256).unwrap();
 //! if digest_256.update(data).is_err() {
 //!     panic!("Error hashing.");
 //! }
@@ -33,7 +33,7 @@
 //!     Err(e) => panic!("Finish digest failed.\n{:?}", e),
 //! };
 //!
-//! let mut digest_512 = Digest::new(Mode::Sha512);
+//! let mut digest_512 = Digest::new(Mode::Sha512).unwrap();
 //! if digest_512.update(data).is_err() {
 //!     panic!("Error hashing.");
 //! }
@@ -76,6 +76,29 @@
 //!
 //! assert_eq!(&digest_256[..], &expected_digest_256[..]);
 //! assert_eq!(&digest_512[..], &expected_digest_512[..]);
+//!
+//! // SHA 3
+//!
+//! let data = b"evercrypt-rust bindings";
+//! let expected_digest_3_256 = [
+//!     0x49, 0x4b, 0xc2, 0xea, 0x73, 0x43, 0x4f, 0x88, 0x62, 0x56, 0x13, 0x39, 0xda, 0x1a, 0x6d,
+//!     0x58, 0x05, 0xee, 0x34, 0x4b, 0x67, 0x5d, 0x18, 0xfb, 0x9a, 0x81, 0xca, 0x65, 0xa7, 0x8f,
+//!     0xeb, 0x6e,
+//! ];
+//! let expected_digest_3_512 = [
+//!     0x7a, 0xaa, 0x97, 0x5c, 0x6b, 0x15, 0x5b, 0x55, 0xd3, 0x7b, 0xa6, 0x99, 0x3f, 0x7e, 0x14,
+//!     0xd9, 0x8c, 0x28, 0x0d, 0x2b, 0x2f, 0xc2, 0x4a, 0xa7, 0x84, 0x07, 0xcf, 0x15, 0x2d, 0x0a,
+//!     0xca, 0xbc, 0x32, 0xf2, 0x11, 0xf4, 0x64, 0x30, 0x19, 0x0a, 0x35, 0x26, 0x94, 0x76, 0x84,
+//!     0x2a, 0x1f, 0x17, 0x41, 0xad, 0x46, 0x06, 0xf6, 0xc8, 0xc6, 0xad, 0x8d, 0x02, 0x2e, 0x85,
+//!     0xb4, 0x9d, 0x6b, 0xd7,
+//! ];
+//!
+//! assert_eq!(digest::hash(Mode::Sha3_256, data), expected_digest_3_256);
+//! assert_eq!(
+//!     digest::hash(Mode::Sha3_512, data)[..],
+//!     expected_digest_3_512[..]
+//! );
+//!
 //! ```
 
 use evercrypt_sys::evercrypt_bindings::*;
@@ -83,6 +106,7 @@ use evercrypt_sys::evercrypt_bindings::*;
 #[derive(Debug)]
 pub enum Error {
     InvalidStateFinished,
+    ModeUnsupportedForStreaming,
 }
 
 /// The Digest Mode.
@@ -93,6 +117,11 @@ pub enum Mode {
     Sha256 = Spec_Hash_Definitions_SHA2_256 as isize,
     Sha384 = Spec_Hash_Definitions_SHA2_384 as isize,
     Sha512 = Spec_Hash_Definitions_SHA2_512 as isize,
+    // XXX: The following is not in evercrypt (agile API) so we define something here.
+    Sha3_224 = 5,
+    Sha3_256 = 6,
+    Sha3_384 = 7,
+    Sha3_512 = 8,
 }
 
 #[allow(non_upper_case_globals)]
@@ -104,6 +133,10 @@ impl From<u32> for Mode {
             Spec_Hash_Definitions_SHA2_256 => Mode::Sha256,
             Spec_Hash_Definitions_SHA2_384 => Mode::Sha384,
             Spec_Hash_Definitions_SHA2_512 => Mode::Sha512,
+            5 => Mode::Sha3_224,
+            6 => Mode::Sha3_256,
+            7 => Mode::Sha3_384,
+            8 => Mode::Sha3_512,
             _ => panic!("Unknown Digest mode {}", v),
         }
     }
@@ -117,6 +150,10 @@ impl From<Mode> for Spec_Hash_Definitions_hash_alg {
             Mode::Sha256 => Spec_Hash_Definitions_SHA2_256 as Spec_Hash_Definitions_hash_alg,
             Mode::Sha384 => Spec_Hash_Definitions_SHA2_384 as Spec_Hash_Definitions_hash_alg,
             Mode::Sha512 => Spec_Hash_Definitions_SHA2_512 as Spec_Hash_Definitions_hash_alg,
+            Mode::Sha3_224 => 5,
+            Mode::Sha3_256 => 6,
+            Mode::Sha3_384 => 7,
+            Mode::Sha3_512 => 8,
         }
     }
 }
@@ -129,6 +166,19 @@ pub fn get_digest_size(mode: Mode) -> usize {
         Mode::Sha256 => 32,
         Mode::Sha384 => 48,
         Mode::Sha512 => 64,
+        Mode::Sha3_224 => 28,
+        Mode::Sha3_256 => 32,
+        Mode::Sha3_384 => 48,
+        Mode::Sha3_512 => 64,
+    }
+}
+
+/// Check if we do SHA3, which is not in the agile API and hence has to be
+/// handled differently.
+fn is_sha3(alg: Mode) -> bool {
+    match alg {
+        Mode::Sha3_224 | Mode::Sha3_256 | Mode::Sha3_384 | Mode::Sha3_512 => true,
+        _ => false,
     }
 }
 
@@ -141,14 +191,18 @@ pub struct Digest {
 
 impl Digest {
     /// Create a new digest for the given mode `alg`.
-    pub fn new(alg: Mode) -> Self {
+    pub fn new(alg: Mode) -> Result<Self, Error> {
+        if is_sha3(alg) {
+            return Err(Error::ModeUnsupportedForStreaming);
+        }
+
         let c_state: *mut Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ =
             unsafe { EverCrypt_Hash_Incremental_create_in(alg.into()) };
-        Self {
+        Ok(Self {
             mode: alg,
             finished: false,
             c_state,
-        }
+        })
     }
 
     /// Update the hash state.
@@ -182,23 +236,6 @@ impl Digest {
     }
 }
 
-// Single-shot API
-
-/// Create the digest for the given `data` and mode `alg`.
-/// The output has length `get_digest_size(alg)`.
-pub fn hash(alg: Mode, data: &[u8]) -> Vec<u8> {
-    let mut out = vec![0u8; get_digest_size(alg)];
-    unsafe {
-        EverCrypt_Hash_hash(
-            alg.into(),
-            out.as_mut_ptr(),
-            data.as_ptr() as _,
-            data.len() as u32,
-        );
-    }
-    out
-}
-
 // Single-shot API with array returns.
 
 macro_rules! define_plain_digest {
@@ -206,14 +243,30 @@ macro_rules! define_plain_digest {
         /// Single-shot API with a fixed length output.
         pub fn $name(data: &[u8]) -> [u8; $l] {
             let mut out = [0u8; $l];
-            unsafe {
-                EverCrypt_Hash_hash(
-                    $version.into(),
-                    out.as_mut_ptr(),
-                    data.as_ptr() as _,
-                    data.len() as u32,
-                );
+
+            match $version {
+                Mode::Sha3_224 => unsafe {
+                    Hacl_SHA3_sha3_224(data.len() as u32, data.as_ptr() as _, out.as_mut_ptr())
+                },
+                Mode::Sha3_256 => unsafe {
+                    Hacl_SHA3_sha3_256(data.len() as u32, data.as_ptr() as _, out.as_mut_ptr())
+                },
+                Mode::Sha3_384 => unsafe {
+                    Hacl_SHA3_sha3_384(data.len() as u32, data.as_ptr() as _, out.as_mut_ptr())
+                },
+                Mode::Sha3_512 => unsafe {
+                    Hacl_SHA3_sha3_512(data.len() as u32, data.as_ptr() as _, out.as_mut_ptr())
+                },
+                _ => unsafe {
+                    EverCrypt_Hash_hash(
+                        $version.into(),
+                        out.as_mut_ptr(),
+                        data.as_ptr() as _,
+                        data.len() as u32,
+                    );
+                },
             }
+
             out
         }
     };
@@ -224,3 +277,25 @@ define_plain_digest!(sha224, Mode::Sha224, 28);
 define_plain_digest!(sha256, Mode::Sha256, 32);
 define_plain_digest!(sha384, Mode::Sha384, 48);
 define_plain_digest!(sha512, Mode::Sha512, 64);
+define_plain_digest!(sha3_224, Mode::Sha3_224, 28);
+define_plain_digest!(sha3_256, Mode::Sha3_256, 32);
+define_plain_digest!(sha3_384, Mode::Sha3_384, 48);
+define_plain_digest!(sha3_512, Mode::Sha3_512, 64);
+
+// Single-shot API
+
+/// Create the digest for the given `data` and mode `alg`.
+/// The output has length `get_digest_size(alg)`.
+pub fn hash(alg: Mode, data: &[u8]) -> Vec<u8> {
+    match alg {
+        Mode::Sha1 => sha1(data).to_vec(),
+        Mode::Sha224 => sha224(data).to_vec(),
+        Mode::Sha256 => sha256(data).to_vec(),
+        Mode::Sha384 => sha384(data).to_vec(),
+        Mode::Sha512 => sha512(data).to_vec(),
+        Mode::Sha3_224 => sha3_224(data).to_vec(),
+        Mode::Sha3_256 => sha3_256(data).to_vec(),
+        Mode::Sha3_384 => sha3_384(data).to_vec(),
+        Mode::Sha3_512 => sha3_512(data).to_vec(),
+    }
+}

@@ -87,6 +87,42 @@ fn criterion_digest(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
+    c.bench_function("SHA3 224", |b| {
+        b.iter_batched(
+            || randombytes(PAYLOAD_SIZE),
+            |data| {
+                let _d = digest::hash(Mode::Sha3_224, &data);
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    c.bench_function("SHA3 256", |b| {
+        b.iter_batched(
+            || randombytes(PAYLOAD_SIZE),
+            |data| {
+                let _d = digest::hash(Mode::Sha3_256, &data);
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    c.bench_function("SHA3 384", |b| {
+        b.iter_batched(
+            || randombytes(PAYLOAD_SIZE),
+            |data| {
+                let _d = digest::hash(Mode::Sha3_384, &data);
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    c.bench_function("SHA3 512", |b| {
+        b.iter_batched(
+            || randombytes(PAYLOAD_SIZE),
+            |data| {
+                let _d = digest::hash(Mode::Sha3_512, &data);
+            },
+            BatchSize::SmallInput,
+        )
+    });
 }
 
 fn criterion_aead(c: &mut Criterion) {
