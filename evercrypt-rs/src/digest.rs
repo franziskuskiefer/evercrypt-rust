@@ -126,6 +126,50 @@
 //! assert_eq!(digest::shake128(data, 64)[..], expected_digest_128[..]);
 //! assert_eq!(digest::shake256(data, 64)[..], expected_digest_256[..]);
 //! ```
+//!
+//! ## Blake2b
+//! ```rust
+//! use evercrypt::digest::{self, Mode};
+//!
+//! let data = [
+//!     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+//!     0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d,
+//!     0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c,
+//!     0x2d, 0x2e, 0x2f, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b,
+//!     0x3c, 0x3d, 0x3e, 0x3f, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a,
+//!     0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59,
+//!     0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+//!     0x69, 0x6a,
+//! ];
+//! let expected_digest = [
+//!     0x22, 0xef, 0xf8, 0xe6, 0xdd, 0x52, 0x36, 0xf5, 0xf5, 0x7d, 0x94, 0xed, 0xe8, 0x74, 0xd6,
+//!     0xc9, 0x42, 0x8e, 0x8f, 0x5d, 0x56, 0x6f, 0x17, 0xcd, 0x6d, 0x18, 0x48, 0xcd, 0x75, 0x2f,
+//!     0xe1, 0x3c, 0x65, 0x5c, 0xb1, 0x0f, 0xba, 0xaf, 0xf7, 0x68, 0x72, 0xf2, 0xbf, 0x2d, 0xa9,
+//!     0x9e, 0x15, 0xdc, 0x62, 0x40, 0x75, 0xe1, 0xec, 0x2f, 0x58, 0xa3, 0xf6, 0x40, 0x72, 0x12,
+//!     0x18, 0x38, 0x56, 0x9e,
+//! ];
+//!
+//! assert_eq!(digest::hash(Mode::Blake2b, &data)[..], expected_digest[..]);
+//! ```
+//!
+//! ## Blake2s
+//! ```rust
+//! use evercrypt::digest::{self, Mode};
+//!
+//! let data = [
+//!     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+//!     0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d,
+//!     0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c,
+//!     0x2d, 0x2e, 0x2f, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
+//! ];
+//! let expected_digest = [
+//!     0xe2, 0x90, 0xdd, 0x27, 0x0b, 0x46, 0x7f, 0x34, 0xab, 0x1c, 0x00, 0x2d, 0x34, 0x0f, 0xa0,
+//!     0x16, 0x25, 0x7f, 0xf1, 0x9e, 0x58, 0x33, 0xfd, 0xbb, 0xf2, 0xcb, 0x40, 0x1c, 0x3b, 0x28,
+//!     0x17, 0xde,
+//! ];
+//!
+//! assert_eq!(digest::hash(Mode::Blake2s, &data), expected_digest);
+//! ```
 
 use evercrypt_sys::evercrypt_bindings::*;
 
@@ -143,11 +187,13 @@ pub enum Mode {
     Sha256 = Spec_Hash_Definitions_SHA2_256 as isize,
     Sha384 = Spec_Hash_Definitions_SHA2_384 as isize,
     Sha512 = Spec_Hash_Definitions_SHA2_512 as isize,
+    Blake2s = Spec_Hash_Definitions_Blake2S as isize,
+    Blake2b = Spec_Hash_Definitions_Blake2B as isize,
     // XXX: The following is not in evercrypt (agile API) so we define something here.
-    Sha3_224 = 5,
-    Sha3_256 = 6,
-    Sha3_384 = 7,
-    Sha3_512 = 8,
+    Sha3_224 = 8,
+    Sha3_256 = 9,
+    Sha3_384 = 10,
+    Sha3_512 = 11,
 }
 
 #[allow(non_upper_case_globals)]
@@ -159,10 +205,12 @@ impl From<u32> for Mode {
             Spec_Hash_Definitions_SHA2_256 => Mode::Sha256,
             Spec_Hash_Definitions_SHA2_384 => Mode::Sha384,
             Spec_Hash_Definitions_SHA2_512 => Mode::Sha512,
-            5 => Mode::Sha3_224,
-            6 => Mode::Sha3_256,
-            7 => Mode::Sha3_384,
-            8 => Mode::Sha3_512,
+            Spec_Hash_Definitions_Blake2S => Mode::Blake2s,
+            Spec_Hash_Definitions_Blake2B => Mode::Blake2b,
+            8 => Mode::Sha3_224,
+            9 => Mode::Sha3_256,
+            10 => Mode::Sha3_384,
+            11 => Mode::Sha3_512,
             _ => panic!("Unknown Digest mode {}", v),
         }
     }
@@ -176,10 +224,12 @@ impl From<Mode> for Spec_Hash_Definitions_hash_alg {
             Mode::Sha256 => Spec_Hash_Definitions_SHA2_256 as Spec_Hash_Definitions_hash_alg,
             Mode::Sha384 => Spec_Hash_Definitions_SHA2_384 as Spec_Hash_Definitions_hash_alg,
             Mode::Sha512 => Spec_Hash_Definitions_SHA2_512 as Spec_Hash_Definitions_hash_alg,
-            Mode::Sha3_224 => 5,
-            Mode::Sha3_256 => 6,
-            Mode::Sha3_384 => 7,
-            Mode::Sha3_512 => 8,
+            Mode::Blake2s => Spec_Hash_Definitions_Blake2S as Spec_Hash_Definitions_hash_alg,
+            Mode::Blake2b => Spec_Hash_Definitions_Blake2B as Spec_Hash_Definitions_hash_alg,
+            Mode::Sha3_224 => 8,
+            Mode::Sha3_256 => 9,
+            Mode::Sha3_384 => 10,
+            Mode::Sha3_512 => 11,
         }
     }
 }
@@ -192,6 +242,8 @@ pub fn get_digest_size(mode: Mode) -> usize {
         Mode::Sha256 => 32,
         Mode::Sha384 => 48,
         Mode::Sha512 => 64,
+        Mode::Blake2s => 32,
+        Mode::Blake2b => 64,
         Mode::Sha3_224 => 28,
         Mode::Sha3_256 => 32,
         Mode::Sha3_384 => 48,
@@ -307,6 +359,8 @@ define_plain_digest!(sha3_224, Mode::Sha3_224, 28);
 define_plain_digest!(sha3_256, Mode::Sha3_256, 32);
 define_plain_digest!(sha3_384, Mode::Sha3_384, 48);
 define_plain_digest!(sha3_512, Mode::Sha3_512, 64);
+define_plain_digest!(blake2s, Mode::Blake2s, 32);
+define_plain_digest!(blake2b, Mode::Blake2b, 64);
 
 // Single-shot API
 
@@ -323,6 +377,8 @@ pub fn hash(alg: Mode, data: &[u8]) -> Vec<u8> {
         Mode::Sha3_256 => sha3_256(data).to_vec(),
         Mode::Sha3_384 => sha3_384(data).to_vec(),
         Mode::Sha3_512 => sha3_512(data).to_vec(),
+        Mode::Blake2s => blake2s(data).to_vec(),
+        Mode::Blake2b => blake2b(data).to_vec(),
     }
 }
 

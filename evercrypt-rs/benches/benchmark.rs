@@ -141,6 +141,24 @@ fn criterion_digest(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
+    c.bench_function("Blake2s", |b| {
+        b.iter_batched(
+            || randombytes(PAYLOAD_SIZE),
+            |data| {
+                let _d = digest::hash(Mode::Blake2s, &data);
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    c.bench_function("Blake2b", |b| {
+        b.iter_batched(
+            || randombytes(PAYLOAD_SIZE),
+            |data| {
+                let _d = digest::hash(Mode::Blake2b, &data);
+            },
+            BatchSize::SmallInput,
+        )
+    });
 }
 
 fn criterion_aead(c: &mut Criterion) {
