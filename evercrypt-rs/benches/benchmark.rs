@@ -5,6 +5,8 @@ extern crate rand;
 
 use criterion::{BatchSize, Criterion};
 
+const PAYLOAD_SIZE: usize = 0x10000;
+
 fn clone_into_array<A, T>(slice: &[T]) -> A
 where
     A: Default + AsMut<[T]>,
@@ -42,7 +44,7 @@ fn criterion_digest(c: &mut Criterion) {
     use evercrypt::digest::{self, Mode};
     c.bench_function("SHA1", |b| {
         b.iter_batched(
-            || randombytes(1_000),
+            || randombytes(PAYLOAD_SIZE),
             |data| {
                 let _d = digest::hash(Mode::Sha1, &data);
             },
@@ -51,7 +53,7 @@ fn criterion_digest(c: &mut Criterion) {
     });
     c.bench_function("SHA224", |b| {
         b.iter_batched(
-            || randombytes(1_000),
+            || randombytes(PAYLOAD_SIZE),
             |data| {
                 let _d = digest::hash(Mode::Sha224, &data);
             },
@@ -60,7 +62,7 @@ fn criterion_digest(c: &mut Criterion) {
     });
     c.bench_function("SHA256", |b| {
         b.iter_batched(
-            || randombytes(1_000),
+            || randombytes(PAYLOAD_SIZE),
             |data| {
                 let _d = digest::hash(Mode::Sha256, &data);
             },
@@ -69,7 +71,7 @@ fn criterion_digest(c: &mut Criterion) {
     });
     c.bench_function("SHA384", |b| {
         b.iter_batched(
-            || randombytes(1_000),
+            || randombytes(PAYLOAD_SIZE),
             |data| {
                 let _d = digest::hash(Mode::Sha384, &data);
             },
@@ -78,7 +80,7 @@ fn criterion_digest(c: &mut Criterion) {
     });
     c.bench_function("SHA512", |b| {
         b.iter_batched(
-            || randombytes(1_000),
+            || randombytes(PAYLOAD_SIZE),
             |data| {
                 let _d = digest::hash(Mode::Sha512, &data);
             },
@@ -95,7 +97,7 @@ fn criterion_aead(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let nonce = random_nonce(12);
-                let data = randombytes(1_000);
+                let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Aes128Gcm, key).unwrap();
                 (data, nonce, aad, aead)
@@ -111,7 +113,7 @@ fn criterion_aead(c: &mut Criterion) {
             || {
                 let key = randombytes(16);
                 let nonce = random_nonce(12);
-                let data = randombytes(1_000);
+                let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Aes128Gcm, &key).unwrap();
                 let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
@@ -130,7 +132,7 @@ fn criterion_aead(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let nonce = random_nonce(12);
-                let data = randombytes(1_000);
+                let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Aes256Gcm, key).unwrap();
                 (data, nonce, aad, aead)
@@ -146,7 +148,7 @@ fn criterion_aead(c: &mut Criterion) {
             || {
                 let key = randombytes(32);
                 let nonce = random_nonce(12);
-                let data = randombytes(1_000);
+                let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Aes256Gcm, &key).unwrap();
                 let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
@@ -165,7 +167,7 @@ fn criterion_aead(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let nonce = random_nonce(12);
-                let data = randombytes(1_000);
+                let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Chacha20Poly1305, key).unwrap();
                 (data, nonce, aad, aead)
@@ -181,7 +183,7 @@ fn criterion_aead(c: &mut Criterion) {
             || {
                 let key = randombytes(32);
                 let nonce = random_nonce(12);
-                let data = randombytes(1_000);
+                let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
                 let aead = Aead::new(Mode::Chacha20Poly1305, &key).unwrap();
                 let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
@@ -230,10 +232,7 @@ macro_rules! p256_signature_bench {
             let sk1 = clone_into_array(&hex_to_bytes(SK1_HEX));
             let nonce = clone_into_array(&hex_to_bytes(NONCE));
             b.iter_batched(
-                || {
-                    let data = randombytes(1_000);
-                    data
-                },
+                || randombytes(PAYLOAD_SIZE),
                 |data| {
                     let _sig = p256::ecdsa_sign($m, &data, &sk1, &nonce).unwrap();
                 },
@@ -246,7 +245,7 @@ macro_rules! p256_signature_bench {
             let nonce = clone_into_array(&hex_to_bytes(NONCE));
             b.iter_batched(
                 || {
-                    let data = randombytes(1_000);
+                    let data = randombytes(PAYLOAD_SIZE);
                     let sig = p256::ecdsa_sign($m, &data, &sk1, &nonce).unwrap();
                     (data, sig)
                 },
@@ -260,10 +259,7 @@ macro_rules! p256_signature_bench {
             let sk1 = hex_to_bytes(SK1_HEX);
             let nonce = clone_into_array(&hex_to_bytes(NONCE));
             b.iter_batched(
-                || {
-                    let data = randombytes(1_000);
-                    data
-                },
+                || randombytes(PAYLOAD_SIZE),
                 |data| {
                     let _sig = signature::sign($sm, Some($m), &sk1, &data, Some(&nonce)).unwrap();
                 },
@@ -276,7 +272,7 @@ macro_rules! p256_signature_bench {
             let nonce = clone_into_array(&hex_to_bytes(NONCE));
             b.iter_batched(
                 || {
-                    let data = randombytes(1_000);
+                    let data = randombytes(PAYLOAD_SIZE);
                     let sig = signature::sign($sm, Some($m), &sk1, &data, Some(&nonce)).unwrap();
                     (data, sig)
                 },
@@ -371,7 +367,7 @@ fn criterion_ed25519(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let sk = clone_into_array(&randombytes(32));
-                let data = randombytes(1_000);
+                let data = randombytes(PAYLOAD_SIZE);
                 (sk, data)
             },
             |(sk, data)| {
@@ -385,7 +381,7 @@ fn criterion_ed25519(c: &mut Criterion) {
             || {
                 let sk = clone_into_array(&randombytes(32));
                 let pk = ed25519::sk2pk(&sk);
-                let data = randombytes(1_000);
+                let data = randombytes(PAYLOAD_SIZE);
                 let sig = ed25519::eddsa_sign(&pk, &data);
                 (pk, data, sig)
             },
@@ -402,7 +398,7 @@ fn criterion_hmac(c: &mut Criterion) {
     const KEY: [u8; 10] = [0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     c.bench_function("HMAC SHA1", |b| {
         b.iter_batched(
-            || randombytes(1_000),
+            || randombytes(PAYLOAD_SIZE),
             |data| {
                 let _hmac = hmac(Mode::Sha1, &KEY, &data, None);
             },
@@ -411,7 +407,7 @@ fn criterion_hmac(c: &mut Criterion) {
     });
     c.bench_function("HMAC SHA256", |b| {
         b.iter_batched(
-            || randombytes(1_000),
+            || randombytes(PAYLOAD_SIZE),
             |data| {
                 let _hmac = hmac(Mode::Sha256, &KEY, &data, None);
             },
@@ -420,7 +416,7 @@ fn criterion_hmac(c: &mut Criterion) {
     });
     c.bench_function("HMAC SHA384", |b| {
         b.iter_batched(
-            || randombytes(1_000),
+            || randombytes(PAYLOAD_SIZE),
             |data| {
                 let _hmac = hmac(Mode::Sha384, &KEY, &data, None);
             },
@@ -429,7 +425,7 @@ fn criterion_hmac(c: &mut Criterion) {
     });
     c.bench_function("HMAC SHA512", |b| {
         b.iter_batched(
-            || randombytes(1_000),
+            || randombytes(PAYLOAD_SIZE),
             |data| {
                 let _hmac = hmac(Mode::Sha512, &KEY, &data, None);
             },
@@ -450,7 +446,7 @@ fn criterion_hkdf(c: &mut Criterion) {
                         let salt = hex_to_bytes("000102030405060708090a0b0c");
                         let len = 32;
                         let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
-                        let data = randombytes(1_000);
+                        let data = randombytes(PAYLOAD_SIZE);
                         (len, prk, data)
                     },
                     |(len, prk, data)| {
@@ -496,7 +492,7 @@ fn criterion_hkdf(c: &mut Criterion) {
                         let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
                         let salt = hex_to_bytes("000102030405060708090a0b0c");
                         let len = 32;
-                        let data = randombytes(1_000);
+                        let data = randombytes(PAYLOAD_SIZE);
                         (ikm, salt, len, data)
                     },
                     |(ikm, salt, len, data)| {
