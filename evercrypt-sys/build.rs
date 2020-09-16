@@ -29,7 +29,7 @@ fn build_hacl(lib_dir: &Path) {
     let mut make_cmd = Command::new("make");
     let make_status = make_cmd
         .current_dir(lib_dir)
-        .arg("-j")
+        // .arg("-j")
         .env("DISABLE_OCAML_BINDINGS", "1")
         .status()
         .expect("Failed to run make");
