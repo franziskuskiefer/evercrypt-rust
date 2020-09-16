@@ -13,7 +13,7 @@ fn build_hacl() {
 #[cfg(not(windows))]
 fn build_hacl(lib_dir: &Path) {
     // Run configure
-    // TODO: add config for iOS and Adnroid
+    // TODO: add config for iOS and Android
     let mut configure_cmd = Command::new(
         fs::canonicalize(lib_dir.join("configure")).expect("Failed to find configure script!"),
     );
