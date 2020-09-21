@@ -124,12 +124,12 @@ pub enum Error {
 
 /// The Aead struct allows to re-use a key without having to initialize it
 /// every time.
-pub struct Aead<'a> {
+pub struct Aead {
     mode: Mode,
     c_state: Option<*mut EverCrypt_AEAD_state_s>,
     op_mode: OpMode,
     #[allow(dead_code)] // key is only used when using rust-crypto
-    key: &'a [u8],
+    key: Vec<u8>,
 }
 
 /// Ciphertexts are byte vectors.
@@ -182,11 +182,11 @@ fn get_op_mode(alg: Mode) -> Result<OpMode, Error> {
     }
 }
 
-impl<'a> Aead<'a> {
+impl Aead {
     /// Create a new Aead cipher with the given Mode `alg` and key `k`.
     /// If the algorithm is not supported or the state generation fails, this
     /// function returns an `Error`.
-    pub fn new(alg: Mode, k: &'a [u8]) -> Result<Self, Error> {
+    pub fn new(alg: Mode, k: &[u8]) -> Result<Self, Error> {
         unsafe {
             // Make sure this happened.
             EverCrypt_AutoConfig2_init();
@@ -210,7 +210,7 @@ impl<'a> Aead<'a> {
                     mode: alg,
                     c_state: Some(state),
                     op_mode: OpMode::Hacl,
-                    key: k,
+                    key: k.to_vec(),
                 })
             }
             Ok(OpMode::RustCryptoAes128) | Ok(OpMode::RustCryptoAes256) => {
@@ -223,7 +223,7 @@ impl<'a> Aead<'a> {
                     mode: alg,
                     c_state: None,
                     op_mode: op_mode.unwrap(),
-                    key: k,
+                    key: k.to_vec(),
                 })
             }
             _ => Err(Error::UnsupportedConfig),
