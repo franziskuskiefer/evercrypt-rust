@@ -18,5 +18,5 @@ Windows and ARM support is on the todo list.
 | MacOS    |                                  ✅                                  |
 | Linux    |                                  ✅                                  |
 | Windows  | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |
-| Arm64    | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |
+| Arm64    | ❌ [#7](https://github.com/franziskuskiefer/evercrypt-rust/issues/7) |
 | Arm32    | ❌ [#7](https://github.com/franziskuskiefer/evercrypt-rust/issues/7) |
