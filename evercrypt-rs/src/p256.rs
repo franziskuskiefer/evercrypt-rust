@@ -35,6 +35,7 @@ fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
     Ok(public)
 }
 
+/// Validate a P256 secret key.
 fn validate_sk(sk: &[u8]) -> Result<Scalar, Error> {
     if sk.is_empty() {
         return Err(Error::InvalidScalar);
@@ -230,10 +231,14 @@ pub fn ecdsa_verify(
     }
 }
 
+/// Generate a random nonce for ECDSA.
 pub fn random_nonce() -> Nonce {
     crate::rand_util::get_random_array()
 }
 
+/// Generate a new P256 scalar (private key).
+///
+/// **WARNING:** The result might not be within [1, p-1]!
 pub fn key_gen() -> Scalar {
     loop {
         let out: Scalar = crate::rand_util::get_random_array();

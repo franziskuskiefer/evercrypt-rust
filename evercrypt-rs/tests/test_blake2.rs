@@ -1,4 +1,4 @@
-use evercrypt::digest::{self, Digest, Mode};
+use evercrypt::digest::{self, Mode};
 
 // Tests from https://raw.githubusercontent.com/BLAKE2/BLAKE2/master/testvectors/blake2-kat.json
 
