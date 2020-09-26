@@ -40,8 +40,7 @@ fn build_hacl(lib_dir: &Path) {
 
 #[allow(dead_code)]
 fn llvm_path() {
-    let llvm_dir =
-        env::var("LLVM_DIR").unwrap_or("/usr/local/Cellar/llvm/10.0.0_3/bin/".to_string());
+    let llvm_dir = env::var("LLVM_DIR").unwrap();
 
     // Set LLVM path
     let llvm_config = llvm_dir + "llvm-config";
@@ -97,8 +96,6 @@ fn main() {
         _ => panic!("Target '{:?}' is not supported yet.", target),
     };
 
-    // println!("Target: {:?}", target);
-
     // Set HACL/Evercrypt paths
     let hacl_dir = Path::new(&out_dir).join("hacl-star");
     let hacl_src_path = hacl_dir.join("dist").join(build_config.hacl_src_dir);
@@ -136,7 +133,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         // Header to wrap HACL/Evercrypt headers
         .header("wrapper.h")
-        // Set inlcude paths for HACL/Evercrypt headers
+        // Set include paths for HACL/Evercrypt headers
         .clang_args(hacl_includes.iter())
         // Allow function we want to have in
         .whitelist_function("EverCrypt_AutoConfig2_.*")
@@ -150,7 +147,7 @@ fn main() {
         .whitelist_function("Hacl_SHA3_.*")
         .whitelist_var("EverCrypt_Error_.*")
         .whitelist_var("Spec_.*")
-        // Block everything we don't need or define ourselfs.
+        // Block everything we don't need or define ourselves.
         .blacklist_type("Hacl_Streaming_.*")
         .blacklist_type("EverCrypt_AEAD_state_s.*")
         // Generate bindings
