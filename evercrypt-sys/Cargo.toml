@@ -9,6 +9,7 @@ links = "evercrypt"
 license = "MPL-2.0"
 documentation = "https://docs.rs/evercrypt-sys"
 description = "FFI binding to HACL/Evercrypt"
+readme = "README.md"
 
 [dependencies]
 libc = { version = "0.2", default-features = false }
