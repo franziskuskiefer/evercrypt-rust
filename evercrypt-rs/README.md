@@ -3,7 +3,7 @@
 ![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)
 ![Maturity Level](https://img.shields.io/badge/maturity-alpha-red.svg)
 
-High-level [evercrypt](evercrypt-rs/) bindings crates.
+High-level [evercrypt](https://github.com/project-everest/hacl-star) bindings crates.
 
 **⚠️ Note:** This crate is still work in progress. Don't use in production.
 
