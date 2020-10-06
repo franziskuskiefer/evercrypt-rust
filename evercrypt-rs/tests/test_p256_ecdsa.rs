@@ -120,16 +120,6 @@ fn test_wycheproof() {
                 continue;
             }
 
-            // Skip failing.
-            // FIXME: investigate
-            if test.tcId == 285 || // k*G has a large x-coordinate
-                test.tcId == 339
-            // point duplication during verification
-            {
-                tests_skipped += 1;
-                continue;
-            }
-
             let msg = hex_str_to_bytes(&test.msg);
             let sig = hex_str_to_bytes(&test.sig);
 

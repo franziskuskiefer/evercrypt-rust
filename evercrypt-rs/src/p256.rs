@@ -47,7 +47,11 @@ fn validate_sk(sk: &[u8]) -> Result<Scalar, Error> {
         private[31 - i] = sk[sk.len() - 1 - i];
     }
 
-    // FIXME: Make sure the key is in range  [1, p-1]
+    // Ensure that the key is in range  [1, p-1]
+    let valid = unsafe { Hacl_P256_is_more_than_zero_less_than_order(private.as_ptr() as _) };
+    if !valid {
+        return Err(Error::InvalidScalar);
+    }
 
     Ok(private)
 }
@@ -57,11 +61,11 @@ pub fn dh_base(s: &[u8]) -> Result<[u8; 64], Error> {
     let private = validate_sk(s)?;
 
     let mut out = [0u8; 64];
-    let r = unsafe { Hacl_P256_ecp256dh_i(out.as_mut_ptr(), private.as_ptr() as _) };
-    if r != 0 {
-        Err(Error::InvalidPoint)
-    } else {
+    let success = unsafe { Hacl_P256_ecp256dh_i(out.as_mut_ptr(), private.as_ptr() as _) };
+    if success {
         Ok(out)
+    } else {
+        Err(Error::InvalidPoint)
     }
 }
 
@@ -71,17 +75,17 @@ pub fn dh(p: &[u8], s: &[u8]) -> Result<[u8; 64], Error> {
     let private = validate_sk(s)?;
 
     let mut out = [0u8; 64];
-    let r = unsafe {
+    let success = unsafe {
         Hacl_P256_ecp256dh_r(
             out.as_mut_ptr(),
             public.as_ptr() as _,
             private.as_ptr() as _,
         )
     };
-    if r != 0 {
-        Err(Error::InvalidPoint)
-    } else {
+    if success {
         Ok(out)
+    } else {
+        Err(Error::InvalidPoint)
     }
 }
 
@@ -148,7 +152,7 @@ pub fn ecdsa_sign(hash: Mode, msg: &[u8], sk: &Scalar, nonce: &Nonce) -> Result<
     let private = validate_sk(sk)?;
 
     let mut signature = [0u8; 64];
-    let result = match hash {
+    let success = match hash {
         Mode::Sha256 => unsafe {
             Hacl_P256_ecdsa_sign_p256_sha2(
                 signature.as_mut_ptr(),
@@ -179,7 +183,7 @@ pub fn ecdsa_sign(hash: Mode, msg: &[u8], sk: &Scalar, nonce: &Nonce) -> Result<
         _ => return Err(Error::InvalidConfig),
     };
 
-    if result != 0 {
+    if !success {
         return Err(Error::SigningFailed);
     }
 
@@ -237,8 +241,6 @@ pub fn random_nonce() -> Nonce {
 }
 
 /// Generate a new P256 scalar (private key).
-///
-/// **WARNING:** The result might not be within [1, p-1]!
 pub fn key_gen() -> Scalar {
     loop {
         let out: Scalar = crate::rand_util::get_random_array();
@@ -247,4 +249,30 @@ pub fn key_gen() -> Scalar {
             Err(_) => continue,
         }
     }
+}
+
+// === Unit tests === //
+
+#[test]
+fn scalar_checks() {
+    let s: Scalar = [
+        0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xBC, 0xE6, 0xFA, 0xAD, 0xA7, 0x17, 0x9E, 0x84, 0xF3, 0xB9, 0xCA, 0xC2, 0xFC, 0x63,
+        0x25, 0x50,
+    ]; // order - 1
+    assert!(validate_sk(&s).is_ok());
+
+    let s: Scalar = [
+        0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xBC, 0xE6, 0xFA, 0xAD, 0xA7, 0x17, 0x9E, 0x84, 0xF3, 0xB9, 0xCA, 0xC2, 0xFC, 0x63,
+        0x25, 0x51,
+    ]; // order
+    assert!(validate_sk(&s).is_err());
+
+    let s: Scalar = [
+        0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xBC, 0xE6, 0xFA, 0xAD, 0xA7, 0x17, 0x9E, 0x84, 0xF3, 0xB9, 0xCA, 0xC2, 0xFC, 0x63,
+        0x25, 0x52,
+    ]; // order + 1
+    assert!(validate_sk(&s).is_err());
 }
