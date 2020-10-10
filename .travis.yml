@@ -25,3 +25,6 @@ script:
   - cd evercrypt-sys
   - cargo build --verbose
   - cargo test --verbose
+  - cd ../evercrypt-rs
+  - cargo build --verbose
+  - cargo test --verbose

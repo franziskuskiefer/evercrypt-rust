@@ -29,8 +29,7 @@ jobs:
         run: |
           cd evercrypt-rs
           cargo build --verbose --release
-      - if: matrix.os == 'macos-latest' # Broken on Ubuntu for some reason right now
-        name: Test evercrypt-sys
+      - name: Test evercrypt-sys
         run: |
           cd evercrypt-sys
           cargo test --verbose
