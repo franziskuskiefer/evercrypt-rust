@@ -26,5 +26,5 @@ script:
   - cargo build --verbose
   - cargo test --verbose
   - cd ../evercrypt-rs
-  - cargo build --verbose
-  - cargo test --verbose
+  - cargo build --verbose --features rust-crypto-aes
+  - cargo test --verbose --features rust-crypto-aes
