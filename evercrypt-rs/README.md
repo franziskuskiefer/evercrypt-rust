@@ -18,15 +18,15 @@ To provide AES for other platforms the Evercrypt crate uses the [RustCrypto](htt
 
 ## Platforms
 Currently only Linux x64 and MacOS are supported.
-Windows and ARM builds are on the To Do list and should be supported in future.
+Windows builds are on the To Do list and should be supported in future.
 
 | Platform |                              Supported                              |
 | :------- | :-----------------------------------------------------------------: |
 | MacOS    |                                  ✅                                  |
 | Linux    |                                  ✅                                  |
 | Windows  | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |
-| Arm64    | ❌ [#7](https://github.com/franziskuskiefer/evercrypt-rust/issues/7) |
-| Arm32    | ❌ [#7](https://github.com/franziskuskiefer/evercrypt-rust/issues/7) |
+| Arm64    |                                  ✅                                  |
+| Arm32    |                                  ✅                                  |
 
 
 ## Benchmarks

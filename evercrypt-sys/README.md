@@ -11,7 +11,7 @@ The hacl/evercrypt build is currently not part of the `cargo build`.
 Run `build-evercrypt.sh` in order to build the `gcc-compatible` dist (this requires OCAML to be set up.).
 
 ### Platforms
-Windows and ARM support is on the todo list.
+Windows support is on the To Do list.
 
 | Platform |                              Supported                              |
 | :------- | :-----------------------------------------------------------------: |
