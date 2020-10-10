@@ -19,8 +19,8 @@ jobs:
     - name: MacOS (xcode12)
       os: osx
       osx_image: xcode12
-    - name: Windows (vs2017)
-      os: windows
+    # - name: Windows (vs2017)
+    #   os: windows
 script:
   - cd evercrypt-sys
   - cargo build --verbose
