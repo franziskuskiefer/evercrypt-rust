@@ -11,12 +11,12 @@ The hacl/evercrypt build is currently not part of the `cargo build`.
 Run `build-evercrypt.sh` in order to build the `gcc-compatible` dist (this requires OCAML to be set up.).
 
 ### Platforms
-Windows and ARM support is on the todo list.
+Windows support is on the To Do list.
 
-| Platform |                              Supported                              |
-| :------- | :-----------------------------------------------------------------: |
-| MacOS    |                                  ✅                                  |
-| Linux    |                                  ✅                                  |
-| Windows  | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |
-| Arm64    | ❌ [#7](https://github.com/franziskuskiefer/evercrypt-rust/issues/7) |
-| Arm32    | ❌ [#7](https://github.com/franziskuskiefer/evercrypt-rust/issues/7) |
+| Platform    |                              Supported                              |
+| :---------- | :-----------------------------------------------------------------: |
+| MacOS       |                                  ✅                                  |
+| Linux       |                                  ✅                                  |
+| Windows     | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |
+| Arm64 Linux |                                  ✅                                  |
+| Arm32 Linux |                                  ✅                                  |
