@@ -2,8 +2,6 @@ extern crate bindgen;
 
 use std::{collections::HashMap, env, fs, path::Path, path::PathBuf, process::Command};
 
-// TODO: add ARM builds
-
 #[cfg(windows)]
 fn build_hacl(lib_dir: &Path, build_config: &BuildConfig) {
     // TODO: add Windows builds
@@ -184,17 +182,11 @@ fn main() {
     println!("cargo:rustc-env=LD_LIBRARY_PATH={}", hacl_src_path_str);
 
     // HACL/Evercrypt header paths
-    let kremlin_include = hacl_dir.join("dist").join("kremlin").join("include");
-    let kremlib_minimal = hacl_dir
-        .join("dist")
-        .join("kremlin")
-        .join("kremlib")
-        .join("dist")
-        .join("minimal");
+    // XXX: Using the output paths here causes constant re-builds.
     let hacl_includes = vec![
-        "-I".to_owned() + hacl_src_path_str,
-        "-I".to_owned() + kremlin_include.to_str().unwrap(),
-        "-I".to_owned() + kremlib_minimal.to_str().unwrap(),
+        "-Ihacl-star/dist/".to_owned() + build_config.hacl_src_dir,
+        "-Ihacl-star/dist/kremlin/include".to_string(),
+        "-Ihacl-star/dist/kremlin/kremlib/dist/minimal".to_string(),
     ];
 
     // Build hacl/evercrypt
