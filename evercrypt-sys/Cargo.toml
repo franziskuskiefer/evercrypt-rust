@@ -1,6 +1,6 @@
 [package]
 name = "evercrypt-sys"
-version = "0.0.3-dev"
+version = "0.0.3-dev2"
 authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
 edition = "2018"
 build = "build.rs"
@@ -15,4 +15,4 @@ readme = "README.md"
 libc = { version = "0.2", default-features = false }
 
 [build-dependencies]
-bindgen = "0.54"
+bindgen = "0.55"

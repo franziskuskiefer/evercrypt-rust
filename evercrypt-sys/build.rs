@@ -1,6 +1,6 @@
 extern crate bindgen;
 
-use std::{collections::HashMap, env, fs, path::Path, path::PathBuf, process::Command};
+use std::{collections::HashMap, env, fs, fs::File, path::Path, io::{Write, Read}, process::Command};
 
 #[cfg(windows)]
 fn build_hacl(lib_dir: &Path, build_config: &BuildConfig) {
@@ -119,6 +119,41 @@ impl BuildConfig {
     }
 }
 
+/// Check if the hacl-star revision changed.
+/// 
+/// Returns true if there's a new hacl-star revision and false otherwise.
+fn rebuild(home_dir: &Path, out_dir: &Path) -> bool {
+    let config_file = out_dir.join("config");
+    let hacl_revision = Command::new("git")
+        .current_dir(home_dir)
+        .args(&["submodule", "status", "hacl-star"])
+        .output()
+        .expect("Failed to get hacl-star revision").stdout;
+    let hacl_revision = String::from_utf8(hacl_revision.clone()[1..41].to_vec()).unwrap();
+    match File::open(config_file.clone()) {
+        Ok(mut file) => {
+            // We have the file already. Check the revision.
+            let mut prev_rev = String::new();
+            file.read_to_string(&mut prev_rev).expect("Error reading hacl revision config");
+            if prev_rev != hacl_revision {
+                println!(" previous hacl_revision: {:?}", prev_rev);
+                // We need to rebuild and write the new revision to the config.
+                drop(file);
+                let mut new_file = File::create(config_file).unwrap();
+                new_file.write(&hacl_revision.into_bytes()).unwrap();
+                return true;
+            }
+            return false;
+        }
+        Err(_) => {
+            // The file doesn't exist. Write it and build.
+            let mut new_file = File::create(config_file).unwrap();
+            new_file.write(&hacl_revision.into_bytes()).unwrap();
+            return true;
+        }
+    }
+}
+
 fn main() {
     // Set re-run trigger
     println!("cargo:rerun-if-changed=wrapper.h");
@@ -126,16 +161,12 @@ fn main() {
 
     // Get ENV variables
     let home_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let home_dir = Path::new(&home_dir);
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_path = Path::new(&out_dir);
-    let profile = env::var("PROFILE").unwrap();
+    let _profile = env::var("PROFILE").unwrap();
     let target = env::var("TARGET").unwrap();
     let host = env::var("HOST").unwrap();
-    let target_dir = env::var("CARGO_TARGET_DIR").unwrap_or("target".to_string());
-    let _target_path = Path::new(&home_dir)
-        .join("..")
-        .join(&target_dir)
-        .join(&profile);
 
     let cross = target != host;
     // Pre-populate config with some commonly used values.
@@ -166,8 +197,15 @@ fn main() {
     };
 
     // Set HACL/Evercrypt paths
-    let hacl_dir = Path::new(&out_dir).join("hacl-star");
+    let hacl_dir = out_path.join("hacl-star");
     let hacl_src_path = hacl_dir.join("dist").join(build_config.hacl_src_dir);
+
+    // Build hacl/evercrypt
+    if rebuild(home_dir, &out_path) {
+        // Only rebuild if the hacl revision changed.
+        copy_hacl_to_out(&out_path);
+        build_hacl(&hacl_src_path, &build_config);
+    }
 
     // Set library name and type
     let mode = "static";
@@ -182,16 +220,18 @@ fn main() {
     println!("cargo:rustc-env=LD_LIBRARY_PATH={}", hacl_src_path_str);
 
     // HACL/Evercrypt header paths
-    // XXX: Using the output paths here causes constant re-builds.
+    let kremlin_include = hacl_dir.join("dist").join("kremlin").join("include");
+    let kremlib_minimal = hacl_dir
+        .join("dist")
+        .join("kremlin")
+        .join("kremlib")
+        .join("dist")
+        .join("minimal");
     let hacl_includes = vec![
-        "-Ihacl-star/dist/".to_owned() + build_config.hacl_src_dir,
-        "-Ihacl-star/dist/kremlin/include".to_string(),
-        "-Ihacl-star/dist/kremlin/kremlib/dist/minimal".to_string(),
+        "-I".to_owned() + hacl_src_path_str,
+        "-I".to_owned() + kremlin_include.to_str().unwrap(),
+        "-I".to_owned() + kremlib_minimal.to_str().unwrap(),
     ];
-
-    // Build hacl/evercrypt
-    copy_hacl_to_out(&out_path);
-    build_hacl(&hacl_src_path, &build_config);
 
     let bindings = bindgen::Builder::default()
         // Header to wrap HACL/Evercrypt headers
@@ -218,7 +258,6 @@ fn main() {
         .generate()
         .expect("Unable to generate bindings");
 
-    let out_path = PathBuf::from(out_dir);
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
