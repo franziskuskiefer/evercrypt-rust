@@ -34,7 +34,7 @@ fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
         }
     }
     let valid = unsafe { Hacl_P256_verify_q(public.as_ptr() as _) };
-    if (!uncompressed_point && !compressed_point) || !valid {
+    if !uncompressed_point && !compressed_point && !valid {
         return Err(Error::InvalidPoint);
     }
 
