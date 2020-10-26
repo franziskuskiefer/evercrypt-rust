@@ -25,6 +25,10 @@ fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
     let compressed_point = if !uncompressed_point {
         unsafe { Hacl_P256_decompression_compressed_form(pk.as_ptr() as _, public.as_mut_ptr()) }
     } else {
+        if pk.len() == 64 {
+            // We might simply have concatenated points (uncompressed without the marker).
+            public.clone_from_slice(pk);
+        }
         false
     };
     let valid = unsafe { Hacl_P256_verify_q(public.as_ptr() as _) };
@@ -70,6 +74,9 @@ pub fn dh_base(s: &[u8]) -> Result<[u8; 64], Error> {
 }
 
 /// Return p * s
+///
+/// The public key `p` can be in uncompressed or compressed form or a concatenation
+/// of the two 32 byte values.
 pub fn dh(p: &[u8], s: &[u8]) -> Result<[u8; 64], Error> {
     let public = validate_pk(p)?;
     let private = validate_sk(s)?;

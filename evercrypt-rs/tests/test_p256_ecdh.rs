@@ -72,6 +72,7 @@ fn test_wycheproof() {
                 }
                 Err(e) => {
                     println!("Error case");
+                    println!("test: {:?}", test);
                     assert!(!valid);
                     assert_eq!(e, Error::InvalidPoint);
                 }

@@ -94,7 +94,8 @@ pub fn derive_base(mode: Mode, s: &[u8]) -> Result<Vec<u8>, Error> {
 }
 
 /// Generate a random `Scalar` on the given curve.
-/// **NOTE:** P256 implementation is insecure!
+///
+/// Returns the scalar key bytes as `u8` vector.
 #[cfg(feature = "random")]
 pub fn key_gen(mode: Mode) -> Vec<u8> {
     match mode {

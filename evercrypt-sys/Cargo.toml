@@ -1,6 +1,6 @@
 [package]
 name = "evercrypt-sys"
-version = "0.0.3-dev3"
+version = "0.0.3-beta1"
 authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
 edition = "2018"
 build = "build.rs"
