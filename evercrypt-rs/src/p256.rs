@@ -12,7 +12,7 @@ pub enum Error {
     InvalidSignature,
 }
 
-fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
+pub fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
     if pk.is_empty() {
         return Err(Error::InvalidPoint);
     }
@@ -42,7 +42,7 @@ fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
 }
 
 /// Validate a P256 secret key.
-fn validate_sk(sk: &[u8]) -> Result<Scalar, Error> {
+pub fn validate_sk(sk: &[u8]) -> Result<Scalar, Error> {
     if sk.is_empty() {
         return Err(Error::InvalidScalar);
     }
