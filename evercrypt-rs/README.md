@@ -1,7 +1,8 @@
 # Evercrypt & HACL Rust bindings
 
 ![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)
-![Maturity Level](https://img.shields.io/badge/maturity-alpha-red.svg)
+[![codecov](https://codecov.io/gh/franziskuskiefer/evercrypt-rust/branch/master/graph/badge.svg?token=RO2Q0YTSNY)](https://codecov.io/gh/franziskuskiefer/evercrypt-rust/)
+![Maturity Level](https://img.shields.io/badge/maturity-beta-orange.svg)
 
 High-level [evercrypt](https://github.com/project-everest/hacl-star) bindings crates.
 
