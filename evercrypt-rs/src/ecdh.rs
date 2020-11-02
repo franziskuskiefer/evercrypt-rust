@@ -39,6 +39,9 @@
 //! };
 //! ```
 
+#[cfg(feature = "serialization")]
+use serde::{Deserialize, Serialize};
+
 use crate::p256;
 use crate::x25519;
 
@@ -50,6 +53,7 @@ pub enum Error {
 
 /// ECDH algorithm.
 #[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "serialization", derive(Serialize, Deserialize))]
 pub enum Mode {
     X25519,
     P256,

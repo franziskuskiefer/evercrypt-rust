@@ -55,6 +55,9 @@
 //! ```
 //!
 
+#[cfg(feature = "serialization")]
+use serde::{Deserialize, Serialize};
+
 use evercrypt_sys::evercrypt_bindings::*;
 
 #[cfg(feature = "rust-crypto-aes")]
@@ -76,6 +79,7 @@ enum OpMode {
 
 /// The AEAD Mode.
 #[derive(Clone, Copy, PartialEq, Debug)]
+#[cfg_attr(feature = "serialization", derive(Serialize, Deserialize))]
 pub enum Mode {
     Aes128Gcm = Spec_Agile_AEAD_AES128_GCM as isize,
     Aes256Gcm = Spec_Agile_AEAD_AES256_GCM as isize,

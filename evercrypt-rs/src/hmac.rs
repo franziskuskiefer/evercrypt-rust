@@ -16,10 +16,14 @@
 //! assert_eq!(expected_tag[..], tag[..]);
 //! ```
 
+#[cfg(feature = "serialization")]
+use serde::{Deserialize, Serialize};
+
 use evercrypt_sys::evercrypt_bindings::*;
 
 /// The HMAC mode defining the used hash function.
 #[derive(Copy, Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serialization", derive(Serialize, Deserialize))]
 pub enum Mode {
     Sha1 = Spec_Hash_Definitions_SHA1 as isize,
     // Not implemented

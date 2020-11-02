@@ -1,3 +1,6 @@
+#[cfg(feature = "serialization")]
+use serde::{Deserialize, Serialize};
+
 use crate::digest;
 use crate::ed25519;
 use crate::p256;
@@ -12,6 +15,7 @@ pub enum Error {
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "serialization", derive(Serialize, Deserialize))]
 pub enum Mode {
     Ed25519,
     P256,

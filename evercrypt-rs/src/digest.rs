@@ -171,6 +171,9 @@
 //! assert_eq!(digest::hash(Mode::Blake2s, &data), expected_digest);
 //! ```
 
+#[cfg(feature = "serialization")]
+use serde::{Deserialize, Serialize};
+
 use evercrypt_sys::evercrypt_bindings::*;
 
 #[derive(Debug)]
@@ -181,6 +184,7 @@ pub enum Error {
 
 /// The Digest Mode.
 #[derive(Copy, Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serialization", derive(Serialize, Deserialize))]
 pub enum Mode {
     Sha1 = Spec_Hash_Definitions_SHA1 as isize,
     Sha224 = Spec_Hash_Definitions_SHA2_224 as isize,
