@@ -1,6 +1,13 @@
 extern crate bindgen;
 
-use std::{collections::HashMap, env, fs, fs::File, path::Path, io::{Write, Read}, process::Command};
+use std::{
+    collections::HashMap,
+    env, fs,
+    fs::File,
+    io::{Read, Write},
+    path::Path,
+    process::Command,
+};
 
 #[cfg(windows)]
 fn build_hacl(lib_dir: &Path, build_config: &BuildConfig) {
@@ -120,7 +127,7 @@ impl BuildConfig {
 }
 
 /// Check if the hacl-star revision changed.
-/// 
+///
 /// Returns true if there's a new hacl-star revision and false otherwise.
 fn rebuild(home_dir: &Path, out_dir: &Path) -> bool {
     let config_file = out_dir.join("config");
@@ -128,13 +135,19 @@ fn rebuild(home_dir: &Path, out_dir: &Path) -> bool {
         .current_dir(home_dir)
         .args(&["submodule", "status", "hacl-star"])
         .output()
-        .expect("Failed to get hacl-star revision").stdout;
-    let hacl_revision = String::from_utf8(hacl_revision.clone()[1..41].to_vec()).unwrap();
+        .expect("Failed to get hacl-star revision")
+        .stdout;
+    let hacl_revision = if hacl_revision.is_empty() || hacl_revision.len() < 42 {
+        String::new()
+    } else {
+        String::from_utf8(hacl_revision.clone()[1..41].to_vec()).unwrap()
+    };
     match File::open(config_file.clone()) {
         Ok(mut file) => {
             // We have the file already. Check the revision.
             let mut prev_rev = String::new();
-            file.read_to_string(&mut prev_rev).expect("Error reading hacl revision config");
+            file.read_to_string(&mut prev_rev)
+                .expect("Error reading hacl revision config");
             if prev_rev != hacl_revision {
                 println!(" previous hacl_revision: {:?}", prev_rev);
                 // We need to rebuild and write the new revision to the config.
