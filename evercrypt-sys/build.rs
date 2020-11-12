@@ -189,6 +189,7 @@ fn main() {
     let build_config = match target.as_str() {
         // No 32-bit support on any platform for now.
         "x86_64-apple-darwin" => cfg.set_cross_config_flags(vec!["-target", "x86_64-apple-darwin"]),
+        "i686-unknown-linux-gnu" => cfg.set_cross_config_flags(vec!["-target", "ia32"]),
         "x86_64-unknown-linux-gnu" => {
             cfg.set_cross_config_flags(vec!["-target", "x86_64-unknown-linux-gnu"])
         }

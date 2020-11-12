@@ -13,10 +13,10 @@ Run `build-evercrypt.sh` in order to build the `gcc-compatible` dist (this requi
 ### Platforms
 Windows support is on the To Do list.
 
-| Platform    |                              Supported                              |
-| :---------- | :-----------------------------------------------------------------: |
-| MacOS       |                                  ✅                                  |
-| Linux       |                                  ✅                                  |
-| Windows     | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |
-| Arm64 Linux |                                  ✅                                  |
-| Arm32 Linux |                                  ✅                                  |
+| Platform      |                              Supported                              |
+| :------------ | :-----------------------------------------------------------------: |
+| MacOS         |                                  ✅                                  |
+| Linux x86/x64 |                                  ✅                                  |
+| Windows       | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |
+| Arm64 Linux   |                                  ✅                                  |
+| Arm32 Linux   |                                  ✅                                  |

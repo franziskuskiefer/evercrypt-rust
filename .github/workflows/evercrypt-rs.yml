@@ -38,10 +38,19 @@ jobs:
         run: |
           cd evercrypt-rs
           cargo test --verbose
+      - if: matrix.os == 'ubuntu-latest'
+        name: Build & Test 32-bit Linux
+        run: |
+          cd evercrypt-rs
+          cargo test --verbose --features rust-crypto-aes
       - name: Test (rust-crypto-aes)
         run: |
           cd evercrypt-rs
           cargo test --verbose --features rust-crypto-aes
+      - name: Test (all-features)
+        run: |
+          cd evercrypt-rs
+          cargo test --verbose --all-features
       - name: Benchmark (rust-crypto-aes)
         run: |
           cd evercrypt-rs
