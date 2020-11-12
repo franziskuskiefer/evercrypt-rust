@@ -1,6 +1,23 @@
 # Evercrypt & HACL Rust bindings
 
+![Maturity Level](https://img.shields.io/badge/maturity-beta-orange.svg)
+
 This workspace holds the [evercrypt-sys](evercrypt-sys/) and high-level [evercrypt](evercrypt-rs/) crates.
+
+| Platform    |                              Supported                              |                                                                                                            Status                                                                                                            |
+| :---------- | :-----------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| MacOS       |                                  ✅                                  | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Linux  x64  |                                  ✅                                  | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Windows     | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |                                                                                                                                                                                                                              |
+| Arm64 Linux |                                  ✅                                  |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
+| Arm32 Linux |                                  ✅                                  |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
+
+## Crates
+
+| Name          | Crates.io                                                                                                  | Docs  |
+| :------------ | :-------------------------------------------------------------------------------------------------------- | :---: |
+| evercrypt-sys | [![crates.io](https://img.shields.io/crates/v/evercrypt-sys.svg)](https://crates.io/crates/evercrypt-sys) |       |
+| evercrypt     | [![crates.io](https://img.shields.io/crates/v/evercrypt.svg)](https://crates.io/crates/evercrypt)         |       |
 
 ## Features
 By default the Evercrypt crate includes the `random` feature that allows generating random values (keys, nonces, etc.).

@@ -7,6 +7,7 @@ license = "MPL-2.0"
 documentation = "https://docs.rs/evercrypt"
 description = "Crypto library using formally verified code from HACL/Evercrypt"
 readme = "README.md"
+repository = "https://github.com/franziskuskiefer/evercrypt-rust/"
 
 [lib]
 crate-type = ["staticlib", "cdylib", "lib"]
