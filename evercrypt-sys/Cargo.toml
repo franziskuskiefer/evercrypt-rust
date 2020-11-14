@@ -17,4 +17,5 @@ libc = { version = "0.2", default-features = false }
 
 [build-dependencies]
 # 0.55 requires at least clang 3.9
+# TODO: not needed on Windows!
 bindgen = "0.54"

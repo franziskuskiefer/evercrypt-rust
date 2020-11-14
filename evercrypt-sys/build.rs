@@ -5,7 +5,7 @@ use std::{
     env, fs,
     fs::File,
     io::{Read, Write},
-    path::{Path, PathBuf},
+    path::Path,
     process::Command,
 };
 
@@ -70,7 +70,7 @@ fn llvm_path() {
     println!("cargo:rustc-env=LLVM_CONFIG_PATH={}", llvm_config);
 }
 
-fn copy_hacl_to_out(out_dir: &Path) {
+fn copy_hacl_to_out(out_dir: &Path, hacl_src_dir: &Path) {
     let cp_status = Command::new("cp")
         .arg("-r")
         .arg("hacl-star")
@@ -79,6 +79,14 @@ fn copy_hacl_to_out(out_dir: &Path) {
         .expect("Failed to copy hacl-star to out_dir.");
     if !cp_status.success() {
         panic!("Failed to copy hacl-star to out_dir.")
+    }
+    let cp_status = Command::new("cp")
+        .arg("hacl-build.bat")
+        .arg(hacl_src_dir)
+        .status()
+        .expect("Failed to copy hacl-build.bat to out_dir.");
+    if !cp_status.success() {
+        panic!("Failed to copy hacl-build.bat to out_dir.")
     }
 }
 
@@ -143,6 +151,10 @@ impl BuildConfig {
         self.windows = true;
         self
     }
+    fn set_hacl_src_dir(&mut self, hacl_src_dir: &'static str) -> &mut Self {
+        self.hacl_src_dir = hacl_src_dir;
+        self
+    }
 }
 
 /// Check if the hacl-star revision changed.
@@ -186,7 +198,7 @@ fn rebuild(home_dir: &Path, out_dir: &Path) -> bool {
     }
 }
 
-fn create_bindings(hacl_dir: PathBuf, hacl_src_path_str: &str, home_dir: &Path) {
+fn create_bindings(hacl_dir: &Path, hacl_src_path_str: &str, home_dir: &Path) {
     // HACL/Evercrypt header paths
     let kremlin_include = hacl_dir.join("dist").join("kremlin").join("include");
     let kremlib_minimal = hacl_dir
@@ -273,7 +285,10 @@ fn main() {
             cfg.set_cross_config_flags(vec!["-target", "aarch64-none-linux-gnu"])
         }
         // Only MSVC builds are supported on Windows.
-        "x86_64-pc-windows-msvc" => cfg.set_lib_name("libevercrypt.lib").windows(),
+        "x86_64-pc-windows-msvc" => cfg
+            .set_lib_name("libevercrypt.lib")
+            .windows()
+            .set_hacl_src_dir("msvc-compatible"),
         // TODO: Which Android versions do we want to support?
         "aarch64-linux-android" => panic!("Target '{:?}' is not supported yet.", target),
         _ => panic!("Target '{:?}' is not supported yet.", target),
@@ -287,16 +302,17 @@ fn main() {
     // Build hacl/evercrypt
     if rebuild(home_dir, &out_path) {
         // Only rebuild if the hacl revision changed.
-        copy_hacl_to_out(&out_path);
+        copy_hacl_to_out(&out_path, &hacl_src_path);
         build_hacl(&hacl_src_path, &build_config);
     }
 
     // Generate new bindings if not on Windows.
     if !cfg.windows {
-        create_bindings(hacl_dir, hacl_src_path_str, home_dir);
+        create_bindings(&hacl_dir, hacl_src_path_str, home_dir);
     }
 
     // Link evercrypt library.
     println!("cargo:rustc-link-search=native={}", hacl_src_path_str);
+    println!("cargo:lib={}", hacl_src_path_str);
     println!("cargo:rustc-link-lib={}={}", mode, cfg.lib_name);
 }
