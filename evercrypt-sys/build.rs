@@ -11,8 +11,15 @@ use std::{
 
 #[cfg(windows)]
 fn build_hacl(lib_dir: &Path, build_config: &BuildConfig) {
-    // TODO: add Windows builds
-    panic!("Windows builds are not supported yet. Sorry!");
+    let mut build_status = Command::new("cmd");
+    build_status
+        .args(&["/C", lib_dir.join("hacl-build.bat").to_str().unwrap()])
+        .envs(build_config.env.clone());
+
+    let build_status = build_status.status().expect("Failed to run hacl build");
+    if !build_status.success() {
+        panic!("Failed to run hacl build.")
+    }
 }
 
 #[cfg(not(windows))]
@@ -63,7 +70,7 @@ fn llvm_path() {
     println!("cargo:rustc-env=LLVM_CONFIG_PATH={}", llvm_config);
 }
 
-fn copy_hacl_to_out(out_dir: &Path) {
+fn copy_hacl_to_out(out_dir: &Path, hacl_src_dir: &Path) {
     let cp_status = Command::new("cp")
         .arg("-r")
         .arg("hacl-star")
@@ -73,6 +80,14 @@ fn copy_hacl_to_out(out_dir: &Path) {
     if !cp_status.success() {
         panic!("Failed to copy hacl-star to out_dir.")
     }
+    let cp_status = Command::new("cp")
+        .arg("hacl-build.bat")
+        .arg(hacl_src_dir)
+        .status()
+        .expect("Failed to copy hacl-build.bat to out_dir.");
+    if !cp_status.success() {
+        panic!("Failed to copy hacl-build.bat to out_dir.")
+    }
 }
 
 struct BuildConfig {
@@ -81,17 +96,21 @@ struct BuildConfig {
     config_flags: Vec<&'static str>,
     make_flags: Vec<&'static str>,
     env: HashMap<String, String>,
+    lib_name: &'static str,
+    windows: bool,
 }
 
 #[allow(dead_code)]
 impl BuildConfig {
-    fn new(hacl_src_dir: &'static str, cross: bool) -> Self {
+    fn new(hacl_src_dir: &'static str, lib_name: &'static str, cross: bool) -> Self {
         Self {
             hacl_src_dir,
             cross,
             config_flags: vec![],
             make_flags: vec![],
             env: HashMap::new(),
+            lib_name,
+            windows: false,
         }
     }
     fn set_config_flags(&mut self, config_flags: Vec<&'static str>) -> &mut Self {
@@ -122,6 +141,18 @@ impl BuildConfig {
         if self.cross {
             self.env = env;
         }
+        self
+    }
+    fn set_lib_name(&mut self, lib_name: &'static str) -> &mut Self {
+        self.lib_name = lib_name;
+        self
+    }
+    fn windows(&mut self) -> &mut Self {
+        self.windows = true;
+        self
+    }
+    fn set_hacl_src_dir(&mut self, hacl_src_dir: &'static str) -> &mut Self {
+        self.hacl_src_dir = hacl_src_dir;
         self
     }
 }
@@ -167,72 +198,7 @@ fn rebuild(home_dir: &Path, out_dir: &Path) -> bool {
     }
 }
 
-fn main() {
-    // Set re-run trigger
-    println!("cargo:rerun-if-changed=wrapper.h");
-    println!("cargo:rerun-if-changed=hacl-star");
-
-    // Get ENV variables
-    let home_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let home_dir = Path::new(&home_dir);
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let out_path = Path::new(&out_dir);
-    let _profile = env::var("PROFILE").unwrap();
-    let target = env::var("TARGET").unwrap();
-    let host = env::var("HOST").unwrap();
-
-    let cross = target != host;
-    // Pre-populate config with some commonly used values.
-    let mut cfg = BuildConfig::new("gcc-compatible", cross);
-
-    // Make sure we can build for the given OS and architecture.
-    let build_config = match target.as_str() {
-        // No 32-bit support on any platform for now.
-        "x86_64-apple-darwin" => cfg.set_cross_config_flags(vec!["-target", "x86_64-apple-darwin"]),
-        "i686-unknown-linux-gnu" => cfg.set_cross_config_flags(vec!["-target", "ia32"]),
-        "x86_64-unknown-linux-gnu" => {
-            cfg.set_cross_config_flags(vec!["-target", "x86_64-unknown-linux-gnu"])
-        }
-        // ARM32 v7 (e.g. raspberry pi 3)
-        // TODO: set TOOLCHAIN
-        "armv7-unknown-linux-gnueabihf" => {
-            cfg.set_cross_config_flags(vec!["-target", "arm32-none-linux-gnu"])
-        }
-        // ARM64 Linux
-        // TODO: set TOOLCHAIN
-        "aarch64-unknown-linux-gnu" => {
-            cfg.set_cross_config_flags(vec!["-target", "aarch64-none-linux-gnu"])
-        }
-        // Only MSVC builds are supported on Windows.
-        "x86_64-pc-windows-msvc" => panic!("Target '{:?}' is not supported yet.", target),
-        // TODO: Which Android versions do we want to support?
-        "aarch64-linux-android" => panic!("Target '{:?}' is not supported yet.", target),
-        _ => panic!("Target '{:?}' is not supported yet.", target),
-    };
-
-    // Set HACL/Evercrypt paths
-    let hacl_dir = out_path.join("hacl-star");
-    let hacl_src_path = hacl_dir.join("dist").join(build_config.hacl_src_dir);
-
-    // Build hacl/evercrypt
-    if rebuild(home_dir, &out_path) {
-        // Only rebuild if the hacl revision changed.
-        copy_hacl_to_out(&out_path);
-        build_hacl(&hacl_src_path, &build_config);
-    }
-
-    // Set library name and type
-    let mode = "static";
-    let name = "evercrypt";
-
-    let hacl_src_path_str = hacl_src_path.to_str().unwrap();
-
-    // Set up rustc link environment
-    println!("cargo:rustc-link-search=native={}", hacl_src_path_str);
-    println!("cargo:rustc-link-lib={}={}", mode, name);
-    println!("cargo:rustc-env=DYLD_LIBRARY_PATH={}", hacl_src_path_str);
-    println!("cargo:rustc-env=LD_LIBRARY_PATH={}", hacl_src_path_str);
-
+fn create_bindings(hacl_dir: &Path, hacl_src_path_str: &str, home_dir: &Path) {
     // HACL/Evercrypt header paths
     let kremlin_include = hacl_dir.join("dist").join("kremlin").join("include");
     let kremlib_minimal = hacl_dir
@@ -272,7 +238,81 @@ fn main() {
         .generate()
         .expect("Unable to generate bindings");
 
+    // let bindings_path = out_path.join("bindings.rs");
+    let home_bindings = home_dir.join("src/bindings/bindings.rs");
     bindings
-        .write_to_file(out_path.join("bindings.rs"))
+        .write_to_file(home_bindings.clone())
         .expect("Couldn't write bindings!");
+}
+
+fn main() {
+    // Set re-run trigger
+    println!("cargo:rerun-if-changed=wrapper.h");
+    println!("cargo:rerun-if-changed=hacl-star");
+
+    // Get ENV variables
+    let home_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let home_dir = Path::new(&home_dir);
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let out_path = Path::new(&out_dir);
+    let _profile = env::var("PROFILE").unwrap();
+    let target = env::var("TARGET").unwrap();
+    let host = env::var("HOST").unwrap();
+
+    // Set library type
+    let mode = "static";
+
+    let cross = target != host;
+    // Pre-populate config with some commonly used values.
+    let mut cfg = BuildConfig::new("gcc-compatible", "evercrypt", cross);
+
+    // Make sure we can build for the given OS and architecture.
+    let build_config = match target.as_str() {
+        // No 32-bit support on any platform for now.
+        "x86_64-apple-darwin" => cfg.set_cross_config_flags(vec!["-target", "x86_64-apple-darwin"]),
+        "i686-unknown-linux-gnu" => cfg.set_cross_config_flags(vec!["-target", "ia32"]),
+        "x86_64-unknown-linux-gnu" => {
+            cfg.set_cross_config_flags(vec!["-target", "x86_64-unknown-linux-gnu"])
+        }
+        // ARM32 v7 (e.g. raspberry pi 3)
+        // TODO: set TOOLCHAIN when cross compiling
+        "armv7-unknown-linux-gnueabihf" => {
+            cfg.set_cross_config_flags(vec!["-target", "arm32-none-linux-gnu"])
+        }
+        // ARM64 Linux
+        // TODO: set TOOLCHAIN when cross compiling
+        "aarch64-unknown-linux-gnu" => {
+            cfg.set_cross_config_flags(vec!["-target", "aarch64-none-linux-gnu"])
+        }
+        // Only MSVC builds are supported on Windows.
+        "x86_64-pc-windows-msvc" => cfg
+            .set_lib_name("libevercrypt")
+            .windows()
+            .set_hacl_src_dir("msvc-compatible"),
+        // TODO: Which Android versions do we want to support?
+        "aarch64-linux-android" => panic!("Target '{:?}' is not supported yet.", target),
+        _ => panic!("Target '{:?}' is not supported yet.", target),
+    };
+
+    // Set HACL/Evercrypt paths
+    let hacl_dir = out_path.join("hacl-star");
+    let hacl_src_path = hacl_dir.join("dist").join(build_config.hacl_src_dir);
+    let hacl_src_path_str = hacl_src_path.to_str().unwrap();
+
+    // Build hacl/evercrypt
+    if rebuild(home_dir, &out_path) {
+        // Only rebuild if the hacl revision changed.
+        copy_hacl_to_out(&out_path, &hacl_src_path);
+        build_hacl(&hacl_src_path, &build_config);
+    }
+
+    // Generate new bindings if not on Windows.
+    if !cfg.windows {
+        create_bindings(&hacl_dir, hacl_src_path_str, home_dir);
+    }
+
+    // Link evercrypt library.
+    println!("cargo:rustc-link-search=native={}", hacl_src_path_str);
+    println!("cargo:lib={}", hacl_src_path_str);
+    println!("cargo:rustc-link-lib={}={}", mode, cfg.lib_name);
 }
