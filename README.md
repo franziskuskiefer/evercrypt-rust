@@ -4,14 +4,14 @@
 
 This workspace holds the [evercrypt-sys](evercrypt-sys/) and high-level [evercrypt](evercrypt-rs/) crates.
 
-| Platform    |                              Supported                              |                                                                                                            Status                                                                                                            |
-| :---------- | :-----------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| MacOS       |                                  ✅                                  | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
-| Linux  x64  |                                  ✅                                  | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
-| Linux  x86  |                                  ✅                                  | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
-| Windows     | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |                                                                                                                                                                                                                              |
-| Arm64 Linux |                                  ✅                                  |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
-| Arm32 Linux |                                  ✅                                  |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
+| Platform    | Supported |                                                                                                            Status                                                                                                            |
+| :---------- | :-------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| MacOS       |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Linux x64   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Linux x86   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Windows x64 |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Arm64 Linux |     ✅     |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
+| Arm32 Linux |     ✅     |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
 
 ## Crates
 
@@ -30,8 +30,12 @@ Evecrypt currently implements AES only for x64 CPUs with a certain set of CPU in
 To provide AES for other platforms the Evercrypt crate uses the [RustCrypto](https://github.com/RustCrypto/) AES implementation when using `--features rust-crypto-aes`.
 
 ## Platforms
-Currently only Linux x64 and MacOS are supported.
-Windows and ARM builds are on the To Do list and should be supported in future.
+See above for a list of supported platforms.
+
+### Building on Windows
+To build `evercrypt` and `evercrypt-sys` on Windows ensure path for the `VsDevCmd.bat`
+called in in `evercrypt-sys/hacl-build.bat` is correct on your system.
+The build has only been tested with VisualStudio 2019.
 
 ## Benchmarks
 To run benchmarks use `cargo bench`.

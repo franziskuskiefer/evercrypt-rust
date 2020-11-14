@@ -11,12 +11,17 @@ The hacl/evercrypt build is currently not part of the `cargo build`.
 Run `build-evercrypt.sh` in order to build the `gcc-compatible` dist (this requires OCAML to be set up.).
 
 ### Platforms
-Windows support is on the To Do list.
 
-| Platform      |                              Supported                              |
-| :------------ | :-----------------------------------------------------------------: |
-| MacOS         |                                  ✅                                  |
-| Linux x86/x64 |                                  ✅                                  |
-| Windows       | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |
-| Arm64 Linux   |                                  ✅                                  |
-| Arm32 Linux   |                                  ✅                                  |
+| Platform    | Supported |                                                                                                            Status                                                                                                            |
+| :---------- | :-------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| MacOS       |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Linux x64   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Linux x86   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Windows x64 |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Arm64 Linux |     ✅     |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
+| Arm32 Linux |     ✅     |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
+
+#### Building on Windows
+To build `evercrypt` and `evercrypt-sys` on Windows ensure path for the `VsDevCmd.bat`
+called in in `hacl-build.bat` is correct on your system.
+The build has only been tested with VisualStudio 2019.

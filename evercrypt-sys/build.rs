@@ -2,7 +2,7 @@ extern crate bindgen;
 
 use std::{
     collections::HashMap,
-    env, fs,
+    env,
     fs::File,
     io::{Read, Write},
     path::Path,
@@ -26,7 +26,7 @@ fn build_hacl(lib_dir: &Path, build_config: &BuildConfig) {
 fn build_hacl(lib_dir: &Path, build_config: &BuildConfig) {
     // Run configure
     let mut configure_cmd = Command::new(
-        fs::canonicalize(lib_dir.join("configure")).expect("Failed to find configure script!"),
+        std::fs::canonicalize(lib_dir.join("configure")).expect("Failed to find configure script!"),
     );
     let configure_status = configure_cmd
         .current_dir(lib_dir)
