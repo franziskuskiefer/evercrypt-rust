@@ -1,7 +1,9 @@
 #![allow(dead_code)]
 
 // Include bindgen output
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+// The bindings are freshly generated on Linux and MacOS builds.
+// For Windows the prebuilt bindings.rs from the repository are used.
+include!("bindings/bindings.rs");
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]

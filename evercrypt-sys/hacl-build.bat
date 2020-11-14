@@ -1,0 +1,17 @@
+echo off
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat" -host_arch=amd64 -arch=amd64
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat" -test
+cd %~dp0
+cl *.c /I ../kremlin/include /I . /I ../kremlin/kremlib/dist/minimal /c || goto :error
+for /F %%i in ('dir /b *-x86_64-msvc.asm') do (
+  ml64 /c %%i || goto :error
+)
+lib /out:libevercrypt.lib *.obj || goto :error
+@REM cd -
+echo "SUCCESS"
+exit /b 0
+
+:error
+@REM cd -
+echo "Failed"
+exit /b %errorlevel%
