@@ -286,7 +286,7 @@ fn main() {
         }
         // Only MSVC builds are supported on Windows.
         "x86_64-pc-windows-msvc" => cfg
-            .set_lib_name("libevercrypt.lib")
+            .set_lib_name("libevercrypt")
             .windows()
             .set_hacl_src_dir("msvc-compatible"),
         // TODO: Which Android versions do we want to support?
