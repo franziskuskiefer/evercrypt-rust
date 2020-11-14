@@ -21,14 +21,15 @@ To provide AES for other platforms the Evercrypt crate uses the [RustCrypto](htt
 Currently only Linux x64 and MacOS are supported.
 Windows builds are on the To Do list and should be supported in future.
 
-| Platform      |                              Supported                              |
-| :------------ | :-----------------------------------------------------------------: |
-| MacOS         |                                  ✅                                  |
-| Linux x86/x64 |                                  ✅                                  |
-| Windows       | ❌ [#3](https://github.com/franziskuskiefer/evercrypt-rust/issues/3) |
-| Arm64 Linux   |                                  ✅                                  |
-| Arm32 Linux   |                                  ✅                                  |
 
+| Platform    | Supported |                                                                                                            Status                                                                                                            |
+| :---------- | :-------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| MacOS       |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Linux x64   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Linux x86   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Windows x64 |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| Arm64 Linux |     ✅     |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
+| Arm32 Linux |     ✅     |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
 
 ## Benchmarks
 To run benchmarks use `cargo bench`.
