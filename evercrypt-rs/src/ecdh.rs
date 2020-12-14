@@ -48,6 +48,7 @@ use crate::x25519;
 #[derive(Debug, PartialEq)]
 pub enum Error {
     InvalidPoint,
+    InvalidScalar,
     UnkownAlgorithm,
 }
 
@@ -64,6 +65,12 @@ pub enum Mode {
 pub fn derive(mode: Mode, p: &[u8], s: &[u8]) -> Result<Vec<u8>, Error> {
     match mode {
         Mode::X25519 => {
+            if p.len() != 32 {
+                return Err(Error::InvalidPoint);
+            }
+            if s.len() != 32 {
+                return Err(Error::InvalidScalar);
+            }
             let mut point = [0u8; 32];
             point.clone_from_slice(p);
             let mut scalar = [0u8; 32];
@@ -85,6 +92,9 @@ pub fn derive(mode: Mode, p: &[u8], s: &[u8]) -> Result<Vec<u8>, Error> {
 pub fn derive_base(mode: Mode, s: &[u8]) -> Result<Vec<u8>, Error> {
     match mode {
         Mode::X25519 => {
+            if s.len() != 32 {
+                return Err(Error::InvalidScalar);
+            }
             let mut scalar = [0u8; 32];
             scalar.clone_from_slice(s);
 
