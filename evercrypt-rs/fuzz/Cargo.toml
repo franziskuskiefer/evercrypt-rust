@@ -23,7 +23,13 @@ evercrypt-sys = { path = "../../evercrypt-sys" }
 members = ["."]
 
 [[bin]]
-name = "fuzz_ecdh"
+name = "ecdh"
 path = "fuzz_targets/ecdh.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "aead"
+path = "fuzz_targets/aead.rs"
 test = false
 doc = false

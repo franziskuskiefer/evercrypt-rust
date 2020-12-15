@@ -124,6 +124,7 @@ pub enum Error {
     UnsupportedConfig = 4,
     Encrypting = 5,
     Decrypting = 6,
+    InvalidKeySize = 7,
 }
 
 /// The Aead struct allows to re-use a key without having to initialize it
@@ -191,6 +192,11 @@ impl Aead {
     /// If the algorithm is not supported or the state generation fails, this
     /// function returns an `Error`.
     pub fn new(alg: Mode, k: &[u8]) -> Result<Self, Error> {
+        // Check key lengths. Evercrypt is not doing this.
+        if k.len() != key_size(&alg) {
+            return Err(Error::InvalidKeySize);
+        }
+
         unsafe {
             // Make sure this happened.
             EverCrypt_AutoConfig2_init();
@@ -385,6 +391,18 @@ impl Aead {
             OpMode::RustCryptoAes128 => self.decrypt_rs(ctxt, tag, iv, aad),
             OpMode::RustCryptoAes256 => self.decrypt_rs(ctxt, tag, iv, aad),
         }
+    }
+}
+
+impl Drop for Aead {
+    fn drop(&mut self) {
+        if let Some(c_state) = self.c_state {
+            unsafe { EverCrypt_AEAD_free(c_state) }
+        }
+        // This will probably be optimised out. But it's only best effort for
+        // now.
+        let zero_key: Vec<u8> = (0u8..self.key.len() as u8).collect();
+        let _ = std::mem::replace(&mut self.key, zero_key);
     }
 }
 
