@@ -65,6 +65,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: true
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
@@ -74,8 +76,6 @@ jobs:
         with:
           crate: cargo-fuzz
           version: latest
-      - name: Clean
-        run: cargo clean
       - name: Fuzz AEAD
         run: |
           cd evercrypt-rs
