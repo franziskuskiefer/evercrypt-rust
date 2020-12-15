@@ -74,6 +74,8 @@ jobs:
         with:
           crate: cargo-fuzz
           version: latest
+      - name: Clean
+        run: cargo clean
       - name: Fuzz AEAD
         run: |
           cd evercrypt-rs
