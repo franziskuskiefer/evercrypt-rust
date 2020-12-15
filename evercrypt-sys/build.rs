@@ -300,14 +300,15 @@ fn main() {
     let hacl_src_path_str = hacl_src_path.to_str().unwrap();
 
     // Build hacl/evercrypt
-    if rebuild(home_dir, &out_path) {
+    // Always rebuild on windows for now. TODO: fix rebuild check on Windows.
+    if build_config.windows || rebuild(home_dir, &out_path) {
         // Only rebuild if the hacl revision changed.
         copy_hacl_to_out(&out_path, &hacl_src_path);
         build_hacl(&hacl_src_path, &build_config);
     }
 
     // Generate new bindings if not on Windows.
-    if !cfg.windows {
+    if !build_config.windows {
         create_bindings(&hacl_dir, hacl_src_path_str, home_dir);
     }
 
