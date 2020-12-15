@@ -19,10 +19,14 @@ pub fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
 
     // Parse the public key.
     let mut public = [0u8; 64];
-    let uncompressed_point = unsafe {
-        Hacl_P256_decompression_not_compressed_form(pk.as_ptr() as _, public.as_mut_ptr())
+    let uncompressed_point = if pk.len() < 65 {
+        false
+    } else {
+        unsafe {
+            Hacl_P256_decompression_not_compressed_form(pk.as_ptr() as _, public.as_mut_ptr())
+        }
     };
-    let compressed_point = if !uncompressed_point {
+    let compressed_point = if !uncompressed_point && pk.len() >= 33 {
         unsafe { Hacl_P256_decompression_compressed_form(pk.as_ptr() as _, public.as_mut_ptr()) }
     } else {
         false
