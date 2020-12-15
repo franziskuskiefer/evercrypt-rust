@@ -55,3 +55,32 @@ jobs:
         run: |
           cd evercrypt-rs
           cargo bench --verbose --features rust-crypto-aes
+  fuzz:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          default: true
+      - uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-fuzz
+          version: latest
+      - name: Fuzz AEAD
+        run: |
+          cd evercrypt-rs
+          cargo fuzz run aead -- -runs=1000000
+      - name: Fuzz ECDH
+        run: |
+          cd evercrypt-rs
+          cargo fuzz run ecdh -- -runs=1000000
