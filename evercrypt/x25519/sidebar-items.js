@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error",""]],"fn":[["dh","Return p * s"],["dh_base","Return base * s"],["key_gen","Generate a random `Scalar`."]],"type":[["Point","Points are 32 byte arrays."],["Scalar","Scalars are 32 byte arrays."]]});

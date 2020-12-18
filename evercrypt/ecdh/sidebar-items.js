@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error",""],["Mode","ECDH algorithm."]],"fn":[["derive","Derive the ECDH shared secret. Returns `Ok(p * s)` on the provided curve (`mode`) or an error."],["derive_base","Returns `Ok(base_point * s)` on the provided curve (`mode`) or an error."],["key_gen","Generate a random `Scalar` on the given curve."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["get_random_array","Generate a random array."],["get_random_vec","Generate a random byte vector of length `len`."]]});

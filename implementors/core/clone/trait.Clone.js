@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["evercrypt"] = [{"text":"impl Clone for Mode","synthetic":false,"types":[]},{"text":"impl Clone for Mode","synthetic":false,"types":[]},{"text":"impl Clone for Mode","synthetic":false,"types":[]},{"text":"impl Clone for Mode","synthetic":false,"types":[]},{"text":"impl Clone for Signature","synthetic":false,"types":[]},{"text":"impl Clone for Mode","synthetic":false,"types":[]}];
+implementors["evercrypt_sys"] = [{"text":"impl Clone for EverCrypt_Hash_state_s_s","synthetic":false,"types":[]},{"text":"impl Clone for EverCrypt_Hash_state_s_s__bindgen_ty_1","synthetic":false,"types":[]},{"text":"impl Clone for EverCrypt_AEAD_state_s","synthetic":false,"types":[]},{"text":"impl Clone for Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

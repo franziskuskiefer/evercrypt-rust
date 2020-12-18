@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error",""],["Mode",""]],"fn":[["key_gen","Generate a new key pair for the given `mode`."],["sign",""],["verify",""]]});
