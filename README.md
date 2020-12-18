@@ -15,10 +15,10 @@ This workspace holds the [evercrypt-sys](evercrypt-sys/) and high-level [evercry
 
 ## Crates
 
-| Name          | Crates.io                                                                                                 | Docs  |
-| :------------ | :-------------------------------------------------------------------------------------------------------- | :---: |
-| evercrypt-sys | [![crates.io](https://img.shields.io/crates/v/evercrypt-sys.svg)](https://crates.io/crates/evercrypt-sys) |       |
-| evercrypt     | [![crates.io](https://img.shields.io/crates/v/evercrypt.svg)](https://crates.io/crates/evercrypt)         |       |
+| Name          | Crates.io                                                                                                 |                                                               Docs                                                                |
+| :------------ | :-------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------: |
+| evercrypt-sys | [![crates.io](https://img.shields.io/crates/v/evercrypt-sys.svg)](https://crates.io/crates/evercrypt-sys) | [![Docs](https://img.shields.io/badge/docs-master-blue.svg)](https://www.franziskuskiefer.de/evercrypt-rust/evercrypt_sys/index.html) |
+| evercrypt     | [![crates.io](https://img.shields.io/crates/v/evercrypt.svg)](https://crates.io/crates/evercrypt)         | [![Docs](https://img.shields.io/badge/docs-master-blue.svg)](https://www.franziskuskiefer.de/evercrypt-rust/evercrypt/index.html) |
 
 ## Features
 By default the Evercrypt crate includes the `random` feature that allows generating random values (keys, nonces, etc.).
