@@ -49,7 +49,7 @@ use crate::x25519;
 pub enum Error {
     InvalidPoint,
     InvalidScalar,
-    UnkownAlgorithm,
+    UnknownAlgorithm,
 }
 
 /// ECDH algorithm.

@@ -11,6 +11,7 @@ use std::{
 
 #[cfg(windows)]
 fn build_hacl(lib_dir: &Path, build_config: &BuildConfig) {
+    println!("Compiling hacl-star in {:?} with {:?}", lib_dir, build_config);
     let mut build_status = Command::new("cmd");
     build_status
         .args(&["/C", lib_dir.join("hacl-build.bat").to_str().unwrap()])
@@ -80,6 +81,7 @@ fn copy_hacl_to_out(out_dir: &Path, hacl_src_dir: &Path) {
     if !cp_status.success() {
         panic!("Failed to copy hacl-star to out_dir.")
     }
+    println!("Copied hacl-star to {:?}", out_dir);
     let cp_status = Command::new("cp")
         .arg("hacl-build.bat")
         .arg(hacl_src_dir)
@@ -88,8 +90,10 @@ fn copy_hacl_to_out(out_dir: &Path, hacl_src_dir: &Path) {
     if !cp_status.success() {
         panic!("Failed to copy hacl-build.bat to out_dir.")
     }
+    println!("Copied hacl-build.bat to {:?}", hacl_src_dir);
 }
 
+#[derive(Debug)]
 struct BuildConfig {
     hacl_src_dir: &'static str,
     cross: bool,
@@ -298,6 +302,10 @@ fn main() {
     let hacl_dir = out_path.join("hacl-star");
     let hacl_src_path = hacl_dir.join("dist").join(build_config.hacl_src_dir);
     let hacl_src_path_str = hacl_src_path.to_str().unwrap();
+
+    println!("build_config: {:?}", build_config);
+    println!("out_path: {:?}", out_path);
+    println!("hacl_src_path: {:?}", hacl_src_path);
 
     // Build hacl/evercrypt
     // Always rebuild on windows for now. TODO: fix rebuild check on Windows.

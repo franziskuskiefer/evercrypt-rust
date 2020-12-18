@@ -8,7 +8,7 @@ use crate::p256;
 #[derive(Debug, PartialEq)]
 pub enum Error {
     InvalidPoint,
-    UnkownAlgorithm,
+    UnknownAlgorithm,
     NonceMissing,
     HashAlgorithmMissing,
     InvalidSignature,
