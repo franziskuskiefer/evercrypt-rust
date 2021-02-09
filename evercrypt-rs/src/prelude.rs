@@ -3,8 +3,8 @@
 
 pub use crate::aead::{
     decrypt as aead_decrypt, encrypt as aead_encrypt, key_gen as aead_key_gen,
-    key_size as aead_key_size, nonce_gen as aead_nonce_gen, Aead, Error as AeadError,
-    Mode as AeadMode,
+    key_size as aead_key_size, nonce_gen as aead_nonce_gen, tag_size as aead_tag_size, Aead,
+    Error as AeadError, Mode as AeadMode,
 };
 pub use crate::digest::{get_digest_size, hash, Digest, Error as DigestError, Mode as DigestMode};
 pub use crate::ecdh::{
