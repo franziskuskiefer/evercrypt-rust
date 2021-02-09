@@ -107,6 +107,7 @@ impl From<Mode> for Spec_Agile_AEAD_alg {
     }
 }
 
+/// Get the key size of the `Mode` in bytes.
 pub fn key_size(mode: &Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 16,
@@ -115,7 +116,8 @@ pub fn key_size(mode: &Mode) -> usize {
     }
 }
 
-pub fn mac_size(mode: &Mode) -> usize {
+/// Get the tag size of the `Mode` in bytes.
+pub fn tag_size(mode: &Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 16,
         Mode::Aes256Gcm => 16,
