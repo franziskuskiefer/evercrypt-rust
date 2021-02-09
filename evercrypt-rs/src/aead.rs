@@ -115,6 +115,14 @@ pub fn key_size(mode: &Mode) -> usize {
     }
 }
 
+pub fn mac_size(mode: &Mode) -> usize {
+    match mode {
+        Mode::Aes128Gcm => 16,
+        Mode::Aes256Gcm => 16,
+        Mode::Chacha20Poly1305 => 16,
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Error {
     InvalidInit = 0,
