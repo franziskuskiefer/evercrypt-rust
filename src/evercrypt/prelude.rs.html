@@ -42,8 +42,8 @@
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">aead</span>::{
     <span class="ident">decrypt</span> <span class="kw">as</span> <span class="ident">aead_decrypt</span>, <span class="ident">encrypt</span> <span class="kw">as</span> <span class="ident">aead_encrypt</span>, <span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">aead_key_gen</span>,
-    <span class="ident">key_size</span> <span class="kw">as</span> <span class="ident">aead_key_size</span>, <span class="ident">nonce_gen</span> <span class="kw">as</span> <span class="ident">aead_nonce_gen</span>, <span class="ident">Aead</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">AeadError</span>,
-    <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">AeadMode</span>,
+    <span class="ident">key_size</span> <span class="kw">as</span> <span class="ident">aead_key_size</span>, <span class="ident">nonce_gen</span> <span class="kw">as</span> <span class="ident">aead_nonce_gen</span>, <span class="ident">tag_size</span> <span class="kw">as</span> <span class="ident">aead_tag_size</span>, <span class="ident">Aead</span>,
+    <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">AeadError</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">AeadMode</span>,
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">digest</span>::{<span class="ident">get_digest_size</span>, <span class="ident">hash</span>, <span class="ident">Digest</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">DigestError</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">DigestMode</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">ecdh</span>::{
