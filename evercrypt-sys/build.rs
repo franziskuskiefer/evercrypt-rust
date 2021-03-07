@@ -11,7 +11,10 @@ use std::{
 
 #[cfg(windows)]
 fn build_hacl(lib_dir: &Path, build_config: &BuildConfig) {
-    println!("Compiling hacl-star in {:?} with {:?}", lib_dir, build_config);
+    println!(
+        "Compiling hacl-star in {:?} with {:?}",
+        lib_dir, build_config
+    );
     let mut build_status = Command::new("cmd");
     build_status
         .args(&["/C", lib_dir.join("hacl-build.bat").to_str().unwrap()])
@@ -71,6 +74,7 @@ fn llvm_path() {
     println!("cargo:rustc-env=LLVM_CONFIG_PATH={}", llvm_config);
 }
 
+#[cfg(not(windows))]
 fn copy_hacl_to_out(out_dir: &Path, hacl_src_dir: &Path) {
     let cp_status = Command::new("cp")
         .arg("-r")
@@ -81,15 +85,38 @@ fn copy_hacl_to_out(out_dir: &Path, hacl_src_dir: &Path) {
     if !cp_status.success() {
         panic!("Failed to copy hacl-star to out_dir.")
     }
-    println!("Copied hacl-star to {:?}", out_dir);
-    let cp_status = Command::new("cp")
-        .arg("hacl-build.bat")
-        .arg(hacl_src_dir)
+}
+
+#[cfg(windows)]
+fn copy_hacl_to_out(out_dir: &Path, hacl_src_dir: &Path) {
+    let cp_status = Command::new("cmd")
+        .args(&[
+            "/C",
+            "robocopy",
+            "hacl-star",
+            &format!("{}\\hacl-star", out_dir.to_str().unwrap()),
+            "/e",
+            "/s",
+        ])
         .status()
-        .expect("Failed to copy hacl-build.bat to out_dir.");
-    if !cp_status.success() {
-        panic!("Failed to copy hacl-build.bat to out_dir.")
-    }
+        .expect(&format!("Failed to copy hacl-star to {:?}", out_dir));
+
+    println!("Return code {}", cp_status.code().unwrap());
+
+    println!("Copied hacl-star to {:?}", out_dir);
+    let cp_status = Command::new("cmd")
+        .args(&[
+            "/C",
+            "copy",
+            "hacl-build.bat",
+            hacl_src_dir.to_str().unwrap(),
+        ])
+        .status()
+        .expect(&format!(
+            "Failed to copy hacl-build.bat to {:?}",
+            hacl_src_dir
+        ));
+    println!("Return code {}", cp_status.code().unwrap());
     println!("Copied hacl-build.bat to {:?}", hacl_src_dir);
 }
 
