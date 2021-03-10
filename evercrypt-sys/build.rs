@@ -1,3 +1,4 @@
+#[cfg(not(windows))]
 extern crate bindgen;
 
 use std::{
