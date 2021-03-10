@@ -32,6 +32,14 @@ To provide AES for other platforms the Evercrypt crate uses the [RustCrypto](htt
 ## Platforms
 See above for a list of supported platforms.
 
+### Building
+You will need to:
+
+```
+git clone --recurse-submodules path_of_repo
+cargo build
+```
+
 ### Building on Windows
 To build `evercrypt` and `evercrypt-sys` on Windows ensure path for the `VsDevCmd.bat`
 called in in `evercrypt-sys/hacl-build.bat` is correct on your system.
