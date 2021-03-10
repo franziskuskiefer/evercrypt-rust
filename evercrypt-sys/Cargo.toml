@@ -1,6 +1,6 @@
 [package]
 name = "evercrypt-sys"
-version = "0.0.7"
+version = "0.0.8"
 authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
 edition = "2018"
 build = "build.rs"
@@ -15,7 +15,5 @@ repository = "https://github.com/franziskuskiefer/evercrypt-rust/"
 [dependencies]
 libc = { version = "0.2", default-features = false }
 
-[build-dependencies]
-# 0.55 requires at least clang 3.9
-# This is not needed on Windows!
-bindgen = "0.54"
+[target.'cfg(not(windows))'.build-dependencies]
+bindgen = "0.57"

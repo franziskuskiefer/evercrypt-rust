@@ -3,19 +3,20 @@
 //! secure alternative.
 //!
 
-use rand::{self, AsByteSliceMut};
-use rand_core::{OsRng, RngCore};
+use rand::{self, thread_rng, Fill};
 
 /// Generate a random byte vector of length `len`.
+/// *PANICS* if randomness generation fails.
 pub fn get_random_vec(len: usize) -> Vec<u8> {
     let mut out = vec![0u8; len];
-    OsRng.fill_bytes(out.as_byte_slice_mut());
+    out.try_fill(&mut thread_rng()).unwrap();
     out
 }
 
 /// Generate a random array.
-pub fn get_random_array<A: Default + AsByteSliceMut>() -> A {
+/// *PANICS* if randomness generation fails.
+pub fn get_random_array<A: Default + Fill>() -> A {
     let mut out = A::default();
-    OsRng.fill_bytes(out.as_byte_slice_mut());
+    out.try_fill(&mut thread_rng()).unwrap();
     out
 }

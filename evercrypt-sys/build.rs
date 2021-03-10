@@ -75,7 +75,7 @@ fn llvm_path() {
 }
 
 #[cfg(not(windows))]
-fn copy_hacl_to_out(out_dir: &Path, hacl_src_dir: &Path) {
+fn copy_hacl_to_out(out_dir: &Path, _hacl_src_dir: &Path) {
     let cp_status = Command::new("cp")
         .arg("-r")
         .arg("hacl-star")

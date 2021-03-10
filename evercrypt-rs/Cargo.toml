@@ -1,6 +1,6 @@
 [package]
 name = "evercrypt"
-version = "0.0.8"
+version = "0.0.9"
 authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
@@ -22,10 +22,10 @@ random = ["rand", "rand_core"]
 serialization = ["serde", "serde_json"]
 
 [dependencies]
-evercrypt-sys = { version = "0.0.7" }
+evercrypt-sys = { version = "0.0.8" }
 aes-gcm = { version = "0.8", optional = true }
-rand = { version = "0.7", optional = true }
-rand_core = { version = "0.5", optional = true }
+rand = { version = "0.8", optional = true }
+rand_core = { version = "0.6", optional = true }
 serde_json = { version = "1.0", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 
@@ -33,7 +33,7 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 serde_json = "1.0"
 serde = {version = "1.0", features = ["derive"]}
 criterion = "^0.3"
-rand = "^0.7"
+rand = "0.8"
 
 [[bench]]
 name = "benchmark"
