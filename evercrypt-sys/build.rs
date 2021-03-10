@@ -230,6 +230,7 @@ fn rebuild(home_dir: &Path, out_dir: &Path) -> bool {
     }
 }
 
+#[cfg(not(windows))]
 fn create_bindings(hacl_dir: &Path, hacl_src_path_str: &str, home_dir: &Path) {
     // HACL/Evercrypt header paths
     let kremlin_include = hacl_dir.join("dist").join("kremlin").join("include");
@@ -276,6 +277,9 @@ fn create_bindings(hacl_dir: &Path, hacl_src_path_str: &str, home_dir: &Path) {
         .write_to_file(home_bindings.clone())
         .expect("Couldn't write bindings!");
 }
+
+#[cfg(windows)]
+fn create_bindings(_hacl_dir: &Path, _hacl_src_path_str: &str, _home_dir: &Path) {}
 
 fn main() {
     // Set re-run trigger
@@ -343,10 +347,8 @@ fn main() {
         build_hacl(&hacl_src_path, &build_config);
     }
 
-    // Generate new bindings if not on Windows.
-    if !build_config.windows {
-        create_bindings(&hacl_dir, hacl_src_path_str, home_dir);
-    }
+    // Generate new bindings. This is a no-op on Windows.
+    create_bindings(&hacl_dir, hacl_src_path_str, home_dir);
 
     // Link evercrypt library.
     println!("cargo:rustc-link-search=native={}", hacl_src_path_str);
