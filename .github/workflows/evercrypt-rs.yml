@@ -38,6 +38,10 @@ jobs:
         run: |
           cd evercrypt-rs
           cargo test --verbose
+      - name: Build (no-default-features)
+        run: |
+          cd evercrypt-rs
+          cargo build --verbose --no-default-features
       - if: matrix.os == 'ubuntu-latest'
         name: Build & Test 32-bit Linux
         run: |
