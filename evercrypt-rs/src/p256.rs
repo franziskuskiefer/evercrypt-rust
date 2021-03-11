@@ -248,11 +248,13 @@ pub fn ecdsa_verify(
     }
 }
 
+#[cfg(feature = "random")]
 /// Generate a random nonce for ECDSA.
 pub fn random_nonce() -> Nonce {
     crate::rand_util::get_random_array()
 }
 
+#[cfg(feature = "random")]
 /// Generate a new P256 scalar (private key).
 pub fn key_gen() -> Scalar {
     loop {

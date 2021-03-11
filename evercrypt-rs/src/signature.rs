@@ -21,6 +21,7 @@ pub enum Mode {
     P256,
 }
 
+#[cfg(feature = "random")]
 /// Generate a new key pair for the given `mode`.
 pub fn key_gen(mode: Mode) -> Result<(Vec<u8>, Vec<u8>), Error> {
     match mode {
