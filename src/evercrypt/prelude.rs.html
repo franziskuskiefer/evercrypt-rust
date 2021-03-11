@@ -36,41 +36,49 @@
 <span id="33">33</span>
 <span id="34">34</span>
 <span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Prelude for Evercrypt.</span>
 <span class="doccomment">//! Include this to get access to all the public functions of Evercrypt.</span>
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">aead</span>::{
-    <span class="ident">decrypt</span> <span class="kw">as</span> <span class="ident">aead_decrypt</span>, <span class="ident">encrypt</span> <span class="kw">as</span> <span class="ident">aead_encrypt</span>, <span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">aead_key_gen</span>,
-    <span class="ident">key_size</span> <span class="kw">as</span> <span class="ident">aead_key_size</span>, <span class="ident">nonce_gen</span> <span class="kw">as</span> <span class="ident">aead_nonce_gen</span>, <span class="ident">tag_size</span> <span class="kw">as</span> <span class="ident">aead_tag_size</span>, <span class="ident">Aead</span>,
-    <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">AeadError</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">AeadMode</span>,
+    <span class="ident">decrypt</span> <span class="kw">as</span> <span class="ident">aead_decrypt</span>, <span class="ident">encrypt</span> <span class="kw">as</span> <span class="ident">aead_encrypt</span>, <span class="ident">key_size</span> <span class="kw">as</span> <span class="ident">aead_key_size</span>,
+    <span class="ident">tag_size</span> <span class="kw">as</span> <span class="ident">aead_tag_size</span>, <span class="ident">Aead</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">AeadError</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">AeadMode</span>,
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">digest</span>::{<span class="ident">get_digest_size</span>, <span class="ident">hash</span>, <span class="ident">Digest</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">DigestError</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">DigestMode</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">ecdh</span>::{
-    <span class="self">self</span>, <span class="ident">derive</span> <span class="kw">as</span> <span class="ident">ecdh_derive</span>, <span class="ident">derive_base</span> <span class="kw">as</span> <span class="ident">ecdh_derive_base</span>, <span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">ecdh_key_gen</span>,
-    <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">EcdhError</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">EcdhMode</span>,
+    <span class="self">self</span>, <span class="ident">derive</span> <span class="kw">as</span> <span class="ident">ecdh_derive</span>, <span class="ident">derive_base</span> <span class="kw">as</span> <span class="ident">ecdh_derive_base</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">EcdhError</span>,
+    <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">EcdhMode</span>,
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">ed25519</span>::{
-    <span class="self">self</span>, <span class="ident">eddsa_sign</span> <span class="kw">as</span> <span class="ident">ed25519_sign</span>, <span class="ident">eddsa_verify</span> <span class="kw">as</span> <span class="ident">ed25519_verify</span>, <span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">ed25519_key_gen</span>,
-    <span class="ident">sk2pk</span> <span class="kw">as</span> <span class="ident">ed25519_sk2pk</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">Ed25519Error</span>, <span class="ident">Point</span> <span class="kw">as</span> <span class="ident">Ed25519Point</span>, <span class="ident">Scalar</span> <span class="kw">as</span> <span class="ident">Ed25519Scalar</span>,
+    <span class="self">self</span>, <span class="ident">eddsa_sign</span> <span class="kw">as</span> <span class="ident">ed25519_sign</span>, <span class="ident">eddsa_verify</span> <span class="kw">as</span> <span class="ident">ed25519_verify</span>, <span class="ident">sk2pk</span> <span class="kw">as</span> <span class="ident">ed25519_sk2pk</span>,
+    <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">Ed25519Error</span>, <span class="ident">Point</span> <span class="kw">as</span> <span class="ident">Ed25519Point</span>, <span class="ident">Scalar</span> <span class="kw">as</span> <span class="ident">Ed25519Scalar</span>,
     <span class="ident">Signature</span> <span class="kw">as</span> <span class="ident">Ed25519Signature</span>,
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">hkdf</span>::{<span class="self">self</span>, <span class="ident">expand</span> <span class="kw">as</span> <span class="ident">hkdf_expand</span>, <span class="ident">extract</span> <span class="kw">as</span> <span class="ident">hkdf_extract</span>, <span class="ident">hkdf</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">hmac</span>::{<span class="ident">get_tag_size</span>, <span class="ident">hmac</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">HmacMode</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">p256</span>::{
     <span class="self">self</span>, <span class="ident">dh</span> <span class="kw">as</span> <span class="ident">p256</span>, <span class="ident">dh_base</span> <span class="kw">as</span> <span class="ident">p256_base</span>, <span class="ident">ecdsa_sign</span> <span class="kw">as</span> <span class="ident">p256_sign</span>, <span class="ident">ecdsa_verify</span> <span class="kw">as</span> <span class="ident">p256_verify</span>,
-    <span class="ident">random_nonce</span> <span class="kw">as</span> <span class="ident">p256_ecdsa_random_nonce</span>, <span class="ident">validate_pk</span> <span class="kw">as</span> <span class="ident">p256_validate_pk</span>,
-    <span class="ident">validate_sk</span> <span class="kw">as</span> <span class="ident">p256_validate_sk</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">P256Error</span>, <span class="ident">Nonce</span> <span class="kw">as</span> <span class="ident">P256Nonce</span>, <span class="ident">Scalar</span> <span class="kw">as</span> <span class="ident">P256Scalar</span>,
-    <span class="ident">Signature</span> <span class="kw">as</span> <span class="ident">EcdsaSignature</span>,
+    <span class="ident">validate_pk</span> <span class="kw">as</span> <span class="ident">p256_validate_pk</span>, <span class="ident">validate_sk</span> <span class="kw">as</span> <span class="ident">p256_validate_sk</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">P256Error</span>,
+    <span class="ident">Nonce</span> <span class="kw">as</span> <span class="ident">P256Nonce</span>, <span class="ident">Scalar</span> <span class="kw">as</span> <span class="ident">P256Scalar</span>, <span class="ident">Signature</span> <span class="kw">as</span> <span class="ident">EcdsaSignature</span>,
 };
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">rand_util</span>::{<span class="ident">get_random_array</span>, <span class="ident">get_random_vec</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">signature</span>::{
-    <span class="self">self</span>, <span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">signature_key_gen</span>, <span class="ident">sign</span>, <span class="ident">verify</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SignatureError</span>,
-    <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">SignatureMode</span>,
-};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">signature</span>::{<span class="self">self</span>, <span class="ident">sign</span>, <span class="ident">verify</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SignatureError</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">SignatureMode</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">x25519</span>::{
-    <span class="self">self</span>, <span class="ident">dh</span> <span class="kw">as</span> <span class="ident">x25519</span>, <span class="ident">dh_base</span> <span class="kw">as</span> <span class="ident">x25519_base</span>, <span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">x25519_key_gen</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">X25519Error</span>,
-    <span class="ident">Point</span> <span class="kw">as</span> <span class="ident">X25519Point</span>, <span class="ident">Scalar</span> <span class="kw">as</span> <span class="ident">X25519Scalar</span>,
+    <span class="self">self</span>, <span class="ident">dh</span> <span class="kw">as</span> <span class="ident">x25519</span>, <span class="ident">dh_base</span> <span class="kw">as</span> <span class="ident">x25519_base</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">X25519Error</span>, <span class="ident">Point</span> <span class="kw">as</span> <span class="ident">X25519Point</span>,
+    <span class="ident">Scalar</span> <span class="kw">as</span> <span class="ident">X25519Scalar</span>,
+};
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">aead</span>::{<span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">aead_key_gen</span>, <span class="ident">nonce_gen</span> <span class="kw">as</span> <span class="ident">aead_nonce_gen</span>},
+    <span class="ident">ecdh</span>::<span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">ecdh_key_gen</span>,
+    <span class="ident">ed25519</span>::<span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">ed25519_key_gen</span>,
+    <span class="ident">p256</span>::<span class="ident">random_nonce</span> <span class="kw">as</span> <span class="ident">p256_ecdsa_random_nonce</span>,
+    <span class="ident">rand_util</span>::{<span class="ident">get_random_array</span>, <span class="ident">get_random_vec</span>},
+    <span class="ident">signature</span>::<span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">signature_key_gen</span>,
+    <span class="ident">x25519</span>::<span class="ident">key_gen</span> <span class="kw">as</span> <span class="ident">x25519_key_gen</span>,
 };
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "evercrypt";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
