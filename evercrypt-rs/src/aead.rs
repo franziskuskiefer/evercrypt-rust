@@ -108,7 +108,7 @@ impl From<Mode> for Spec_Agile_AEAD_alg {
 }
 
 /// Get the key size of the `Mode` in bytes.
-pub fn key_size(mode: &Mode) -> usize {
+pub fn key_size(mode: Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 16,
         Mode::Aes256Gcm => 32,
@@ -117,11 +117,20 @@ pub fn key_size(mode: &Mode) -> usize {
 }
 
 /// Get the tag size of the `Mode` in bytes.
-pub fn tag_size(mode: &Mode) -> usize {
+pub fn tag_size(mode: Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 16,
         Mode::Aes256Gcm => 16,
         Mode::Chacha20Poly1305 => 16,
+    }
+}
+
+/// Get the nonce size of the `Mode` in bytes.
+pub fn nonce_size(mode: Mode) -> usize {
+    match mode {
+        Mode::Aes128Gcm => 12,
+        Mode::Aes256Gcm => 12,
+        Mode::Chacha20Poly1305 => 12,
     }
 }
 
@@ -203,7 +212,7 @@ impl Aead {
     /// function returns an `Error`.
     pub fn new(alg: Mode, k: &[u8]) -> Result<Self, Error> {
         // Check key lengths. Evercrypt is not doing this.
-        if k.len() != key_size(&alg) {
+        if k.len() != key_size(alg) {
             return Err(Error::InvalidKeySize);
         }
 
@@ -446,7 +455,7 @@ pub fn decrypt(
 /// Generate a random key.
 #[cfg(feature = "random")]
 pub fn key_gen(alg: Mode) -> Vec<u8> {
-    crate::rand_util::get_random_vec(key_size(&alg))
+    crate::rand_util::get_random_vec(key_size(alg))
 }
 
 /// Generate a nonce.

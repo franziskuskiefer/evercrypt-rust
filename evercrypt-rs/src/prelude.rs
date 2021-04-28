@@ -2,8 +2,8 @@
 //! Include this to get access to all the public functions of Evercrypt.
 
 pub use crate::aead::{
-    decrypt as aead_decrypt, encrypt as aead_encrypt, key_size as aead_key_size,
-    tag_size as aead_tag_size, Aead, Error as AeadError, Mode as AeadMode,
+    decrypt as aead_decrypt, encrypt as aead_encrypt, key_size as aead_key_size, nonce_size as aead_nonce_size,
+    tag_size as aead_tag_size, Aead, Error as AeadError, Mode as AeadMode, Nonce as AeadNonce,
 };
 pub use crate::digest::{get_digest_size, hash, Digest, Error as DigestError, Mode as DigestMode};
 pub use crate::ecdh::{
