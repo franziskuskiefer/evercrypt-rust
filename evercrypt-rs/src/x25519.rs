@@ -63,5 +63,5 @@ pub fn dh(p: &Point, s: &Scalar) -> Result<Point, Error> {
 /// Generate a random `Scalar`.
 #[cfg(feature = "random")]
 pub fn key_gen() -> Scalar {
-    crate::rand_util::get_random_array()
+    crate::rand_util::random_array()
 }

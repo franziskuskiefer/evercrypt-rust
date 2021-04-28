@@ -238,8 +238,16 @@ impl From<Mode> for Spec_Hash_Definitions_hash_alg {
     }
 }
 
-/// Returns the output size of a digest.
+#[deprecated(
+    since = "0.0.10",
+    note = "Please use digest_size instead. This alias will be removed with the first stable 0.1 release."
+)]
 pub fn get_digest_size(mode: Mode) -> usize {
+    digest_size(mode)
+}
+
+/// Returns the output size of a digest.
+pub fn digest_size(mode: Mode) -> usize {
     match mode {
         Mode::Sha1 => 20,
         Mode::Sha224 => 28,
@@ -308,7 +316,7 @@ impl Digest {
         if self.finished {
             return Err(Error::InvalidStateFinished);
         }
-        let mut out = vec![0u8; get_digest_size(self.mode)];
+        let mut out = vec![0u8; digest_size(self.mode)];
         unsafe {
             EverCrypt_Hash_Incremental_finish(self.c_state, out.as_mut_ptr());
             EverCrypt_Hash_Incremental_free(self.c_state);

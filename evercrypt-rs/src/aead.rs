@@ -455,11 +455,11 @@ pub fn decrypt(
 /// Generate a random key.
 #[cfg(feature = "random")]
 pub fn key_gen(alg: Mode) -> Vec<u8> {
-    crate::rand_util::get_random_vec(key_size(alg))
+    crate::rand_util::random_vec(key_size(alg))
 }
 
 /// Generate a nonce.
 #[cfg(feature = "random")]
 pub fn nonce_gen(_alg: Mode) -> Nonce {
-    crate::rand_util::get_random_array()
+    crate::rand_util::random_array()
 }

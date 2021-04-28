@@ -18,12 +18,12 @@
 
 use evercrypt_sys::evercrypt_bindings::*;
 
-use crate::hmac::{get_tag_size, Mode};
+use crate::hmac::{tag_size, Mode};
 
 /// HKDF extract using hash function `mode`, `salt`, and the input key material `ikm`.
 /// Returns the pre-key material in a vector of tag length.
 pub fn extract(mode: Mode, salt: &[u8], ikm: &[u8]) -> Vec<u8> {
-    let mut prk = vec![0u8; get_tag_size(mode)];
+    let mut prk = vec![0u8; tag_size(mode)];
     unsafe {
         EverCrypt_HKDF_extract(
             mode as u8,
@@ -40,7 +40,7 @@ pub fn extract(mode: Mode, salt: &[u8], ikm: &[u8]) -> Vec<u8> {
 /// HKDF expand using hash function `mode`, pre-key material `prk`, `info`, and output length `okm_len`.
 /// Returns the key material in a vector of length `okm_len`.
 pub fn expand(mode: Mode, prk: &[u8], info: &[u8], okm_len: usize) -> Vec<u8> {
-    if okm_len > 255 * get_tag_size(mode) {
+    if okm_len > 255 * tag_size(mode) {
         // Output size is too large. HACL doesn't catch this.
         return Vec::new();
     }
