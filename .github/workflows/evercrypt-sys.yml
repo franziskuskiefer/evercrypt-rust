@@ -32,7 +32,7 @@ jobs:
       - if: matrix.os == 'macos-latest'
         run: brew install pkg-config
       - name: Update HACL
-        run: git submodule foreach git pull
+        run: git submodule foreach git pull origin master --allow-unrelated-histories
       - name: Test evercrypt-sys
         run: |
           cd evercrypt-sys
