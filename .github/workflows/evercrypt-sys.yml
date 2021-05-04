@@ -3,10 +3,6 @@ name: HACL Nightly
 on:
   schedule:
     - cron: "0 0 * * *"
-  push:
-    branches:
-      - main
-      - hacl-nightly
 
 env:
   CARGO_TERM_COLOR: always
