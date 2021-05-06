@@ -9,7 +9,7 @@ fn test_p256_signature() {
         Some(DigestMode::Sha256),
         &sk,
         msg,
-        Some(&p256_ecdsa_random_nonce()),
+        &p256_ecdsa_random_nonce().unwrap(),
     )
     .unwrap();
     let verified = verify(

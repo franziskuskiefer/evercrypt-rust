@@ -42,7 +42,7 @@ pub fn get_tag_size(mode: Mode) -> usize {
 }
 
 /// Get the tag size for a given mode.
-pub fn tag_size(mode: Mode) -> usize {
+pub const fn tag_size(mode: Mode) -> usize {
     match mode {
         Mode::Sha1 => 20,
         Mode::Sha256 => 32,

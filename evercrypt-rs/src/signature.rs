@@ -12,6 +12,7 @@ pub enum Error {
     NonceMissing,
     HashAlgorithmMissing,
     InvalidSignature,
+    KeyGenError,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -31,7 +32,7 @@ pub fn key_gen(mode: Mode) -> Result<(Vec<u8>, Vec<u8>), Error> {
             Ok((sk.to_vec(), pk.to_vec()))
         }
         Mode::P256 => {
-            let sk = p256::key_gen();
+            let sk = p256::key_gen().map_err(|_| Error::KeyGenError)?;
             let pk = match p256::dh_base(&sk) {
                 Ok(k) => {
                     let mut pk = vec![0x04];
@@ -46,12 +47,12 @@ pub fn key_gen(mode: Mode) -> Result<(Vec<u8>, Vec<u8>), Error> {
 }
 
 // TODO: unnecessary conversions for P256
-pub fn sign(
+pub fn sign<'a>(
     mode: Mode,
-    hash: Option<digest::Mode>,
+    hash: impl Into<Option<digest::Mode>>,
     sk: &[u8],
     msg: &[u8],
-    nonce: Option<&p256::Nonce>,
+    nonce: impl Into<Option<&'a p256::Nonce>>,
 ) -> Result<Vec<u8>, Error> {
     match mode {
         Mode::Ed25519 => {
@@ -61,11 +62,11 @@ pub fn sign(
             Ok(ed25519::eddsa_sign(&key, msg).to_vec())
         }
         Mode::P256 => {
-            let nonce = match nonce {
+            let nonce = match nonce.into() {
                 Some(n) => n,
                 None => return Err(Error::NonceMissing),
             };
-            let hash = match hash {
+            let hash = match hash.into() {
                 Some(h) => h,
                 None => return Err(Error::HashAlgorithmMissing),
             };

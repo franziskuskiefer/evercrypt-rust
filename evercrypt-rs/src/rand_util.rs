@@ -26,6 +26,7 @@ pub fn random_vec(len: usize) -> Vec<u8> {
     since = "0.0.10",
     note = "Please use random_array instead. This alias will be removed with the first stable 0.1 release."
 )]
+/// Generate a random array.
 pub fn get_random_array<A: Default + Fill>() -> A {
     let mut out = A::default();
     out.try_fill(&mut thread_rng()).unwrap();

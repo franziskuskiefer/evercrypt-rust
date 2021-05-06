@@ -247,7 +247,7 @@ pub fn get_digest_size(mode: Mode) -> usize {
 }
 
 /// Returns the output size of a digest.
-pub fn digest_size(mode: Mode) -> usize {
+pub const fn digest_size(mode: Mode) -> usize {
     match mode {
         Mode::Sha1 => 20,
         Mode::Sha224 => 28,
@@ -265,7 +265,7 @@ pub fn digest_size(mode: Mode) -> usize {
 
 /// Check if we do SHA3, which is not in the agile API and hence has to be
 /// handled differently.
-fn is_sha3(alg: Mode) -> bool {
+const fn is_sha3(alg: Mode) -> bool {
     match alg {
         Mode::Sha3_224 | Mode::Sha3_256 | Mode::Sha3_384 | Mode::Sha3_512 => true,
         _ => false,
