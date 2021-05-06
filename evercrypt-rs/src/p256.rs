@@ -3,6 +3,7 @@ use evercrypt_sys::evercrypt_bindings::*;
 use crate::digest::Mode;
 
 #[derive(Debug, PartialEq)]
+/// P256 errors
 pub enum Error {
     InvalidPoint,
     InvalidScalar,

@@ -30,7 +30,9 @@
 use evercrypt_sys::evercrypt_bindings::*;
 
 #[derive(Debug, PartialEq)]
+/// Curve 25519 errors
 pub enum Error {
+    /// The computed or provided point is not on the curve.
     InvalidPoint,
 }
 
