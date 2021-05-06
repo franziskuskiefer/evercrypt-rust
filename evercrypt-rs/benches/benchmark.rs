@@ -26,11 +26,6 @@ fn randombytes(n: usize) -> Vec<u8> {
     bytes
 }
 
-fn random_nonce<A: Default + AsMut<[u8]>>(n: usize) -> A {
-    let b = randombytes(n);
-    clone_into_array(&b)
-}
-
 fn hex_to_bytes(hex: &str) -> Vec<u8> {
     let mut bytes = Vec::new();
     for i in 0..(hex.len() / 2) {
@@ -165,13 +160,13 @@ fn criterion_aead(c: &mut Criterion) {
     use evercrypt::aead::{Aead, Mode};
 
     c.bench_function("AES128 encrypt", |b| {
-        let key = &randombytes(16);
         b.iter_batched(
             || {
-                let nonce = random_nonce(12);
+                let mut aead = Aead::init(Mode::Aes128Gcm).unwrap();
+                aead.set_random_key().unwrap();
+                let nonce = aead.nonce_gen();
                 let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
-                let aead = Aead::new(Mode::Aes128Gcm, key).unwrap();
                 (data, nonce, aad, aead)
             },
             |(data, nonce, aad, aead)| {
@@ -183,11 +178,12 @@ fn criterion_aead(c: &mut Criterion) {
     c.bench_function("AES128 decrypt", |b| {
         b.iter_batched(
             || {
-                let key = randombytes(16);
-                let nonce = random_nonce(12);
+                let aead = Aead::init(Mode::Aes128Gcm).unwrap();
+                let key = aead.key_gen();
+                let aead = aead.set_key(&key).unwrap();
+                let nonce = aead.nonce_gen();
                 let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
-                let aead = Aead::new(Mode::Aes128Gcm, &key).unwrap();
                 let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
                 (key, nonce, ct, tag, aad)
             },
@@ -200,13 +196,13 @@ fn criterion_aead(c: &mut Criterion) {
     });
 
     c.bench_function("AES256 encrypt", |b| {
-        let key = &randombytes(32);
         b.iter_batched(
             || {
-                let nonce = random_nonce(12);
+                let mut aead = Aead::init(Mode::Aes256Gcm).unwrap();
+                aead.set_random_key().unwrap();
+                let nonce = aead.nonce_gen();
                 let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
-                let aead = Aead::new(Mode::Aes256Gcm, key).unwrap();
                 (data, nonce, aad, aead)
             },
             |(data, nonce, aad, aead)| {
@@ -218,11 +214,12 @@ fn criterion_aead(c: &mut Criterion) {
     c.bench_function("AES256 decrypt", |b| {
         b.iter_batched(
             || {
-                let key = randombytes(32);
-                let nonce = random_nonce(12);
+                let aead = Aead::init(Mode::Aes256Gcm).unwrap();
+                let key = aead.key_gen();
+                let aead = aead.set_key(&key).unwrap();
+                let nonce = aead.nonce_gen();
                 let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
-                let aead = Aead::new(Mode::Aes256Gcm, &key).unwrap();
                 let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
                 (key, nonce, ct, tag, aad)
             },
@@ -235,13 +232,13 @@ fn criterion_aead(c: &mut Criterion) {
     });
 
     c.bench_function("ChaCha20Poly1305 encrypt", |b| {
-        let key = &randombytes(32);
         b.iter_batched(
             || {
-                let nonce = random_nonce(12);
+                let mut aead = Aead::init(Mode::Chacha20Poly1305).unwrap();
+                aead.set_random_key().unwrap();
+                let nonce = aead.nonce_gen();
                 let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
-                let aead = Aead::new(Mode::Chacha20Poly1305, key).unwrap();
                 (data, nonce, aad, aead)
             },
             |(data, nonce, aad, aead)| {
@@ -253,11 +250,12 @@ fn criterion_aead(c: &mut Criterion) {
     c.bench_function("ChaCha20Poly1305 decrypt", |b| {
         b.iter_batched(
             || {
-                let key = randombytes(32);
-                let nonce = random_nonce(12);
+                let aead = Aead::init(Mode::Chacha20Poly1305).unwrap();
+                let key = aead.key_gen();
+                let aead = aead.set_key(&key).unwrap();
+                let nonce = aead.nonce_gen();
                 let data = randombytes(PAYLOAD_SIZE);
                 let aad = randombytes(1_000);
-                let aead = Aead::new(Mode::Chacha20Poly1305, &key).unwrap();
                 let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
                 (key, nonce, ct, tag, aad)
             },

@@ -4,7 +4,7 @@
 pub use crate::aead::{
     self, decrypt as aead_decrypt, encrypt as aead_encrypt, key_size as aead_key_size,
     nonce_size as aead_nonce_size, tag_size as aead_tag_size, Aead, Error as AeadError,
-    Mode as AeadMode, Nonce as AeadNonce,
+    Mode as AeadMode, Nonce as AeadNonce, Tag as AeadTag,
 };
 pub use crate::digest::{
     self, digest_size, get_digest_size, hash, Digest, Error as DigestError, Mode as DigestMode,

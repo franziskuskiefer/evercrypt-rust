@@ -55,6 +55,8 @@
 //! ```
 //!
 
+use std::convert::TryInto;
+
 #[cfg(feature = "serialization")]
 use serde::{Deserialize, Serialize};
 
@@ -108,7 +110,7 @@ impl From<Mode> for Spec_Agile_AEAD_alg {
 }
 
 /// Get the key size of the `Mode` in bytes.
-pub fn key_size(mode: Mode) -> usize {
+pub const fn key_size(mode: Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 16,
         Mode::Aes256Gcm => 32,
@@ -117,7 +119,7 @@ pub fn key_size(mode: Mode) -> usize {
 }
 
 /// Get the tag size of the `Mode` in bytes.
-pub fn tag_size(mode: Mode) -> usize {
+pub const fn tag_size(mode: Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 16,
         Mode::Aes256Gcm => 16,
@@ -126,7 +128,7 @@ pub fn tag_size(mode: Mode) -> usize {
 }
 
 /// Get the nonce size of the `Mode` in bytes.
-pub fn nonce_size(mode: Mode) -> usize {
+pub const fn nonce_size(mode: Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 12,
         Mode::Aes256Gcm => 12,
@@ -158,10 +160,16 @@ pub struct Aead {
 
 /// Ciphertexts are byte vectors.
 pub type Ciphertext = Vec<u8>;
-/// Tags are 16-byte arrays.
-pub type Tag = [u8; 16];
-/// Nonces are 12-byte arrays.
-pub type Nonce = [u8; 12];
+
+/// Aead keys are byte vectors.
+pub type Key = Vec<u8>;
+
+/// Aead tags are byte vectors.
+pub type Tag = Vec<u8>;
+
+/// Nonces are byte vectors.
+pub type Nonce = Vec<u8>;
+
 /// Associated data are byte arrays.
 pub type Aad = [u8];
 
@@ -187,7 +195,7 @@ fn alg_is_aes(alg: Mode) -> bool {
     }
 }
 
-fn get_op_mode(alg: Mode) -> Result<OpMode, Error> {
+fn op_mode(alg: Mode) -> Result<OpMode, Error> {
     match alg {
         Mode::Aes128Gcm | Mode::Aes256Gcm => {
             if hacl_aes_available() {
@@ -207,26 +215,13 @@ fn get_op_mode(alg: Mode) -> Result<OpMode, Error> {
 }
 
 impl Aead {
-    /// Create a new Aead cipher with the given Mode `alg` and key `k`.
-    /// If the algorithm is not supported or the state generation fails, this
-    /// function returns an `Error`.
-    pub fn new(alg: Mode, k: &[u8]) -> Result<Self, Error> {
-        // Check key lengths. Evercrypt is not doing this.
-        if k.len() != key_size(alg) {
-            return Err(Error::InvalidKeySize);
-        }
-
-        unsafe {
-            // Make sure this happened.
-            EverCrypt_AutoConfig2_init();
-        }
-        let op_mode = get_op_mode(alg);
-        match op_mode {
-            Ok(OpMode::Hacl) => {
+    fn set_key_(&mut self, k: Vec<u8>) -> Result<(), Error> {
+        match self.op_mode {
+            OpMode::Hacl => {
                 let state = unsafe {
                     let mut state_ptr: *mut EverCrypt_AEAD_state_s = std::ptr::null_mut();
                     let e = EverCrypt_AEAD_create_in(
-                        alg.into(),
+                        self.mode.into(),
                         &mut state_ptr,
                         k.to_vec().as_mut_ptr(),
                     );
@@ -235,46 +230,102 @@ impl Aead {
                     }
                     state_ptr
                 };
-                Ok(Self {
-                    mode: alg,
-                    c_state: Some(state),
-                    op_mode: OpMode::Hacl,
-                    key: k.to_vec(),
-                })
+                self.c_state = Some(state);
+                self.key = k;
             }
-            Ok(OpMode::RustCryptoAes128) | Ok(OpMode::RustCryptoAes256) => {
+            OpMode::RustCryptoAes128 | OpMode::RustCryptoAes256 => {
                 if !cfg!(feature = "rust-crypto-aes") {
                     return Err(Error::UnsupportedConfig);
                 }
                 // Fall back to software AES GCM implemented in RustCrypto
-                debug_assert!(alg_is_aes(alg));
-                Ok(Self {
-                    mode: alg,
-                    c_state: None,
-                    op_mode: op_mode.unwrap(),
-                    key: k.to_vec(),
-                })
+                debug_assert!(alg_is_aes(self.mode));
+                self.key = k;
             }
-            _ => Err(Error::UnsupportedConfig),
         }
+        Ok(())
+    }
+
+    /// Create a new Aead cipher with the given Mode `alg` and key `k`.
+    /// If the algorithm is not supported or the state generation fails, this
+    /// function returns an `Error`.
+    ///
+    /// To get an Aead instance without setting a key immediately see `init`.
+    pub fn new(mode: Mode, k: &[u8]) -> Result<Self, Error> {
+        // Check key lengths. Evercrypt is not doing this.
+        if k.len() != key_size(mode) {
+            return Err(Error::InvalidKeySize);
+        }
+
+        unsafe {
+            // Make sure this happened.
+            EverCrypt_AutoConfig2_init();
+        }
+        let mut out = Self::init(mode)?;
+        out.set_key_(k.to_vec())?;
+        Ok(out)
+    }
+
+    /// Initialize a new Aead object without a key.
+    /// Use `set_key` to do so later.
+    pub fn init(mode: Mode) -> Result<Self, Error> {
+        unsafe {
+            // Make sure this happened.
+            EverCrypt_AutoConfig2_init();
+        }
+        Ok(Self {
+            mode,
+            c_state: None,
+            op_mode: op_mode(mode)?,
+            key: Vec::new(),
+        })
+    }
+
+    /// Set the key for this instance.
+    /// This consumes the Aead and returns a new instance with the key.
+    pub fn set_key(self, k: &[u8]) -> Result<Self, Error> {
+        Self::new(self.mode, k)
+    }
+
+    /// Generate a new random key for this instance.
+    /// This consumes the Aead and returns a new instance with the key.
+    #[cfg(feature = "random")]
+    pub fn set_random_key(&mut self) -> Result<(), Error> {
+        let k = self.key_gen();
+        self.set_key_(k)
     }
 
     /// Generate a random key.
     #[cfg(feature = "random")]
-    pub fn key_gen(alg: Mode) -> Vec<u8> {
-        key_gen(alg)
+    pub fn key_gen(&self) -> Key {
+        key_gen(self.mode)
     }
 
     /// Generate a nonce.
     #[cfg(feature = "random")]
     pub fn nonce_gen(&self) -> Nonce {
+        // debug_assert!(LEN == nonce_size(self.mode));
         nonce_gen(self.mode)
     }
 
-    // Encryption using RustCrytpo AES.
+    /// Get the nonce size of this Aead in bytes.
+    pub const fn nonce_size(&self) -> usize {
+        nonce_size(self.mode)
+    }
+
+    /// Get the key size of this Aead in bytes.
+    pub const fn key_size(&self) -> usize {
+        key_size(self.mode)
+    }
+
+    /// Get the tag size of this Aead in bytes.
+    pub const fn tag_size(&self) -> usize {
+        tag_size(self.mode)
+    }
+
+    // Encryption using RustCrypto AES.
     // Only available if the feature is enabled.
     #[cfg(feature = "rust-crypto-aes")]
-    fn encrypt_rs(&self, msg: &[u8], iv: &Nonce, aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
+    fn encrypt_rs(&self, msg: &[u8], iv: &[u8], aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
         let ctxt_tag = match self.op_mode {
             OpMode::RustCryptoAes128 => Aes128Gcm::new(GenericArray::from_slice(&self.key))
                 .encrypt((&iv[..]).into(), Payload { msg: msg, aad: aad }),
@@ -283,9 +334,10 @@ impl Aead {
             _ => return Err(Error::UnsupportedConfig),
         };
         match ctxt_tag {
-            Ok(c) => {
-                let (ctxt, tag) = c.split_at(c.len() - 16);
-                Ok((ctxt.to_owned(), clone_into_array(&tag)))
+            Ok(mut c) => {
+                let tag = c.split_off(c.len() - self.tag_size());
+                debug_assert!(tag.len() == self.tag_size());
+                Ok((c, tag.try_into().map_err(|_| Error::Decrypting)?))
             }
             Err(_) => Err(Error::Encrypting),
         }
@@ -294,7 +346,7 @@ impl Aead {
     // Decryption using RustCrytpo AES.
     // Only available if the feature is enabled.
     #[cfg(feature = "rust-crypto-aes")]
-    fn decrypt_rs(&self, ctxt: &[u8], tag: &[u8], iv: &Nonce, aad: &Aad) -> Result<Vec<u8>, Error> {
+    fn decrypt_rs(&self, ctxt: &[u8], tag: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
         let mut p_in: Vec<u8> = vec![];
         p_in.extend(ctxt);
         p_in.extend(tag);
@@ -325,7 +377,7 @@ impl Aead {
 
     // Stub function for the default mode when RustCrypto support is not enabled.
     #[cfg(not(feature = "rust-crypto-aes"))]
-    fn encrypt_rs(&self, _msg: &[u8], _iv: &Nonce, _aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
+    fn encrypt_rs(&self, _msg: &[u8], _iv: &[u8], _aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
         Err(Error::UnsupportedConfig)
     }
 
@@ -335,7 +387,7 @@ impl Aead {
         &self,
         _ctxt: &[u8],
         _tag: &[u8],
-        _iv: &Nonce,
+        _iv: &[u8],
         _aad: &Aad,
     ) -> Result<Vec<u8>, Error> {
         Err(Error::UnsupportedConfig)
@@ -343,20 +395,20 @@ impl Aead {
 
     /// Encrypt with the algorithm and key of this Aead.
     /// Returns `(ctxt, tag)` or an `Error`.
-    pub fn encrypt(&self, msg: &[u8], iv: &Nonce, aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
-        if iv.len() != 12 {
+    pub fn encrypt(&self, msg: &[u8], iv: &[u8], aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
+        if iv.len() != self.nonce_size() {
             return Err(Error::InvalidNonce);
         }
 
         match self.op_mode {
             OpMode::Hacl => {
                 let mut ctxt = vec![0u8; msg.len()];
-                let mut tag = [0u8; 16];
+                let mut tag = vec![0u8; self.tag_size()];
                 unsafe {
                     EverCrypt_AEAD_encrypt(
                         self.c_state.unwrap(),
                         iv.as_ptr() as _,
-                        12,
+                        self.nonce_size().try_into().unwrap(),
                         aad.as_ptr() as _,
                         aad.len() as u32,
                         msg.as_ptr() as _,
@@ -374,13 +426,7 @@ impl Aead {
 
     /// Decrypt with the algorithm and key of this Aead.
     /// Returns `msg` or an `Error`.
-    pub fn decrypt(
-        &self,
-        ctxt: &[u8],
-        tag: &[u8],
-        iv: &Nonce,
-        aad: &Aad,
-    ) -> Result<Vec<u8>, Error> {
+    pub fn decrypt(&self, ctxt: &[u8], tag: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
         if iv.len() != 12 {
             return Err(Error::InvalidNonce);
         }
@@ -392,7 +438,7 @@ impl Aead {
                     EverCrypt_AEAD_decrypt(
                         self.c_state.unwrap(),
                         iv.as_ptr() as _,
-                        12,
+                        self.nonce_size().try_into().unwrap(),
                         aad.as_ptr() as _,
                         aad.len() as u32,
                         ctxt.as_ptr() as _,
@@ -432,7 +478,7 @@ pub fn encrypt(
     alg: Mode,
     k: &[u8],
     msg: &[u8],
-    iv: &Nonce,
+    iv: &[u8],
     aad: &Aad,
 ) -> Result<(Ciphertext, Tag), Error> {
     let cipher = Aead::new(alg, k)?;
@@ -445,7 +491,7 @@ pub fn decrypt(
     k: &[u8],
     ctxt: &[u8],
     tag: &[u8],
-    iv: &Nonce,
+    iv: &[u8],
     aad: &Aad,
 ) -> Result<Vec<u8>, Error> {
     let cipher = Aead::new(alg, k)?;
@@ -454,12 +500,12 @@ pub fn decrypt(
 
 /// Generate a random key.
 #[cfg(feature = "random")]
-pub fn key_gen(alg: Mode) -> Vec<u8> {
-    crate::rand_util::random_vec(key_size(alg))
+pub fn key_gen(mode: Mode) -> Key {
+    crate::rand_util::random_vec(key_size(mode))
 }
 
 /// Generate a nonce.
 #[cfg(feature = "random")]
-pub fn nonce_gen(_alg: Mode) -> Nonce {
-    crate::rand_util::random_array()
+pub fn nonce_gen(mode: Mode) -> Nonce {
+    crate::rand_util::random_vec(nonce_size(mode))
 }
