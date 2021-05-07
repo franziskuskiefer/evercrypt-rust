@@ -10,22 +10,20 @@ fuzz_target!(|data: &[u8]| {
         AeadMode::Chacha20Poly1305,
     ];
     for &mode in modes.iter() {
-        let k = if data.len() >= aead_key_size(mode) {
-            data[0..aead_key_size(mode)].to_vec()
+        let aead = Aead::init(mode).unwrap();
+        let k = if data.len() >= aead.key_size() {
+            data[0..aead.key_size()].to_vec()
         } else {
-            aead_key_gen(mode)
+            aead.key_gen()
         };
-        let nonce = if data.len() >= aead_key_size(mode) + aead_nonce_size(mode) {
-            let mut nonce = AeadNonce::default();
-            nonce.clone_from_slice(
-                &data[aead_key_size(mode)..aead_key_size(mode) + aead_nonce_size(mode)],
-            );
-            nonce
+        let nonce = if data.len() >= aead.key_size() + aead.nonce_size() {
+            data[aead.key_size()..aead.key_size() + aead.nonce_size()].to_vec()
         } else {
-            aead_nonce_gen(mode)
+            aead.nonce_gen()
         };
-        let (c, t) = aead_encrypt(mode, &k, data, &nonce, &[]).expect("Error encrypting");
-        let dec_result = aead_decrypt(mode, data, &c, &t, &nonce, &[]);
+        let aead = aead.set_key(&k).unwrap();
+        let (c, t) = aead.encrypt(data, &nonce, &[]).expect("Error encrypting");
+        let dec_result = aead.decrypt(&c, &t, &nonce, &[]);
         if let Ok(ptxt) = dec_result {
             assert_eq!(ptxt, data);
         }

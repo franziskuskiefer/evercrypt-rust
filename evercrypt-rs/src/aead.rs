@@ -63,9 +63,6 @@ use serde::{Deserialize, Serialize};
 use evercrypt_sys::evercrypt_bindings::*;
 
 #[cfg(feature = "rust-crypto-aes")]
-use crate::util::*;
-
-#[cfg(feature = "rust-crypto-aes")]
 use aes_gcm::aead::{Aead as RcAead, NewAead, Payload};
 #[cfg(feature = "rust-crypto-aes")]
 use aes_gcm::{aead::generic_array::GenericArray, Aes128Gcm, Aes256Gcm};
