@@ -20,7 +20,7 @@ ls
 cd /d %~dp0
 echo "pwd: " %~dp0
 ls
-cl *.c /I ../kremlin/include /I . /I ../kremlin/kremlib/dist/minimal /c || goto :error
+cl *.c /I ../kremlin/include /I . /I ../kremlin/kremlib/dist/minimal /c /DHACL_CAN_COMPILE_INTRINSICS /DHACL_CAN_COMPILE_VALE /DHACL_CAN_COMPILE_VEC128 /DHACL_CAN_COMPILE_VEC256 || goto :error
 for /F %%i in ('dir /b *-x86_64-msvc.asm') do (
   ml64 /c %%i || goto :error
 )

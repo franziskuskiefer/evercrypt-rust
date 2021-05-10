@@ -159,7 +159,7 @@ fn criterion_digest(c: &mut Criterion) {
 fn criterion_aead(c: &mut Criterion) {
     use evercrypt::aead::{Aead, Mode};
 
-    c.bench_function("AES128 encrypt", |b| {
+    c.bench_function("AES128 GCM encrypt", |b| {
         b.iter_batched(
             || {
                 let mut aead = Aead::init(Mode::Aes128Gcm).unwrap();
@@ -175,7 +175,7 @@ fn criterion_aead(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
-    c.bench_function("AES128 decrypt", |b| {
+    c.bench_function("AES128 GCM decrypt", |b| {
         b.iter_batched(
             || {
                 let aead = Aead::init(Mode::Aes128Gcm).unwrap();
@@ -195,7 +195,7 @@ fn criterion_aead(c: &mut Criterion) {
         )
     });
 
-    c.bench_function("AES256 encrypt", |b| {
+    c.bench_function("AES256 GCM encrypt", |b| {
         b.iter_batched(
             || {
                 let mut aead = Aead::init(Mode::Aes256Gcm).unwrap();
@@ -211,7 +211,7 @@ fn criterion_aead(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
-    c.bench_function("AES256 decrypt", |b| {
+    c.bench_function("AES256 GCM decrypt", |b| {
         b.iter_batched(
             || {
                 let aead = Aead::init(Mode::Aes256Gcm).unwrap();
