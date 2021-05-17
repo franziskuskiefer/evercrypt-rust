@@ -1,7 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `evercrypt-rs/src/aead.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>aead.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `evercrypt-rs/src/aead.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>aead.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../evercrypt/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../evercrypt/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -457,6 +457,58 @@
 <span id="454">454</span>
 <span id="455">455</span>
 <span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Authenticated Encryption with Associated Data (AEAD)</span>
 <span class="doccomment">//!</span>
@@ -515,13 +567,12 @@
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialization&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
 <span class="kw">use</span> <span class="ident">evercrypt_sys</span>::<span class="ident">evercrypt_bindings</span>::<span class="kw-2">*</span>;
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rust-crypto-aes&quot;</span>)]</span>
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">util</span>::<span class="kw-2">*</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rust-crypto-aes&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">aes_gcm</span>::<span class="ident">aead</span>::{<span class="ident">Aead</span> <span class="kw">as</span> <span class="ident">RcAead</span>, <span class="ident">NewAead</span>, <span class="ident">Payload</span>};
@@ -568,7 +619,7 @@
 }
 
 <span class="doccomment">/// Get the key size of the `Mode` in bytes.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_size</span>(<span class="ident">mode</span>: <span class="kw-2">&amp;</span><span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">key_size</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
     <span class="kw">match</span> <span class="ident">mode</span> {
         <span class="ident">Mode</span>::<span class="ident">Aes128Gcm</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">16</span>,
         <span class="ident">Mode</span>::<span class="ident">Aes256Gcm</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">32</span>,
@@ -577,11 +628,20 @@
 }
 
 <span class="doccomment">/// Get the tag size of the `Mode` in bytes.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tag_size</span>(<span class="ident">mode</span>: <span class="kw-2">&amp;</span><span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">tag_size</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
     <span class="kw">match</span> <span class="ident">mode</span> {
         <span class="ident">Mode</span>::<span class="ident">Aes128Gcm</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">16</span>,
         <span class="ident">Mode</span>::<span class="ident">Aes256Gcm</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">16</span>,
         <span class="ident">Mode</span>::<span class="ident">Chacha20Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">16</span>,
+    }
+}
+
+<span class="doccomment">/// Get the nonce size of the `Mode` in bytes.</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">nonce_size</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">match</span> <span class="ident">mode</span> {
+        <span class="ident">Mode</span>::<span class="ident">Aes128Gcm</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">12</span>,
+        <span class="ident">Mode</span>::<span class="ident">Aes256Gcm</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">12</span>,
+        <span class="ident">Mode</span>::<span class="ident">Chacha20Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">12</span>,
     }
 }
 
@@ -609,10 +669,16 @@
 
 <span class="doccomment">/// Ciphertexts are byte vectors.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Ciphertext</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
-<span class="doccomment">/// Tags are 16-byte arrays.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Tag</span> <span class="op">=</span> [<span class="ident">u8</span>; <span class="number">16</span>];
-<span class="doccomment">/// Nonces are 12-byte arrays.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Nonce</span> <span class="op">=</span> [<span class="ident">u8</span>; <span class="number">12</span>];
+
+<span class="doccomment">/// Aead keys are byte vectors.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Key</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// Aead tags are byte vectors.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Tag</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// Nonces are byte vectors.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Nonce</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+
 <span class="doccomment">/// Associated data are byte arrays.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Aad</span> <span class="op">=</span> [<span class="ident">u8</span>];
 
@@ -638,7 +704,7 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">get_op_mode</span>(<span class="ident">alg</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OpMode</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">op_mode</span>(<span class="ident">alg</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OpMode</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">alg</span> {
         <span class="ident">Mode</span>::<span class="ident">Aes128Gcm</span> <span class="op">|</span> <span class="ident">Mode</span>::<span class="ident">Aes256Gcm</span> <span class="op">=</span><span class="op">&gt;</span> {
             <span class="kw">if</span> <span class="ident">hacl_aes_available</span>() {
@@ -658,26 +724,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Aead</span> {
-    <span class="doccomment">/// Create a new Aead cipher with the given Mode `alg` and key `k`.</span>
-    <span class="doccomment">/// If the algorithm is not supported or the state generation fails, this</span>
-    <span class="doccomment">/// function returns an `Error`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">alg</span>: <span class="ident">Mode</span>, <span class="ident">k</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="comment">// Check key lengths. Evercrypt is not doing this.</span>
-        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">key_size</span>(<span class="kw-2">&amp;</span><span class="ident">alg</span>) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InvalidKeySize</span>);
-        }
-
-        <span class="kw">unsafe</span> {
-            <span class="comment">// Make sure this happened.</span>
-            <span class="ident">EverCrypt_AutoConfig2_init</span>();
-        }
-        <span class="kw">let</span> <span class="ident">op_mode</span> <span class="op">=</span> <span class="ident">get_op_mode</span>(<span class="ident">alg</span>);
-        <span class="kw">match</span> <span class="ident">op_mode</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">OpMode</span>::<span class="ident">Hacl</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">set_key_</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">k</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">op_mode</span> {
+            <span class="ident">OpMode</span>::<span class="ident">Hacl</span> <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="kw">unsafe</span> {
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state_ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">EverCrypt_AEAD_state_s</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">ptr</span>::<span class="ident">null_mut</span>();
                     <span class="kw">let</span> <span class="ident">e</span> <span class="op">=</span> <span class="ident">EverCrypt_AEAD_create_in</span>(
-                        <span class="ident">alg</span>.<span class="ident">into</span>(),
+                        <span class="self">self</span>.<span class="ident">mode</span>.<span class="ident">into</span>(),
                         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state_ptr</span>,
                         <span class="ident">k</span>.<span class="ident">to_vec</span>().<span class="ident">as_mut_ptr</span>(),
                     );
@@ -686,46 +739,102 @@
                     }
                     <span class="ident">state_ptr</span>
                 };
-                <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-                    <span class="ident">mode</span>: <span class="ident">alg</span>,
-                    <span class="ident">c_state</span>: <span class="prelude-val">Some</span>(<span class="ident">state</span>),
-                    <span class="ident">op_mode</span>: <span class="ident">OpMode</span>::<span class="ident">Hacl</span>,
-                    <span class="ident">key</span>: <span class="ident">k</span>.<span class="ident">to_vec</span>(),
-                })
+                <span class="self">self</span>.<span class="ident">c_state</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">state</span>);
+                <span class="self">self</span>.<span class="ident">key</span> <span class="op">=</span> <span class="ident">k</span>;
             }
-            <span class="prelude-val">Ok</span>(<span class="ident">OpMode</span>::<span class="ident">RustCryptoAes128</span>) <span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">OpMode</span>::<span class="ident">RustCryptoAes256</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes128</span> <span class="op">|</span> <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes256</span> <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">if</span> <span class="op">!</span><span class="macro">cfg</span><span class="macro">!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rust-crypto-aes&quot;</span>) {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">UnsupportedConfig</span>);
                 }
                 <span class="comment">// Fall back to software AES GCM implemented in RustCrypto</span>
-                <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">alg_is_aes</span>(<span class="ident">alg</span>));
-                <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-                    <span class="ident">mode</span>: <span class="ident">alg</span>,
-                    <span class="ident">c_state</span>: <span class="prelude-val">None</span>,
-                    <span class="ident">op_mode</span>: <span class="ident">op_mode</span>.<span class="ident">unwrap</span>(),
-                    <span class="ident">key</span>: <span class="ident">k</span>.<span class="ident">to_vec</span>(),
-                })
+                <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">alg_is_aes</span>(<span class="self">self</span>.<span class="ident">mode</span>));
+                <span class="self">self</span>.<span class="ident">key</span> <span class="op">=</span> <span class="ident">k</span>;
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">UnsupportedConfig</span>),
         }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Create a new Aead cipher with the given Mode `alg` and key `k`.</span>
+    <span class="doccomment">/// If the algorithm is not supported or the state generation fails, this</span>
+    <span class="doccomment">/// function returns an `Error`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// To get an Aead instance without setting a key immediately see `init`.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>, <span class="ident">k</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="comment">// Check key lengths. Evercrypt is not doing this.</span>
+        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">key_size</span>(<span class="ident">mode</span>) {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InvalidKeySize</span>);
+        }
+
+        <span class="kw">unsafe</span> {
+            <span class="comment">// Make sure this happened.</span>
+            <span class="ident">EverCrypt_AutoConfig2_init</span>();
+        }
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">init</span>(<span class="ident">mode</span>)<span class="question-mark">?</span>;
+        <span class="ident">out</span>.<span class="ident">set_key_</span>(<span class="ident">k</span>.<span class="ident">to_vec</span>())<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="ident">out</span>)
+    }
+
+    <span class="doccomment">/// Initialize a new Aead object without a key.</span>
+    <span class="doccomment">/// Use `set_key` to do so later.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> {
+            <span class="comment">// Make sure this happened.</span>
+            <span class="ident">EverCrypt_AutoConfig2_init</span>();
+        }
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">mode</span>,
+            <span class="ident">c_state</span>: <span class="prelude-val">None</span>,
+            <span class="ident">op_mode</span>: <span class="ident">op_mode</span>(<span class="ident">mode</span>)<span class="question-mark">?</span>,
+            <span class="ident">key</span>: <span class="ident">Vec</span>::<span class="ident">new</span>(),
+        })
+    }
+
+    <span class="doccomment">/// Set the key for this instance.</span>
+    <span class="doccomment">/// This consumes the Aead and returns a new instance with the key.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_key</span>(<span class="self">self</span>, <span class="ident">k</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="self">Self</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">mode</span>, <span class="ident">k</span>)
+    }
+
+    <span class="doccomment">/// Generate a new random key for this instance.</span>
+    <span class="doccomment">/// This consumes the Aead and returns a new instance with the key.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_random_key</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">key_gen</span>();
+        <span class="self">self</span>.<span class="ident">set_key_</span>(<span class="ident">k</span>)
     }
 
     <span class="doccomment">/// Generate a random key.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_gen</span>(<span class="ident">alg</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
-        <span class="ident">key_gen</span>(<span class="ident">alg</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_gen</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Key</span> {
+        <span class="ident">key_gen</span>(<span class="self">self</span>.<span class="ident">mode</span>)
     }
 
     <span class="doccomment">/// Generate a nonce.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">nonce_gen</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Nonce</span> {
+        <span class="comment">// debug_assert!(LEN == nonce_size(self.mode));</span>
         <span class="ident">nonce_gen</span>(<span class="self">self</span>.<span class="ident">mode</span>)
     }
 
-    <span class="comment">// Encryption using RustCrytpo AES.</span>
+    <span class="doccomment">/// Get the nonce size of this Aead in bytes.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">nonce_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+        <span class="ident">nonce_size</span>(<span class="self">self</span>.<span class="ident">mode</span>)
+    }
+
+    <span class="doccomment">/// Get the key size of this Aead in bytes.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">key_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+        <span class="ident">key_size</span>(<span class="self">self</span>.<span class="ident">mode</span>)
+    }
+
+    <span class="doccomment">/// Get the tag size of this Aead in bytes.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">tag_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+        <span class="ident">tag_size</span>(<span class="self">self</span>.<span class="ident">mode</span>)
+    }
+
+    <span class="comment">// Encryption using RustCrypto AES.</span>
     <span class="comment">// Only available if the feature is enabled.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rust-crypto-aes&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">encrypt_rs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Ciphertext</span>, <span class="ident">Tag</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">encrypt_rs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Ciphertext</span>, <span class="ident">Tag</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">ctxt_tag</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">op_mode</span> {
             <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Aes128Gcm</span>::<span class="ident">new</span>(<span class="ident">GenericArray</span>::<span class="ident">from_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>))
                 .<span class="ident">encrypt</span>((<span class="kw-2">&amp;</span><span class="ident">iv</span>[..]).<span class="ident">into</span>(), <span class="ident">Payload</span> { <span class="ident">msg</span>: <span class="ident">msg</span>, <span class="ident">aad</span>: <span class="ident">aad</span> }),
@@ -734,9 +843,10 @@
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">UnsupportedConfig</span>),
         };
         <span class="kw">match</span> <span class="ident">ctxt_tag</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> (<span class="ident">ctxt</span>, <span class="ident">tag</span>) <span class="op">=</span> <span class="ident">c</span>.<span class="ident">split_at</span>(<span class="ident">c</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">16</span>);
-                <span class="prelude-val">Ok</span>((<span class="ident">ctxt</span>.<span class="ident">to_owned</span>(), <span class="ident">clone_into_array</span>(<span class="kw-2">&amp;</span><span class="ident">tag</span>)))
+            <span class="prelude-val">Ok</span>(<span class="kw-2">mut</span> <span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">split_off</span>(<span class="ident">c</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">tag_size</span>());
+                <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">tag</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">tag_size</span>());
+                <span class="prelude-val">Ok</span>((<span class="ident">c</span>, <span class="ident">tag</span>.<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">Decrypting</span>)<span class="question-mark">?</span>))
             }
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">Encrypting</span>),
         }
@@ -745,7 +855,7 @@
     <span class="comment">// Decryption using RustCrytpo AES.</span>
     <span class="comment">// Only available if the feature is enabled.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rust-crypto-aes&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">decrypt_rs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">tag</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">decrypt_rs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">tag</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p_in</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[];
         <span class="ident">p_in</span>.<span class="ident">extend</span>(<span class="ident">ctxt</span>);
         <span class="ident">p_in</span>.<span class="ident">extend</span>(<span class="ident">tag</span>);
@@ -776,7 +886,7 @@
 
     <span class="comment">// Stub function for the default mode when RustCrypto support is not enabled.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rust-crypto-aes&quot;</span>))]</span>
-    <span class="kw">fn</span> <span class="ident">encrypt_rs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">_iv</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">_aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Ciphertext</span>, <span class="ident">Tag</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">encrypt_rs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">_iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">_aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Ciphertext</span>, <span class="ident">Tag</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">UnsupportedConfig</span>)
     }
 
@@ -786,7 +896,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">_ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
         <span class="ident">_tag</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">_iv</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
+        <span class="ident">_iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
         <span class="ident">_aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">UnsupportedConfig</span>)
@@ -794,20 +904,20 @@
 
     <span class="doccomment">/// Encrypt with the algorithm and key of this Aead.</span>
     <span class="doccomment">/// Returns `(ctxt, tag)` or an `Error`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encrypt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Ciphertext</span>, <span class="ident">Tag</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">iv</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">12</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encrypt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Ciphertext</span>, <span class="ident">Tag</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">iv</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">nonce_size</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InvalidNonce</span>);
         }
 
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">op_mode</span> {
             <span class="ident">OpMode</span>::<span class="ident">Hacl</span> <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ctxt</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="ident">msg</span>.<span class="ident">len</span>()];
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">16</span>];
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="self">self</span>.<span class="ident">tag_size</span>()];
                 <span class="kw">unsafe</span> {
                     <span class="ident">EverCrypt_AEAD_encrypt</span>(
                         <span class="self">self</span>.<span class="ident">c_state</span>.<span class="ident">unwrap</span>(),
                         <span class="ident">iv</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
-                        <span class="number">12</span>,
+                        <span class="self">self</span>.<span class="ident">nonce_size</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>(),
                         <span class="ident">aad</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
                         <span class="ident">aad</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>,
                         <span class="ident">msg</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
@@ -825,13 +935,7 @@
 
     <span class="doccomment">/// Decrypt with the algorithm and key of this Aead.</span>
     <span class="doccomment">/// Returns `msg` or an `Error`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decrypt</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">tag</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">iv</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-        <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decrypt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">tag</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">iv</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">12</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InvalidNonce</span>);
         }
@@ -843,7 +947,7 @@
                     <span class="ident">EverCrypt_AEAD_decrypt</span>(
                         <span class="self">self</span>.<span class="ident">c_state</span>.<span class="ident">unwrap</span>(),
                         <span class="ident">iv</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
-                        <span class="number">12</span>,
+                        <span class="self">self</span>.<span class="ident">nonce_size</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>(),
                         <span class="ident">aad</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
                         <span class="ident">aad</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>,
                         <span class="ident">ctxt</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
@@ -883,7 +987,7 @@
     <span class="ident">alg</span>: <span class="ident">Mode</span>,
     <span class="ident">k</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
     <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-    <span class="ident">iv</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
+    <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
     <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Ciphertext</span>, <span class="ident">Tag</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">cipher</span> <span class="op">=</span> <span class="ident">Aead</span>::<span class="ident">new</span>(<span class="ident">alg</span>, <span class="ident">k</span>)<span class="question-mark">?</span>;
@@ -896,7 +1000,7 @@
     <span class="ident">k</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
     <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
     <span class="ident">tag</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-    <span class="ident">iv</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
+    <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
     <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">cipher</span> <span class="op">=</span> <span class="ident">Aead</span>::<span class="ident">new</span>(<span class="ident">alg</span>, <span class="ident">k</span>)<span class="question-mark">?</span>;
@@ -905,15 +1009,15 @@
 
 <span class="doccomment">/// Generate a random key.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_gen</span>(<span class="ident">alg</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
-    <span class="kw">crate</span>::<span class="ident">rand_util</span>::<span class="ident">get_random_vec</span>(<span class="ident">key_size</span>(<span class="kw-2">&amp;</span><span class="ident">alg</span>))
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_gen</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Key</span> {
+    <span class="kw">crate</span>::<span class="ident">rand_util</span>::<span class="ident">random_vec</span>(<span class="ident">key_size</span>(<span class="ident">mode</span>))
 }
 
 <span class="doccomment">/// Generate a nonce.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">nonce_gen</span>(<span class="ident">_alg</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Nonce</span> {
-    <span class="kw">crate</span>::<span class="ident">rand_util</span>::<span class="ident">get_random_array</span>()
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">nonce_gen</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Nonce</span> {
+    <span class="kw">crate</span>::<span class="ident">rand_util</span>::<span class="ident">random_vec</span>(<span class="ident">nonce_size</span>(<span class="ident">mode</span>))
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="evercrypt"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="evercrypt" data-search-js="../../search-index.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
