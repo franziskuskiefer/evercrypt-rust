@@ -7,7 +7,7 @@ pub use crate::aead::{
     Mode as AeadMode, Nonce as AeadNonce, Tag as AeadTag,
 };
 pub use crate::digest::{
-    self, digest_size, get_digest_size, hash, Digest, Error as DigestError, Mode as DigestMode,
+    self, digest_size, hash, Digest, Error as DigestError, Mode as DigestMode,
 };
 pub use crate::ecdh::{
     self, derive as ecdh_derive, derive_base as ecdh_derive_base, Error as EcdhError,
@@ -19,7 +19,7 @@ pub use crate::ed25519::{
     Signature as Ed25519Signature,
 };
 pub use crate::hkdf::{self, expand as hkdf_expand, extract as hkdf_extract, hkdf};
-pub use crate::hmac::{self, get_tag_size, hmac, tag_size, Mode as HmacMode};
+pub use crate::hmac::{self, hmac, tag_size, Mode as HmacMode};
 pub use crate::p256::{
     self, dh as p256, dh_base as p256_base, ecdsa_sign as p256_sign, ecdsa_verify as p256_verify,
     validate_pk as p256_validate_pk, validate_sk as p256_validate_sk, Error as P256Error,
@@ -36,7 +36,7 @@ pub use crate::{
     ecdh::key_gen as ecdh_key_gen,
     ed25519::key_gen as ed25519_key_gen,
     p256::random_nonce as p256_ecdsa_random_nonce,
-    rand_util::{get_random_array, get_random_vec, random_array, random_vec},
+    rand_util::{random_array, random_vec},
     signature::key_gen as signature_key_gen,
     x25519::key_gen as x25519_key_gen,
 };
