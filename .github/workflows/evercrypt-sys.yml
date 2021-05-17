@@ -1,0 +1,50 @@
+name: HACL Nightly
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - if: matrix.os == 'ubuntu-latest'
+        run: sudo apt -y install pkg-config
+      - if: matrix.os == 'macos-latest'
+        run: brew install pkg-config
+      - name: Update HACL
+        run: |
+          git submodule foreach git reset --hard origin/master
+          git submodule foreach git pull origin master --allow-unrelated-histories
+      - name: Test evercrypt-sys
+        run: |
+          cd evercrypt-sys
+          cargo test --verbose
+      - name: Build (no-default-features)
+        run: |
+          cd evercrypt-rs
+          cargo build --verbose --no-default-features
+      - name: Test w/ rust-crypto-aes
+        run: |
+          cd evercrypt-rs
+          cargo test --verbose --features rust-crypto-aes
+      - name: Test w/ all-features
+        run: |
+          cd evercrypt-rs
+          cargo test --verbose --all-features
