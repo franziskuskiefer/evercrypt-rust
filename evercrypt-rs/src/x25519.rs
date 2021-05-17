@@ -30,7 +30,9 @@
 use evercrypt_sys::evercrypt_bindings::*;
 
 #[derive(Debug, PartialEq)]
+/// Curve 25519 errors
 pub enum Error {
+    /// The computed or provided point is not on the curve.
     InvalidPoint,
 }
 
@@ -63,5 +65,5 @@ pub fn dh(p: &Point, s: &Scalar) -> Result<Point, Error> {
 /// Generate a random `Scalar`.
 #[cfg(feature = "random")]
 pub fn key_gen() -> Scalar {
-    crate::rand_util::get_random_array()
+    crate::rand_util::random_array()
 }

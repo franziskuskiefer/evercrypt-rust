@@ -16,4 +16,4 @@ repository = "https://github.com/franziskuskiefer/evercrypt-rust/"
 libc = { version = "0.2", default-features = false }
 
 [target.'cfg(not(windows))'.build-dependencies]
-bindgen = "0.57"
+bindgen = "0.58"
