@@ -80,5 +80,5 @@ pub fn sk2pk(sk: &Scalar) -> Point {
 /// Generate a random `Scalar`.
 #[cfg(feature = "random")]
 pub fn key_gen() -> Scalar {
-    crate::rand_util::get_random_array()
+    crate::rand_util::random_array()
 }

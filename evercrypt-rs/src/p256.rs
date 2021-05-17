@@ -3,6 +3,7 @@ use evercrypt_sys::evercrypt_bindings::*;
 use crate::digest::Mode;
 
 #[derive(Debug, PartialEq)]
+/// P256 errors
 pub enum Error {
     InvalidPoint,
     InvalidScalar,
@@ -10,9 +11,10 @@ pub enum Error {
     InvalidConfig,
     SigningFailed,
     InvalidSignature,
+    KeyGenError,
 }
 
-pub fn validate_pk(pk: &[u8]) -> Result<[u8; 64], Error> {
+pub fn validate_pk(pk: &[u8]) -> Result<PublicKey, Error> {
     if pk.is_empty() {
         return Err(Error::InvalidPoint);
     }
@@ -102,6 +104,9 @@ pub fn dh(p: &[u8], s: &[u8]) -> Result<[u8; 64], Error> {
     }
 }
 
+/// P256 public keys are 64-byte arrays containing the 32-byte X and 32-byte Y
+/// coordinate.
+pub type PublicKey = [u8; 64];
 /// Nonces are 32 byte arrays.
 pub type Nonce = [u8; 32];
 /// Scalars are 32 byte arrays.
@@ -110,14 +115,14 @@ pub type Scalar = [u8; 32];
 /// An ECDSA signature holding `r` and `s`.
 #[derive(Clone, Copy, Debug)]
 pub struct Signature {
-    r: [u8; 32],
-    s: [u8; 32],
+    r: Scalar,
+    s: Scalar,
 }
 
 /// Convert bytes to signatures and vice versa.
 impl Signature {
     /// Build a new signature from `r` and `s`.
-    pub fn new(r: &[u8; 32], s: &[u8; 32]) -> Self {
+    pub fn new(r: &Scalar, s: &Scalar) -> Self {
         Self { r: *r, s: *s }
     }
 
@@ -163,6 +168,7 @@ impl Signature {
 /// Sign `msg` with `sk` and `nonce` using `hash` with EcDSA on P256.
 pub fn ecdsa_sign(hash: Mode, msg: &[u8], sk: &Scalar, nonce: &Nonce) -> Result<Signature, Error> {
     let private = validate_sk(sk)?;
+    let nonce = validate_sk(nonce)?;
 
     let mut signature = [0u8; 64];
     let success = match hash {
@@ -250,20 +256,30 @@ pub fn ecdsa_verify(
 
 #[cfg(feature = "random")]
 /// Generate a random nonce for ECDSA.
-pub fn random_nonce() -> Nonce {
-    crate::rand_util::get_random_array()
+pub fn random_nonce() -> Result<Nonce, Error> {
+    const LIMIT: usize = 100;
+    for _ in 0..LIMIT {
+        let out: Scalar = crate::rand_util::random_array();
+        match validate_sk(&out) {
+            Ok(v) => return Ok(v),
+            Err(_) => continue,
+        }
+    }
+    Err(Error::KeyGenError)
 }
 
 #[cfg(feature = "random")]
 /// Generate a new P256 scalar (private key).
-pub fn key_gen() -> Scalar {
-    loop {
-        let out: Scalar = crate::rand_util::get_random_array();
+pub fn key_gen() -> Result<Scalar, Error> {
+    const LIMIT: usize = 100;
+    for _ in 0..LIMIT {
+        let out: Scalar = crate::rand_util::random_array();
         match validate_sk(&out) {
-            Ok(v) => return v,
+            Ok(v) => return Ok(v),
             Err(_) => continue,
         }
     }
+    Err(Error::KeyGenError)
 }
 
 // === Unit tests === //

@@ -33,8 +33,16 @@ pub enum Mode {
     Sha512 = Spec_Hash_Definitions_SHA2_512 as isize,
 }
 
-/// Get the tag size for a given mode.
+#[deprecated(
+    since = "0.0.10",
+    note = "Please use tag_size instead. This alias will be removed with the first stable 0.1 release."
+)]
 pub fn get_tag_size(mode: Mode) -> usize {
+    tag_size(mode)
+}
+
+/// Get the tag size for a given mode.
+pub const fn tag_size(mode: Mode) -> usize {
     match mode {
         Mode::Sha1 => 20,
         Mode::Sha256 => 32,
@@ -47,7 +55,7 @@ pub fn get_tag_size(mode: Mode) -> usize {
 /// output tag length of `tag_length`.
 /// Returns a vector of length `tag_length`.
 pub fn hmac(mode: Mode, key: &[u8], data: &[u8], tag_length: Option<usize>) -> Vec<u8> {
-    let native_tag_length = get_tag_size(mode);
+    let native_tag_length = tag_size(mode);
     let tag_length = match tag_length {
         Some(v) => v,
         None => native_tag_length,

@@ -165,7 +165,7 @@ fn test_self() {
 
     let pk = hex_str_to_bytes(PK_HEX);
     let sk = hex_str_to_array(SK_HEX);
-    let nonce = p256::random_nonce();
+    let nonce = p256::random_nonce().unwrap();
     let msg = b"sample";
 
     let sig = p256::ecdsa_sign(Mode::Sha256, &msg[..], &sk, &nonce).unwrap();
@@ -174,7 +174,7 @@ fn test_self() {
         Some(Mode::Sha256),
         &sk,
         &msg[..],
-        Some(&nonce),
+        &nonce,
     );
     assert_eq!(&sig.raw()[..], &sig_.unwrap()[..]);
     let verified = p256::ecdsa_verify(Mode::Sha256, &msg[..], &pk, &sig).unwrap();

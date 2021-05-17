@@ -50,6 +50,7 @@ pub enum Error {
     InvalidPoint,
     InvalidScalar,
     UnknownAlgorithm,
+    KeyGenError,
 }
 
 /// ECDH algorithm.
@@ -111,9 +112,11 @@ pub fn derive_base(mode: Mode, s: &[u8]) -> Result<Vec<u8>, Error> {
 ///
 /// Returns the scalar key bytes as `u8` vector.
 #[cfg(feature = "random")]
-pub fn key_gen(mode: Mode) -> Vec<u8> {
+pub fn key_gen(mode: Mode) -> Result<Vec<u8>, Error> {
     match mode {
-        Mode::X25519 => x25519::key_gen().to_vec(),
-        Mode::P256 => p256::key_gen().to_vec(),
+        Mode::X25519 => Ok(x25519::key_gen().to_vec()),
+        Mode::P256 => p256::key_gen()
+            .map_err(|_| Error::KeyGenError)
+            .map(|v| v.to_vec()),
     }
 }

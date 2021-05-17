@@ -1,7 +1,7 @@
 mod test_util;
 use test_util::*;
 
-use evercrypt::aead::{self, Aead, Error, Mode, Nonce, Tag};
+use evercrypt::aead::{Aead, Error, Mode};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -84,10 +84,8 @@ fn test_wycheproof() {
                 let valid = test.result.eq("valid");
                 if invalid_iv {
                     // AEAD requires input of a 12-byte nonce.
-                    let result = std::panic::catch_unwind(|| {
-                        let _nonce: Nonce = hex_str_to_array(&test.iv);
-                    });
-                    assert!(result.is_err());
+                    let nonce = hex_str_to_bytes(&test.iv);
+                    assert!(nonce.len() != 12);
                     *skipped_tests += 1;
                     continue;
                 }
@@ -97,11 +95,11 @@ fn test_wycheproof() {
                     false
                 };
                 println!("Test {:?}: {:?}", test.tcId, test.comment);
-                let nonce: Nonce = hex_str_to_array(&test.iv);
+                let nonce = hex_str_to_bytes(&test.iv);
                 let msg = hex_str_to_bytes(&test.msg);
                 let aad = hex_str_to_bytes(&test.aad);
                 let exp_cipher = hex_str_to_bytes(&test.ct);
-                let exp_tag: Tag = hex_str_to_array(&test.tag);
+                let exp_tag = hex_str_to_bytes(&test.tag);
                 let key = hex_str_to_bytes(&test.key);
 
                 let cipher = Aead::new(algorithm, &key).unwrap();
@@ -150,9 +148,10 @@ fn key_gen_self_test() {
     fn run(algorithm: Mode) {
         let msg = b"Evercrypt rulez";
         let aad = b"associated data";
-        let key = aead::key_gen(algorithm);
-        let nonce = aead::nonce_gen(algorithm);
-        let cipher = Aead::new(algorithm, &key).unwrap();
+        let cipher = Aead::init(algorithm).unwrap();
+        let key = cipher.key_gen();
+        let nonce = cipher.nonce_gen();
+        let cipher = cipher.set_key(&key).unwrap();
         let (ctxt, tag) = match cipher.encrypt(msg, &nonce, aad) {
             Ok(v) => v,
             Err(e) => {

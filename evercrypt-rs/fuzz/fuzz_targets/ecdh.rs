@@ -6,4 +6,7 @@ use evercrypt::prelude::*;
 fuzz_target!(|data: &[u8]| {
     let _ = ecdh_derive(EcdhMode::X25519, data, data);
     let _ = ecdh_derive_base(EcdhMode::X25519, data);
+
+    let _ = ecdh_derive(EcdhMode::P256, data, data);
+    let _ = ecdh_derive_base(EcdhMode::P256, data);
 });
