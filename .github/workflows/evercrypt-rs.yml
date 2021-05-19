@@ -24,15 +24,24 @@ jobs:
       - if: matrix.os == 'ubuntu-latest'
         run: sudo apt -y install pkg-config
       - if: matrix.os == 'macos-latest'
-        run: brew install pkg-config
+        run: |
+          brew install pkg-config
+          sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+          sudo xcode-select -s /Applications/Xcode_12.4.app
+          rustup target install aarch64-apple-darwin
+          rustup target install aarch64-apple-ios
       - name: Build
+        run: cargo build --verbose
+      - name: Apple Silicon Build
+        if: matrix.os == 'macos-latest'
         run: |
-          cd evercrypt-rs
-          cargo build --verbose --release
-      - name: Test evercrypt-sys
+          cargo build --target aarch64-apple-darwin --tests --verbose --features rust-crypto-aes
+          cargo build --release --target aarch64-apple-darwin --tests --verbose --features rust-crypto-aes
+      - name: iOS aarch64
+        if: matrix.os == 'macos-latest'
         run: |
-          cd evercrypt-sys
-          cargo test --verbose
+          cargo build --target aarch64-apple-ios --tests --verbose --features rust-crypto-aes
+          cargo build --release --target aarch64-apple-ios --tests --verbose --features rust-crypto-aes
       - if: matrix.os == 'ubuntu-latest'
         name: Test evercrypt-rs
         run: |
@@ -55,6 +64,11 @@ jobs:
         run: |
           cd evercrypt-rs
           cargo test --verbose --all-features
+      - name: Release (all-features)
+        run: |
+          cd evercrypt-rs
+          cargo clean
+          cargo test --release --verbose --all-features
       - name: Benchmark (rust-crypto-aes)
         run: |
           cd evercrypt-rs
