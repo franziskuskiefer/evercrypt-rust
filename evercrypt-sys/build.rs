@@ -305,7 +305,9 @@ fn main() {
     // Make sure we can build for the given OS and architecture.
     let build_config = match target.as_str() {
         "x86_64-apple-darwin" => cfg.set_cross_config_flags(vec!["-target", "x86_64-apple-darwin"]),
-        "aarch64-apple-darwin" => cfg.set_cross_config_flags(vec!["-target", "aarch64-apple-darwin"]),
+        "aarch64-apple-darwin" => {
+            cfg.set_cross_config_flags(vec!["-target", "aarch64-apple-darwin"])
+        }
         "aarch64-apple-ios" => cfg.set_cross_config_flags(vec!["-target", "aarch64-apple-ios"]),
         "i686-unknown-linux-gnu" => cfg.set_cross_config_flags(vec!["-target", "ia32"]),
         "x86_64-unknown-linux-gnu" => {

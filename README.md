@@ -6,10 +6,10 @@ This workspace holds the [evercrypt-sys](evercrypt-sys/) and high-level [evercry
 
 | Platform    | Supported |                                                                                                            Status                                                                                                            |
 | :---------- | :-------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| MacOS       |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
-| Linux x64   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
-| Linux x86   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
-| Windows x64 |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amaster) |
+| MacOS       |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
+| Linux x64   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
+| Linux x86   |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
+| Windows x64 |     ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
 | Arm64 Linux |     ✅     |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
 | Arm32 Linux |     ✅     |                                   [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                    |
 
@@ -17,8 +17,8 @@ This workspace holds the [evercrypt-sys](evercrypt-sys/) and high-level [evercry
 
 | Name          | Crates.io                                                                                                 |                                                               Docs                                                                |
 | :------------ | :-------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------: |
-| evercrypt-sys | [![crates.io](https://img.shields.io/crates/v/evercrypt-sys.svg)](https://crates.io/crates/evercrypt-sys) | [![Docs](https://img.shields.io/badge/docs-master-blue.svg)](https://www.franziskuskiefer.de/evercrypt-rust/evercrypt_sys/index.html) |
-| evercrypt     | [![crates.io](https://img.shields.io/crates/v/evercrypt.svg)](https://crates.io/crates/evercrypt)         | [![Docs](https://img.shields.io/badge/docs-master-blue.svg)](https://www.franziskuskiefer.de/evercrypt-rust/evercrypt/index.html) |
+| evercrypt-sys | [![crates.io](https://img.shields.io/crates/v/evercrypt-sys.svg)](https://crates.io/crates/evercrypt-sys) | [![Docs](https://img.shields.io/badge/docs-main-blue.svg)](https://www.franziskuskiefer.de/evercrypt-rust/evercrypt_sys/index.html) |
+| evercrypt     | [![crates.io](https://img.shields.io/crates/v/evercrypt.svg)](https://crates.io/crates/evercrypt)         | [![Docs](https://img.shields.io/badge/docs-main-blue.svg)](https://www.franziskuskiefer.de/evercrypt-rust/evercrypt/index.html) |
 
 ## Features
 By default the Evercrypt crate includes the `random` feature that allows generating random values (keys, nonces, etc.).
