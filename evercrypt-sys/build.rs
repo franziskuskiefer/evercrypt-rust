@@ -307,7 +307,6 @@ fn main() {
         "x86_64-apple-darwin" => cfg.set_cross_config_flags(vec!["-target", "x86_64-apple-darwin"]),
         "aarch64-apple-darwin" => cfg.set_cross_config_flags(vec!["-target", "aarch64-apple-darwin"]),
         "aarch64-apple-ios" => cfg.set_cross_config_flags(vec!["-target", "aarch64-apple-ios"]),
-        // "x86_64-apple-ios" => cfg.set_cross_config_flags(vec!["-target", "x86_64-apple-ios-simulator"]),
         "i686-unknown-linux-gnu" => cfg.set_cross_config_flags(vec!["-target", "ia32"]),
         "x86_64-unknown-linux-gnu" => {
             cfg.set_cross_config_flags(vec!["-target", "x86_64-unknown-linux-gnu"])

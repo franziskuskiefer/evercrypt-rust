@@ -31,9 +31,7 @@ jobs:
           rustup target install aarch64-apple-darwin
           rustup target install aarch64-apple-ios
       - name: Build
-        run: |
-          cd evercrypt-rs
-          cargo build --verbose
+        run: cargo build --verbose
       - name: Apple Silicon Build
         if: matrix.os == 'macos-latest'
         run: |
@@ -44,15 +42,6 @@ jobs:
         run: |
           cargo build --target aarch64-apple-ios --tests --verbose --features rust-crypto-aes
           cargo build --release --target aarch64-apple-ios --tests --verbose --features rust-crypto-aes
-      # - name: iOS x64 simulator
-      #   if: matrix.os == 'macos-latest'
-      #   run: |
-      #     cargo build --target x86_64-apple-ios --tests --verbose --features rust-crypto-aes
-      #     cargo build --release --target x86_64-apple-ios --tests --verbose --features rust-crypto-aes
-#       - name: Test evercrypt-sys
-#         run: |
-#           cd evercrypt-sys
-#           cargo test --verbose
       - if: matrix.os == 'ubuntu-latest'
         name: Test evercrypt-rs
         run: |
