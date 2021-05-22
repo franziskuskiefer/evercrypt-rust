@@ -143,6 +143,7 @@ pub enum Error {
     Encrypting = 5,
     Decrypting = 6,
     InvalidKeySize = 7,
+    InvalidTagSize = 8,
 }
 
 /// The Aead struct allows to re-use a key without having to initialize it
@@ -416,16 +417,52 @@ impl Aead {
                 }
                 Ok((ctxt, tag))
             }
-            OpMode::RustCryptoAes128 => self.encrypt_rs(msg, iv, aad),
-            OpMode::RustCryptoAes256 => self.encrypt_rs(msg, iv, aad),
+            OpMode::RustCryptoAes128 | OpMode::RustCryptoAes256 => self.encrypt_rs(msg, iv, aad),
         }
     }
 
-    /// Decrypt with the algorithm and key of this Aead.
-    /// Returns `msg` or an `Error`.
-    pub fn decrypt(&self, ctxt: &[u8], tag: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
+    /// Encrypt with the algorithm and key of this Aead.
+    /// Returns `(ctxt || tag)` or an `Error`.
+    /// This is more efficient if the tag needs to be appended to the cipher text.
+    pub fn encrypt_comb(&self, msg: &[u8], iv: &[u8], aad: &Aad) -> Result<Ciphertext, Error> {
+        if iv.len() != self.nonce_size() {
+            return Err(Error::InvalidNonce);
+        }
+
+        match self.op_mode {
+            OpMode::Hacl => {
+                // combined cipher text and tag
+                let mut ctxt = vec![0u8; msg.len() + self.tag_size()];
+                unsafe {
+                    EverCrypt_AEAD_encrypt(
+                        self.c_state.unwrap(),
+                        iv.as_ptr() as _,
+                        self.nonce_size().try_into().unwrap(),
+                        aad.as_ptr() as _,
+                        aad.len() as u32,
+                        msg.as_ptr() as _,
+                        msg.len() as u32,
+                        ctxt.as_mut_ptr(),
+                        ctxt.as_mut_ptr().offset(msg.len().try_into().unwrap()),
+                    );
+                }
+                Ok(ctxt)
+            }
+            OpMode::RustCryptoAes128 | OpMode::RustCryptoAes256 => {
+                let (mut ctxt, mut tag) = self.encrypt_rs(msg, iv, aad)?;
+                ctxt.append(&mut tag);
+                Ok(ctxt)
+            }
+        }
+    }
+
+    #[inline]
+    fn _decrypt(&self, ctxt: &[u8], tag: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
         if iv.len() != 12 {
             return Err(Error::InvalidNonce);
+        }
+        if tag.len() != self.tag_size() {
+            return Err(Error::InvalidTagSize);
         }
 
         match self.op_mode {
@@ -450,9 +487,30 @@ impl Aead {
                     Ok(msg)
                 }
             }
-            OpMode::RustCryptoAes128 => self.decrypt_rs(ctxt, tag, iv, aad),
-            OpMode::RustCryptoAes256 => self.decrypt_rs(ctxt, tag, iv, aad),
+            OpMode::RustCryptoAes128 | OpMode::RustCryptoAes256 => {
+                self.decrypt_rs(ctxt, tag, iv, aad)
+            }
         }
+    }
+
+    /// Decrypt with the algorithm and key of this Aead.
+    /// Returns `msg` or an `Error`.
+    pub fn decrypt(&self, ctxt: &[u8], tag: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
+        self._decrypt(ctxt, tag, iv, aad)
+    }
+
+    /// Decrypt with the algorithm and key of this Aead.
+    /// Returns `msg` or an `Error`.
+    /// This takes the combined ctxt || tag as input and might be more efficient
+    /// than `decrypt`.
+    pub fn decrypt_comb(&self, ctxt: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
+        if ctxt.len() < self.tag_size() {
+            return Err(Error::InvalidTagSize);
+        }
+        let msg_len = ctxt.len() - self.tag_size();
+        let tag = &ctxt[msg_len..];
+        let ctxt = &ctxt[..msg_len];
+        self._decrypt(ctxt, tag, iv, aad)
     }
 }
 
