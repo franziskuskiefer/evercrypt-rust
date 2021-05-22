@@ -95,3 +95,18 @@ fn test_wycheproof() {
         assert_eq!(num_tests, tests_run);
     }
 }
+
+#[test]
+fn test_empty_salt() {
+    let algorithm = HmacMode::Sha1;
+    let ikm = hex_str_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+    let okm = hex_str_to_bytes(
+        "0ac1af7002b3d761d1e55298da9d0506b9ae52057220a306e07b6b87e8df21d0ea00033de03984d34918",
+    );
+    let prk = hkdf_extract(algorithm, &vec![0u8; tag_size(algorithm)], &ikm);
+    let r_expand = hkdf_expand(algorithm, &prk, &[], 42);
+    assert_eq!(r_expand[..], okm[..]);
+    let prk = hkdf_extract(algorithm, &[], &ikm);
+    let r_expand = hkdf_expand(algorithm, &prk, &[], 42);
+    assert_eq!(r_expand[..], okm[..]);
+}

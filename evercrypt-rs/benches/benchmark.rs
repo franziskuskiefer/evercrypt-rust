@@ -5,7 +5,8 @@ extern crate rand;
 
 use criterion::{BatchSize, Criterion};
 
-const PAYLOAD_SIZE: usize = 0x10000;
+// 1 MB
+const PAYLOAD_SIZE: usize = 0x100000;
 
 fn clone_into_array<A, T>(slice: &[T]) -> A
 where
@@ -159,113 +160,198 @@ fn criterion_digest(c: &mut Criterion) {
 fn criterion_aead(c: &mut Criterion) {
     use evercrypt::aead::{Aead, Mode};
 
-    c.bench_function("AES128 GCM encrypt", |b| {
-        b.iter_batched(
-            || {
-                let mut aead = Aead::init(Mode::Aes128Gcm).unwrap();
-                aead.set_random_key().unwrap();
-                let nonce = aead.nonce_gen();
-                let data = randombytes(PAYLOAD_SIZE);
-                let aad = randombytes(1_000);
-                (data, nonce, aad, aead)
-            },
-            |(data, nonce, aad, aead)| {
-                let (_ct, _tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    c.bench_function("AES128 GCM decrypt", |b| {
-        b.iter_batched(
-            || {
-                let aead = Aead::init(Mode::Aes128Gcm).unwrap();
-                let key = aead.key_gen();
-                let aead = aead.set_key(&key).unwrap();
-                let nonce = aead.nonce_gen();
-                let data = randombytes(PAYLOAD_SIZE);
-                let aad = randombytes(1_000);
-                let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
-                (key, nonce, ct, tag, aad)
-            },
-            |(key, nonce, ct, tag, aad)| {
-                let aead = Aead::new(Mode::Aes128Gcm, &key).unwrap();
-                let _decrypted = aead.decrypt(&ct, &tag, &nonce, &aad).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
+    fn bench_encrypt<F>(c: &mut Criterion, id: &str, mode: Mode, mut fun: F)
+    where
+        F: FnMut(&[u8], &[u8], &[u8], Aead),
+    {
+        c.bench_function(id, |b| {
+            b.iter_batched(
+                || {
+                    let mut aead = Aead::init(mode).unwrap();
+                    aead.set_random_key().unwrap();
+                    let nonce = aead.nonce_gen();
+                    let data = randombytes(PAYLOAD_SIZE);
+                    let aad = randombytes(1_000);
+                    (data, nonce, aad, aead)
+                },
+                |(data, nonce, aad, aead)| {
+                    fun(&data, &nonce, &aad, aead);
+                },
+                BatchSize::SmallInput,
+            )
+        });
+    }
 
-    c.bench_function("AES256 GCM encrypt", |b| {
-        b.iter_batched(
-            || {
-                let mut aead = Aead::init(Mode::Aes256Gcm).unwrap();
-                aead.set_random_key().unwrap();
-                let nonce = aead.nonce_gen();
-                let data = randombytes(PAYLOAD_SIZE);
-                let aad = randombytes(1_000);
-                (data, nonce, aad, aead)
-            },
-            |(data, nonce, aad, aead)| {
-                let (_ct, _tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    c.bench_function("AES256 GCM decrypt", |b| {
-        b.iter_batched(
-            || {
-                let aead = Aead::init(Mode::Aes256Gcm).unwrap();
-                let key = aead.key_gen();
-                let aead = aead.set_key(&key).unwrap();
-                let nonce = aead.nonce_gen();
-                let data = randombytes(PAYLOAD_SIZE);
-                let aad = randombytes(1_000);
-                let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
-                (key, nonce, ct, tag, aad)
-            },
-            |(key, nonce, ct, tag, aad)| {
-                let aead = Aead::new(Mode::Aes256Gcm, &key).unwrap();
-                let _decrypted = aead.decrypt(&ct, &tag, &nonce, &aad).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
+    fn bench_decrypt<F>(c: &mut Criterion, id: &str, mode: Mode, mut fun: F)
+    where
+        F: FnMut(Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>),
+    {
+        c.bench_function(id, |b| {
+            b.iter_batched(
+                || {
+                    let aead = Aead::init(mode).unwrap();
+                    let key = aead.key_gen();
+                    let aead = aead.set_key(&key).unwrap();
+                    let nonce = aead.nonce_gen();
+                    let data = randombytes(PAYLOAD_SIZE);
+                    let aad = randombytes(1_000);
+                    let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
+                    let mut ct_tag = ct.clone();
+                    ct_tag.extend(tag.clone());
+                    (key, nonce, ct, tag, ct_tag, aad)
+                },
+                |(key, nonce, ct, tag, ct_tag, aad)| {
+                    fun(key, nonce, ct, tag, ct_tag, aad);
+                },
+                BatchSize::SmallInput,
+            )
+        });
+    }
 
-    c.bench_function("ChaCha20Poly1305 encrypt", |b| {
-        b.iter_batched(
-            || {
-                let mut aead = Aead::init(Mode::Chacha20Poly1305).unwrap();
-                aead.set_random_key().unwrap();
-                let nonce = aead.nonce_gen();
-                let data = randombytes(PAYLOAD_SIZE);
-                let aad = randombytes(1_000);
-                (data, nonce, aad, aead)
-            },
-            |(data, nonce, aad, aead)| {
-                let (_ct, _tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    c.bench_function("ChaCha20Poly1305 decrypt", |b| {
-        b.iter_batched(
-            || {
-                let aead = Aead::init(Mode::Chacha20Poly1305).unwrap();
-                let key = aead.key_gen();
-                let aead = aead.set_key(&key).unwrap();
-                let nonce = aead.nonce_gen();
-                let data = randombytes(PAYLOAD_SIZE);
-                let aad = randombytes(1_000);
-                let (ct, tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
-                (key, nonce, ct, tag, aad)
-            },
-            |(key, nonce, ct, tag, aad)| {
-                let aead = Aead::new(Mode::Chacha20Poly1305, &key).unwrap();
-                let _decrypted = aead.decrypt(&ct, &tag, &nonce, &aad).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
+    let payload_mb = PAYLOAD_SIZE / 1024 / 1024;
+    bench_encrypt(
+        c,
+        &format!("AES128 GCM encrypt {}MB", payload_mb),
+        Mode::Aes128Gcm,
+        |data, nonce, aad, aead| {
+            let (_ct, _tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
+        },
+    );
+    bench_encrypt(
+        c,
+        &format!("AES128 GCM encrypt (combine ctxt || tag) {}MB", payload_mb),
+        Mode::Aes128Gcm,
+        |data, nonce, aad, aead| {
+            let (mut ct, mut tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
+            ct.append(&mut tag);
+        },
+    );
+    bench_encrypt(
+        c,
+        &format!("AES128 GCM encrypt (combined ctxt || tag) {}MB", payload_mb),
+        Mode::Aes128Gcm,
+        |data, nonce, aad, aead| {
+            let _ct = aead.encrypt_comb(&data, &nonce, &aad).unwrap();
+        },
+    );
+
+    bench_decrypt(
+        c,
+        &format!("AES128 GCM decrypt {}MB", payload_mb),
+        Mode::Aes128Gcm,
+        |key, nonce, ct, tag, _ct_tag, aad| {
+            let aead = Aead::new(Mode::Aes128Gcm, &key).unwrap();
+            let _decrypted = aead.decrypt(&ct, &tag, &nonce, &aad).unwrap();
+        },
+    );
+    bench_decrypt(
+        c,
+        &format!("AES128 GCM decrypt (combined ctxt || tag) {}MB", payload_mb),
+        Mode::Aes128Gcm,
+        |key, nonce, _ct, _tag, ct_tag, aad| {
+            let aead = Aead::new(Mode::Aes128Gcm, &key).unwrap();
+            let _decrypted = aead.decrypt_comb(&ct_tag, &nonce, &aad).unwrap();
+        },
+    );
+
+    bench_encrypt(
+        c,
+        &format!("AES256 GCM encrypt {}MB", payload_mb),
+        Mode::Aes256Gcm,
+        |data, nonce, aad, aead| {
+            let (_ct, _tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
+        },
+    );
+    bench_encrypt(
+        c,
+        &format!("AES256 GCM encrypt (combine ctxt || tag) {}MB", payload_mb),
+        Mode::Aes256Gcm,
+        |data, nonce, aad, aead| {
+            let (mut ct, mut tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
+            ct.append(&mut tag);
+        },
+    );
+    bench_encrypt(
+        c,
+        &format!("AES256 GCM encrypt (combined ctxt || tag) {}MB", payload_mb),
+        Mode::Aes256Gcm,
+        |data, nonce, aad, aead| {
+            let _ct = aead.encrypt_comb(&data, &nonce, &aad).unwrap();
+        },
+    );
+
+    bench_decrypt(
+        c,
+        &format!("AES256 GCM decrypt {}MB", payload_mb),
+        Mode::Aes128Gcm,
+        |key, nonce, ct, tag, _ct_tag, aad| {
+            let aead = Aead::new(Mode::Aes128Gcm, &key).unwrap();
+            let _decrypted = aead.decrypt(&ct, &tag, &nonce, &aad).unwrap();
+        },
+    );
+    bench_decrypt(
+        c,
+        &format!("AES256 GCM decrypt (combined ctxt || tag) {}MB", payload_mb),
+        Mode::Aes256Gcm,
+        |key, nonce, _ct, _tag, ct_tag, aad| {
+            let aead = Aead::new(Mode::Aes256Gcm, &key).unwrap();
+            let _decrypted = aead.decrypt_comb(&ct_tag, &nonce, &aad).unwrap();
+        },
+    );
+
+    bench_encrypt(
+        c,
+        &format!("ChaCha20Poly1305 encrypt {}MB", payload_mb),
+        Mode::Chacha20Poly1305,
+        |data, nonce, aad, aead| {
+            let (_ct, _tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
+        },
+    );
+    bench_encrypt(
+        c,
+        &format!(
+            "ChaCha20Poly1305 encrypt (combine ctxt || tag) {}MB",
+            payload_mb
+        ),
+        Mode::Chacha20Poly1305,
+        |data, nonce, aad, aead| {
+            let (mut ct, mut tag) = aead.encrypt(&data, &nonce, &aad).unwrap();
+            ct.append(&mut tag);
+        },
+    );
+    bench_encrypt(
+        c,
+        &format!(
+            "ChaCha20Poly1305 encrypt (combined ctxt || tag) {}MB",
+            payload_mb
+        ),
+        Mode::Chacha20Poly1305,
+        |data, nonce, aad, aead| {
+            let _ct = aead.encrypt_comb(&data, &nonce, &aad).unwrap();
+        },
+    );
+
+    bench_decrypt(
+        c,
+        &format!("ChaCha20Poly1305 decrypt {}MB", payload_mb),
+        Mode::Chacha20Poly1305,
+        |key, nonce, ct, tag, _ct_tag, aad| {
+            let aead = Aead::new(Mode::Chacha20Poly1305, &key).unwrap();
+            let _decrypted = aead.decrypt(&ct, &tag, &nonce, &aad).unwrap();
+        },
+    );
+    bench_decrypt(
+        c,
+        &format!(
+            "ChaCha20Poly1305 decrypt (combined ctxt || tag) {}MB",
+            payload_mb
+        ),
+        Mode::Chacha20Poly1305,
+        |key, nonce, _ct, _tag, ct_tag, aad| {
+            let aead = Aead::new(Mode::Chacha20Poly1305, &key).unwrap();
+            let _decrypted = aead.decrypt_comb(&ct_tag, &nonce, &aad).unwrap();
+        },
+    );
 }
 
 fn criterion_x25519(c: &mut Criterion) {

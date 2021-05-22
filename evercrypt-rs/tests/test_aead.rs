@@ -122,6 +122,11 @@ fn test_wycheproof() {
                     assert_ne!(tag, exp_tag);
                 }
                 assert_eq!(ctxt, exp_cipher);
+                let ctxt_comb = cipher.encrypt_comb(&msg, &nonce, &aad).unwrap();
+                assert_eq!(
+                    ctxt_comb.split_at(ctxt_comb.len() - cipher.tag_size()),
+                    (&ctxt[..], &tag[..])
+                );
                 let msg_decrypted = match cipher.decrypt(&ctxt, &tag, &nonce, &aad) {
                     Ok(m) => m,
                     Err(_) => {
@@ -130,6 +135,8 @@ fn test_wycheproof() {
                     }
                 };
                 assert_eq!(msg, msg_decrypted);
+                let msg_decrypted_comb = cipher.decrypt_comb(&ctxt_comb, &nonce, &aad).unwrap();
+                assert_eq!(msg, msg_decrypted_comb);
                 *tests_run += 1;
             }
         }
