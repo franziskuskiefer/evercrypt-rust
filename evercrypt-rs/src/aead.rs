@@ -540,6 +540,18 @@ pub fn encrypt(
     cipher.encrypt(msg, iv, aad)
 }
 
+/// Single-shot API for combined AEAD encryption.
+pub fn encrypt_comb(
+    alg: Mode,
+    k: &[u8],
+    msg: &[u8],
+    iv: &[u8],
+    aad: &Aad,
+) -> Result<Ciphertext, Error> {
+    let cipher = Aead::new(alg, k)?;
+    cipher.encrypt_comb(msg, iv, aad)
+}
+
 /// Single-shot API for AEAD decryption.
 pub fn decrypt(
     alg: Mode,
@@ -551,6 +563,18 @@ pub fn decrypt(
 ) -> Result<Vec<u8>, Error> {
     let cipher = Aead::new(alg, k)?;
     cipher.decrypt(ctxt, tag, iv, aad)
+}
+
+/// Single-shot API for combined AEAD decryption.
+pub fn decrypt_comb(
+    alg: Mode,
+    k: &[u8],
+    ctxt: &[u8],
+    iv: &[u8],
+    aad: &Aad,
+) -> Result<Vec<u8>, Error> {
+    let cipher = Aead::new(alg, k)?;
+    cipher.decrypt_comb(ctxt, iv, aad)
 }
 
 /// Generate a random key.
