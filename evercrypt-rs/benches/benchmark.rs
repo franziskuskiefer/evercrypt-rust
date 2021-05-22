@@ -158,7 +158,7 @@ fn criterion_digest(c: &mut Criterion) {
 }
 
 fn criterion_aead(c: &mut Criterion) {
-    use evercrypt::aead::{Aead, Mode};
+    use evercrypt::aead::{self, Aead, Mode};
 
     fn bench_encrypt<F>(c: &mut Criterion, id: &str, mode: Mode, mut fun: F)
     where
@@ -350,6 +350,62 @@ fn criterion_aead(c: &mut Criterion) {
         |key, nonce, _ct, _tag, ct_tag, aad| {
             let aead = Aead::new(Mode::Chacha20Poly1305, &key).unwrap();
             let _decrypted = aead.decrypt_comb(&ct_tag, &nonce, &aad).unwrap();
+        },
+    );
+
+    const CHUNKS: usize = 50;
+    c.bench_function(
+        &format!("AES128 GCM encrypt single key {}x{}MB", CHUNKS, payload_mb),
+        |b| {
+            b.iter_batched(
+                || {
+                    let mut aead = Aead::init(Mode::Aes128Gcm).unwrap();
+                    aead.set_random_key().unwrap();
+                    let mut nonce = Vec::new();
+                    let mut data = Vec::new();
+                    for _ in 0..CHUNKS {
+                        data.push(randombytes(PAYLOAD_SIZE));
+                        nonce.push(aead.nonce_gen());
+                    }
+                    let aad = randombytes(1_000);
+                    (data, nonce, aad, aead)
+                },
+                |(data, nonce, aad, aead)| {
+                    let mut ct = Vec::with_capacity(CHUNKS * PAYLOAD_SIZE);
+                    for (chunk, chunk_nonce) in data.iter().zip(nonce.iter()) {
+                        ct.push(aead.encrypt_comb(chunk, chunk_nonce, &aad).unwrap());
+                    }
+                },
+                BatchSize::SmallInput,
+            )
+        },
+    );
+    c.bench_function(
+        &format!("AES128 GCM encrypt {}x{}MB", CHUNKS, payload_mb),
+        |b| {
+            b.iter_batched(
+                || {
+                    let key = aead::key_gen(Mode::Aes128Gcm);
+                    let mut nonce = Vec::new();
+                    let mut data = Vec::new();
+                    for _ in 0..CHUNKS {
+                        data.push(randombytes(PAYLOAD_SIZE));
+                        nonce.push(aead::nonce_gen(Mode::Aes128Gcm));
+                    }
+                    let aad = randombytes(1_000);
+                    (data, nonce, aad, key)
+                },
+                |(data, nonce, aad, key)| {
+                    let mut ct = Vec::with_capacity(CHUNKS * PAYLOAD_SIZE);
+                    for (chunk, chunk_nonce) in data.iter().zip(nonce.iter()) {
+                        ct.push(
+                            aead::encrypt_comb(Mode::Aes128Gcm, &key, chunk, chunk_nonce, &aad)
+                                .unwrap(),
+                        );
+                    }
+                },
+                BatchSize::SmallInput,
+            )
         },
     );
 }
