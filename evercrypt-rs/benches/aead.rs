@@ -41,10 +41,10 @@ fn aead_keys() {
             // Stateful
             let name = format!("AES128 GCM encrypt stateful {}x{}MB", chunks, payload_mb);
             println!("{}", name);
-            let mut ct = Vec::with_capacity(chunks * payload_size);
+            let mut ct1 = vec![];
             let start = Instant::now();
             for (chunk, chunk_nonce) in data.iter().zip(nonce.iter()) {
-                ct.push(aead.encrypt_comb(chunk, chunk_nonce, &aad).unwrap());
+                ct1 = aead.encrypt_comb(chunk, chunk_nonce, &aad).unwrap();
             }
             let end = Instant::now();
             let time = duration(end.duration_since(start));
@@ -53,14 +53,13 @@ fn aead_keys() {
             // Stateless
             let name = format!("AES128 GCM encrypt single-shot {}x{}MB", chunks, payload_mb);
             println!("{}", name);
-            let mut ct = Vec::with_capacity(chunks * payload_size);
+            let mut ct2 = vec![];
             let start = Instant::now();
             for (chunk, chunk_nonce) in data.iter().zip(nonce.iter()) {
-                ct.push(
-                    aead::encrypt_comb(Mode::Aes128Gcm, &key, chunk, chunk_nonce, &aad).unwrap(),
-                );
+                ct2 = aead::encrypt_comb(Mode::Aes128Gcm, &key, chunk, chunk_nonce, &aad).unwrap();
             }
             let end = Instant::now();
+            assert_eq!(&ct1, &ct2);
             let time = duration(end.duration_since(start));
             println!("\t{} MB/s", total_mb / time);
         }
