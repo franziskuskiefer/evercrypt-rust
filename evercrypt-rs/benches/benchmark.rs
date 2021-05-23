@@ -158,7 +158,7 @@ fn criterion_digest(c: &mut Criterion) {
 }
 
 fn criterion_aead(c: &mut Criterion) {
-    use evercrypt::aead::{self, Aead, Mode};
+    use evercrypt::aead::{Aead, Mode};
 
     fn bench_encrypt<F>(c: &mut Criterion, id: &str, mode: Mode, mut fun: F)
     where
@@ -352,10 +352,15 @@ fn criterion_aead(c: &mut Criterion) {
             let _decrypted = aead.decrypt_comb(&ct_tag, &nonce, &aad).unwrap();
         },
     );
+}
 
+fn criterion_aead_keys(c: &mut Criterion) {
+    use evercrypt::aead::{self, Aead, Mode};
+
+    const PAYLOAD_MB: usize = PAYLOAD_SIZE / 1024 / 1024;
     const CHUNKS: usize = 50;
     c.bench_function(
-        &format!("AES128 GCM encrypt single key {}x{}MB", CHUNKS, payload_mb),
+        &format!("AES128 GCM encrypt single key {}x{}MB", CHUNKS, PAYLOAD_MB),
         |b| {
             b.iter_batched(
                 || {
@@ -381,7 +386,7 @@ fn criterion_aead(c: &mut Criterion) {
         },
     );
     c.bench_function(
-        &format!("AES128 GCM encrypt {}x{}MB", CHUNKS, payload_mb),
+        &format!("AES128 GCM encrypt {}x{}MB", CHUNKS, PAYLOAD_MB),
         |b| {
             b.iter_batched(
                 || {
@@ -723,6 +728,7 @@ fn criterion_hkdf(c: &mut Criterion) {
 
 fn criterion_benchmark(c: &mut Criterion) {
     criterion_digest(c);
+    criterion_aead_keys(c);
     criterion_aead(c);
     criterion_x25519(c);
     criterion_p256(c);
