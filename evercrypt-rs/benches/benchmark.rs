@@ -358,9 +358,9 @@ fn criterion_aead_keys(c: &mut Criterion) {
     use evercrypt::aead::{self, Aead, Mode};
 
     const PAYLOAD_MB: usize = PAYLOAD_SIZE / 1024 / 1024;
-    const CHUNKS: usize = 50;
+    const CHUNKS: usize = 100;
     c.bench_function(
-        &format!("AES128 GCM encrypt single key {}x{}MB", CHUNKS, PAYLOAD_MB),
+        &format!("AES128 GCM encrypt stateful {}x{}MB", CHUNKS, PAYLOAD_MB),
         |b| {
             b.iter_batched(
                 || {
@@ -386,7 +386,7 @@ fn criterion_aead_keys(c: &mut Criterion) {
         },
     );
     c.bench_function(
-        &format!("AES128 GCM encrypt {}x{}MB", CHUNKS, PAYLOAD_MB),
+        &format!("AES128 GCM encrypt single-shot {}x{}MB", CHUNKS, PAYLOAD_MB),
         |b| {
             b.iter_batched(
                 || {
@@ -584,7 +584,7 @@ fn criterion_ed25519(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let sk = clone_into_array(&randombytes(32));
-                let data = randombytes(PAYLOAD_SIZE);
+                let data = randombytes(0x10000);
                 (sk, data)
             },
             |(sk, data)| {
@@ -598,7 +598,7 @@ fn criterion_ed25519(c: &mut Criterion) {
             || {
                 let sk = clone_into_array(&randombytes(32));
                 let pk = ed25519::sk2pk(&sk);
-                let data = randombytes(PAYLOAD_SIZE);
+                let data = randombytes(0x10000);
                 let sig = ed25519::eddsa_sign(&pk, &data);
                 (pk, data, sig)
             },
@@ -728,8 +728,8 @@ fn criterion_hkdf(c: &mut Criterion) {
 
 fn criterion_benchmark(c: &mut Criterion) {
     criterion_digest(c);
-    criterion_aead_keys(c);
     criterion_aead(c);
+    criterion_aead_keys(c);
     criterion_x25519(c);
     criterion_p256(c);
     criterion_ed25519(c);
