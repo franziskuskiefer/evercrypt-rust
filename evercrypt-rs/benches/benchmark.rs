@@ -663,7 +663,7 @@ fn criterion_hkdf(c: &mut Criterion) {
                         let salt = hex_to_bytes("000102030405060708090a0b0c");
                         let len = 32;
                         let prk = hkdf_extract(HmacMode::Sha1, &salt, &ikm);
-                        let data = randombytes(PAYLOAD_SIZE);
+                        let data = randombytes(0x10000);
                         (len, prk, data)
                     },
                     |(len, prk, data)| {
@@ -709,7 +709,7 @@ fn criterion_hkdf(c: &mut Criterion) {
                         let ikm = hex_to_bytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
                         let salt = hex_to_bytes("000102030405060708090a0b0c");
                         let len = 32;
-                        let data = randombytes(PAYLOAD_SIZE);
+                        let data = randombytes(0x10000);
                         (ikm, salt, len, data)
                     },
                     |(ikm, salt, len, data)| {
