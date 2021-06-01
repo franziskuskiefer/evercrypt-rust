@@ -424,7 +424,7 @@ impl Aead {
     /// Encrypt with the algorithm and key of this Aead.
     /// Returns `(ctxt || tag)` or an `Error`.
     /// This is more efficient if the tag needs to be appended to the cipher text.
-    pub fn encrypt_comb(&self, msg: &[u8], iv: &[u8], aad: &Aad) -> Result<Ciphertext, Error> {
+    pub fn encrypt_combined(&self, msg: &[u8], iv: &[u8], aad: &Aad) -> Result<Ciphertext, Error> {
         if iv.len() != self.nonce_size() {
             return Err(Error::InvalidNonce);
         }
@@ -503,7 +503,7 @@ impl Aead {
     /// Returns `msg` or an `Error`.
     /// This takes the combined ctxt || tag as input and might be more efficient
     /// than `decrypt`.
-    pub fn decrypt_comb(&self, ctxt: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
+    pub fn decrypt_combined(&self, ctxt: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
         if ctxt.len() < self.tag_size() {
             return Err(Error::InvalidTagSize);
         }
@@ -541,7 +541,7 @@ pub fn encrypt(
 }
 
 /// Single-shot API for combined AEAD encryption.
-pub fn encrypt_comb(
+pub fn encrypt_combined(
     alg: Mode,
     k: &[u8],
     msg: &[u8],
@@ -549,7 +549,7 @@ pub fn encrypt_comb(
     aad: &Aad,
 ) -> Result<Ciphertext, Error> {
     let cipher = Aead::new(alg, k)?;
-    cipher.encrypt_comb(msg, iv, aad)
+    cipher.encrypt_combined(msg, iv, aad)
 }
 
 /// Single-shot API for AEAD decryption.
@@ -566,7 +566,7 @@ pub fn decrypt(
 }
 
 /// Single-shot API for combined AEAD decryption.
-pub fn decrypt_comb(
+pub fn decrypt_combined(
     alg: Mode,
     k: &[u8],
     ctxt: &[u8],
@@ -574,7 +574,7 @@ pub fn decrypt_comb(
     aad: &Aad,
 ) -> Result<Vec<u8>, Error> {
     let cipher = Aead::new(alg, k)?;
-    cipher.decrypt_comb(ctxt, iv, aad)
+    cipher.decrypt_combined(ctxt, iv, aad)
 }
 
 /// Generate a random key.

@@ -32,7 +32,7 @@ fn aead_keys() {
 
         println!("Warmup ...");
         for (chunk, chunk_nonce) in data.iter().zip(nonce.iter()) {
-            aead::encrypt_comb(Mode::Aes128Gcm, &key, chunk, chunk_nonce, &aad).unwrap();
+            aead::encrypt_combined(Mode::Aes128Gcm, &key, chunk, chunk_nonce, &aad).unwrap();
         }
 
         // Stateful
@@ -48,7 +48,7 @@ fn aead_keys() {
         let mut ct1 = vec![];
         let start = Instant::now();
         for (chunk, chunk_nonce) in data.iter().zip(nonce.iter()) {
-            ct1 = aead.encrypt_comb(chunk, chunk_nonce, &aad).unwrap();
+            ct1 = aead.encrypt_combined(chunk, chunk_nonce, &aad).unwrap();
         }
         let end = Instant::now();
         let time = duration(end.duration_since(start));
@@ -60,7 +60,7 @@ fn aead_keys() {
         let mut ct2 = vec![];
         let start = Instant::now();
         for (chunk, chunk_nonce) in data.iter().zip(nonce.iter()) {
-            ct2 = aead::encrypt_comb(Mode::Aes128Gcm, &key, chunk, chunk_nonce, &aad).unwrap();
+            ct2 = aead::encrypt_combined(Mode::Aes128Gcm, &key, chunk, chunk_nonce, &aad).unwrap();
         }
         let end = Instant::now();
         assert_eq!(&ct1, &ct2);

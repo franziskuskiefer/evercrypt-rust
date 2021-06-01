@@ -2,8 +2,8 @@
 //! Include this to get access to all the public functions of Evercrypt.
 
 pub use crate::aead::{
-    self, decrypt as aead_decrypt, decrypt_comb as aead_decrypt_comb, encrypt as aead_encrypt,
-    encrypt_comb as aead_encrypt_comb, key_size as aead_key_size, nonce_size as aead_nonce_size,
+    self, decrypt as aead_decrypt, decrypt_combined as aead_decrypt_combined, encrypt as aead_encrypt,
+    encrypt_combined as aead_encrypt_combined, key_size as aead_key_size, nonce_size as aead_nonce_size,
     tag_size as aead_tag_size, Aead, Error as AeadError, Mode as AeadMode, Nonce as AeadNonce,
     Tag as AeadTag,
 };
