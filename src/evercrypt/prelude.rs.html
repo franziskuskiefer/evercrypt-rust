@@ -43,14 +43,16 @@
 <span id="40">40</span>
 <span id="41">41</span>
 <span id="42">42</span>
+<span id="43">43</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Prelude for Evercrypt.</span>
 <span class="doccomment">//! Include this to get access to all the public functions of Evercrypt.</span>
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">aead</span>::{
-    <span class="self">self</span>, <span class="ident">decrypt</span> <span class="kw">as</span> <span class="ident">aead_decrypt</span>, <span class="ident">encrypt</span> <span class="kw">as</span> <span class="ident">aead_encrypt</span>, <span class="ident">key_size</span> <span class="kw">as</span> <span class="ident">aead_key_size</span>,
-    <span class="ident">nonce_size</span> <span class="kw">as</span> <span class="ident">aead_nonce_size</span>, <span class="ident">tag_size</span> <span class="kw">as</span> <span class="ident">aead_tag_size</span>, <span class="ident">Aead</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">AeadError</span>,
-    <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">AeadMode</span>, <span class="ident">Nonce</span> <span class="kw">as</span> <span class="ident">AeadNonce</span>, <span class="ident">Tag</span> <span class="kw">as</span> <span class="ident">AeadTag</span>,
+    <span class="self">self</span>, <span class="ident">decrypt</span> <span class="kw">as</span> <span class="ident">aead_decrypt</span>, <span class="ident">decrypt_combined</span> <span class="kw">as</span> <span class="ident">aead_decrypt_combined</span>, <span class="ident">encrypt</span> <span class="kw">as</span> <span class="ident">aead_encrypt</span>,
+    <span class="ident">encrypt_combined</span> <span class="kw">as</span> <span class="ident">aead_encrypt_combined</span>, <span class="ident">key_size</span> <span class="kw">as</span> <span class="ident">aead_key_size</span>, <span class="ident">nonce_size</span> <span class="kw">as</span> <span class="ident">aead_nonce_size</span>,
+    <span class="ident">tag_size</span> <span class="kw">as</span> <span class="ident">aead_tag_size</span>, <span class="ident">Aead</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">AeadError</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">AeadMode</span>, <span class="ident">Nonce</span> <span class="kw">as</span> <span class="ident">AeadNonce</span>,
+    <span class="ident">Tag</span> <span class="kw">as</span> <span class="ident">AeadTag</span>,
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">digest</span>::{
     <span class="self">self</span>, <span class="ident">digest_size</span>, <span class="ident">hash</span>, <span class="ident">Digest</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">DigestError</span>, <span class="ident">Mode</span> <span class="kw">as</span> <span class="ident">DigestMode</span>,

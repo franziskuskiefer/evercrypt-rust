@@ -509,6 +509,88 @@
 <span id="506">506</span>
 <span id="507">507</span>
 <span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Authenticated Encryption with Associated Data (AEAD)</span>
 <span class="doccomment">//!</span>
@@ -655,6 +737,7 @@
     <span class="ident">Encrypting</span> <span class="op">=</span> <span class="number">5</span>,
     <span class="ident">Decrypting</span> <span class="op">=</span> <span class="number">6</span>,
     <span class="ident">InvalidKeySize</span> <span class="op">=</span> <span class="number">7</span>,
+    <span class="ident">InvalidTagSize</span> <span class="op">=</span> <span class="number">8</span>,
 }
 
 <span class="doccomment">/// The Aead struct allows to re-use a key without having to initialize it</span>
@@ -928,16 +1011,52 @@
                 }
                 <span class="prelude-val">Ok</span>((<span class="ident">ctxt</span>, <span class="ident">tag</span>))
             }
-            <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">encrypt_rs</span>(<span class="ident">msg</span>, <span class="ident">iv</span>, <span class="ident">aad</span>),
-            <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">encrypt_rs</span>(<span class="ident">msg</span>, <span class="ident">iv</span>, <span class="ident">aad</span>),
+            <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes128</span> <span class="op">|</span> <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">encrypt_rs</span>(<span class="ident">msg</span>, <span class="ident">iv</span>, <span class="ident">aad</span>),
         }
     }
 
-    <span class="doccomment">/// Decrypt with the algorithm and key of this Aead.</span>
-    <span class="doccomment">/// Returns `msg` or an `Error`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decrypt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">tag</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Encrypt with the algorithm and key of this Aead.</span>
+    <span class="doccomment">/// Returns `(ctxt || tag)` or an `Error`.</span>
+    <span class="doccomment">/// This is more efficient if the tag needs to be appended to the cipher text.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encrypt_combined</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Ciphertext</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">iv</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">nonce_size</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InvalidNonce</span>);
+        }
+
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">op_mode</span> {
+            <span class="ident">OpMode</span>::<span class="ident">Hacl</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="comment">// combined cipher text and tag</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ctxt</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="ident">msg</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">tag_size</span>()];
+                <span class="kw">unsafe</span> {
+                    <span class="ident">EverCrypt_AEAD_encrypt</span>(
+                        <span class="self">self</span>.<span class="ident">c_state</span>.<span class="ident">unwrap</span>(),
+                        <span class="ident">iv</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
+                        <span class="self">self</span>.<span class="ident">nonce_size</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>(),
+                        <span class="ident">aad</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
+                        <span class="ident">aad</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>,
+                        <span class="ident">msg</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
+                        <span class="ident">msg</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>,
+                        <span class="ident">ctxt</span>.<span class="ident">as_mut_ptr</span>(),
+                        <span class="ident">ctxt</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">offset</span>(<span class="ident">msg</span>.<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                    );
+                }
+                <span class="prelude-val">Ok</span>(<span class="ident">ctxt</span>)
+            }
+            <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes128</span> <span class="op">|</span> <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes256</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">ctxt</span>, <span class="kw-2">mut</span> <span class="ident">tag</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">encrypt_rs</span>(<span class="ident">msg</span>, <span class="ident">iv</span>, <span class="ident">aad</span>)<span class="question-mark">?</span>;
+                <span class="ident">ctxt</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tag</span>);
+                <span class="prelude-val">Ok</span>(<span class="ident">ctxt</span>)
+            }
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">_decrypt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">tag</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">iv</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">12</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InvalidNonce</span>);
+        }
+        <span class="kw">if</span> <span class="ident">tag</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">tag_size</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InvalidTagSize</span>);
         }
 
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">op_mode</span> {
@@ -962,9 +1081,30 @@
                     <span class="prelude-val">Ok</span>(<span class="ident">msg</span>)
                 }
             }
-            <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">decrypt_rs</span>(<span class="ident">ctxt</span>, <span class="ident">tag</span>, <span class="ident">iv</span>, <span class="ident">aad</span>),
-            <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">decrypt_rs</span>(<span class="ident">ctxt</span>, <span class="ident">tag</span>, <span class="ident">iv</span>, <span class="ident">aad</span>),
+            <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes128</span> <span class="op">|</span> <span class="ident">OpMode</span>::<span class="ident">RustCryptoAes256</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="self">self</span>.<span class="ident">decrypt_rs</span>(<span class="ident">ctxt</span>, <span class="ident">tag</span>, <span class="ident">iv</span>, <span class="ident">aad</span>)
+            }
         }
+    }
+
+    <span class="doccomment">/// Decrypt with the algorithm and key of this Aead.</span>
+    <span class="doccomment">/// Returns `msg` or an `Error`.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decrypt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">tag</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">_decrypt</span>(<span class="ident">ctxt</span>, <span class="ident">tag</span>, <span class="ident">iv</span>, <span class="ident">aad</span>)
+    }
+
+    <span class="doccomment">/// Decrypt with the algorithm and key of this Aead.</span>
+    <span class="doccomment">/// Returns `msg` or an `Error`.</span>
+    <span class="doccomment">/// This takes the combined ctxt || tag as input and might be more efficient</span>
+    <span class="doccomment">/// than `decrypt`.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decrypt_combined</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">ctxt</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">tag_size</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InvalidTagSize</span>);
+        }
+        <span class="kw">let</span> <span class="ident">msg_len</span> <span class="op">=</span> <span class="ident">ctxt</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">tag_size</span>();
+        <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">ctxt</span>[<span class="ident">msg_len</span>..];
+        <span class="kw">let</span> <span class="ident">ctxt</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">ctxt</span>[..<span class="ident">msg_len</span>];
+        <span class="self">self</span>.<span class="ident">_decrypt</span>(<span class="ident">ctxt</span>, <span class="ident">tag</span>, <span class="ident">iv</span>, <span class="ident">aad</span>)
     }
 }
 
@@ -994,6 +1134,18 @@
     <span class="ident">cipher</span>.<span class="ident">encrypt</span>(<span class="ident">msg</span>, <span class="ident">iv</span>, <span class="ident">aad</span>)
 }
 
+<span class="doccomment">/// Single-shot API for combined AEAD encryption.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encrypt_combined</span>(
+    <span class="ident">alg</span>: <span class="ident">Mode</span>,
+    <span class="ident">k</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Ciphertext</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">cipher</span> <span class="op">=</span> <span class="ident">Aead</span>::<span class="ident">new</span>(<span class="ident">alg</span>, <span class="ident">k</span>)<span class="question-mark">?</span>;
+    <span class="ident">cipher</span>.<span class="ident">encrypt_combined</span>(<span class="ident">msg</span>, <span class="ident">iv</span>, <span class="ident">aad</span>)
+}
+
 <span class="doccomment">/// Single-shot API for AEAD decryption.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decrypt</span>(
     <span class="ident">alg</span>: <span class="ident">Mode</span>,
@@ -1005,6 +1157,18 @@
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">cipher</span> <span class="op">=</span> <span class="ident">Aead</span>::<span class="ident">new</span>(<span class="ident">alg</span>, <span class="ident">k</span>)<span class="question-mark">?</span>;
     <span class="ident">cipher</span>.<span class="ident">decrypt</span>(<span class="ident">ctxt</span>, <span class="ident">tag</span>, <span class="ident">iv</span>, <span class="ident">aad</span>)
+}
+
+<span class="doccomment">/// Single-shot API for combined AEAD decryption.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decrypt_combined</span>(
+    <span class="ident">alg</span>: <span class="ident">Mode</span>,
+    <span class="ident">k</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">ctxt</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">iv</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">aad</span>: <span class="kw-2">&amp;</span><span class="ident">Aad</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">cipher</span> <span class="op">=</span> <span class="ident">Aead</span>::<span class="ident">new</span>(<span class="ident">alg</span>, <span class="ident">k</span>)<span class="question-mark">?</span>;
+    <span class="ident">cipher</span>.<span class="ident">decrypt_combined</span>(<span class="ident">ctxt</span>, <span class="ident">iv</span>, <span class="ident">aad</span>)
 }
 
 <span class="doccomment">/// Generate a random key.</span>
