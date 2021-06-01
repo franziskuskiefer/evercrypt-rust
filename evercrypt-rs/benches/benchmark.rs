@@ -231,7 +231,7 @@ fn criterion_aead(c: &mut Criterion) {
         &format!("AES128 GCM encrypt (combined ctxt || tag) {}MB", payload_mb),
         Mode::Aes128Gcm,
         |data, nonce, aad, aead| {
-            let _ct = aead.encrypt_comb(&data, &nonce, &aad).unwrap();
+            let _ct = aead.encrypt_combined(&data, &nonce, &aad).unwrap();
         },
     );
 
@@ -250,7 +250,7 @@ fn criterion_aead(c: &mut Criterion) {
         Mode::Aes128Gcm,
         |key, nonce, _ct, _tag, ct_tag, aad| {
             let aead = Aead::new(Mode::Aes128Gcm, &key).unwrap();
-            let _decrypted = aead.decrypt_comb(&ct_tag, &nonce, &aad).unwrap();
+            let _decrypted = aead.decrypt_combined(&ct_tag, &nonce, &aad).unwrap();
         },
     );
 
@@ -276,7 +276,7 @@ fn criterion_aead(c: &mut Criterion) {
         &format!("AES256 GCM encrypt (combined ctxt || tag) {}MB", payload_mb),
         Mode::Aes256Gcm,
         |data, nonce, aad, aead| {
-            let _ct = aead.encrypt_comb(&data, &nonce, &aad).unwrap();
+            let _ct = aead.encrypt_combined(&data, &nonce, &aad).unwrap();
         },
     );
 
@@ -295,7 +295,7 @@ fn criterion_aead(c: &mut Criterion) {
         Mode::Aes256Gcm,
         |key, nonce, _ct, _tag, ct_tag, aad| {
             let aead = Aead::new(Mode::Aes256Gcm, &key).unwrap();
-            let _decrypted = aead.decrypt_comb(&ct_tag, &nonce, &aad).unwrap();
+            let _decrypted = aead.decrypt_combined(&ct_tag, &nonce, &aad).unwrap();
         },
     );
 
@@ -327,7 +327,7 @@ fn criterion_aead(c: &mut Criterion) {
         ),
         Mode::Chacha20Poly1305,
         |data, nonce, aad, aead| {
-            let _ct = aead.encrypt_comb(&data, &nonce, &aad).unwrap();
+            let _ct = aead.encrypt_combined(&data, &nonce, &aad).unwrap();
         },
     );
 
@@ -349,7 +349,7 @@ fn criterion_aead(c: &mut Criterion) {
         Mode::Chacha20Poly1305,
         |key, nonce, _ct, _tag, ct_tag, aad| {
             let aead = Aead::new(Mode::Chacha20Poly1305, &key).unwrap();
-            let _decrypted = aead.decrypt_comb(&ct_tag, &nonce, &aad).unwrap();
+            let _decrypted = aead.decrypt_combined(&ct_tag, &nonce, &aad).unwrap();
         },
     );
 }
@@ -378,7 +378,7 @@ fn criterion_aead_keys(c: &mut Criterion) {
                 |(data, nonce, aad, aead)| {
                     let mut ct = Vec::with_capacity(CHUNKS * PAYLOAD_SIZE);
                     for (chunk, chunk_nonce) in data.iter().zip(nonce.iter()) {
-                        ct.push(aead.encrypt_comb(chunk, chunk_nonce, &aad).unwrap());
+                        ct.push(aead.encrypt_combined(chunk, chunk_nonce, &aad).unwrap());
                     }
                 },
                 BatchSize::SmallInput,
@@ -404,7 +404,7 @@ fn criterion_aead_keys(c: &mut Criterion) {
                     let mut ct = Vec::with_capacity(CHUNKS * PAYLOAD_SIZE);
                     for (chunk, chunk_nonce) in data.iter().zip(nonce.iter()) {
                         ct.push(
-                            aead::encrypt_comb(Mode::Aes128Gcm, &key, chunk, chunk_nonce, &aad)
+                            aead::encrypt_combined(Mode::Aes128Gcm, &key, chunk, chunk_nonce, &aad)
                                 .unwrap(),
                         );
                     }
