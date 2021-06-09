@@ -6,3 +6,9 @@ members = [
 
 [patch.crates-io]
 evercrypt-sys = { path = "evercrypt-sys" }
+
+[patch.'https://github.com/franziskuskiefer/key-store-rs']
+key_store = { path = "../key-store" }
+
+[patch.'https://github.com/franziskuskiefer/algorithm-identifiers-rs.git']
+crypto_algorithms = { path = "../crypto_types" }

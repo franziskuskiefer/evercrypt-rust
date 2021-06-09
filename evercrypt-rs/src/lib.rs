@@ -8,6 +8,11 @@ pub mod p256;
 pub mod signature;
 pub mod x25519;
 
+#[cfg(feature = "sqlite-key-store")]
+pub mod sqlite_key_store;
+#[cfg(feature = "sqlite-key-store")]
+pub mod openmls_crypto;
+
 mod util;
 
 #[cfg(feature = "random")]
