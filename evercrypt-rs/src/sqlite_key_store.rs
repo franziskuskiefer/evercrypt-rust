@@ -4,11 +4,7 @@ use std::{
     sync::{Mutex, PoisonError},
 };
 
-use key_store::{
-    traits::{KeyStore as KeyStoreTrait, KeyStoreValue},
-    types::Status,
-    Error, KeyStoreResult,
-};
+use key_store::traits::KeyStoreValue;
 use rusqlite::{
     params,
     types::{FromSql, FromSqlError, ToSqlOutput},
@@ -16,6 +12,9 @@ use rusqlite::{
 };
 
 mod types;
+pub use key_store::{
+    traits::KeyStore as KeyStoreTrait, types::Status, Error as KeyStoreError, KeyStoreResult,
+};
 pub use types::PrivateKey;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -31,7 +30,7 @@ impl<Guard> From<PoisonError<Guard>> for EverestSqlKeyStoreError {
     }
 }
 
-impl From<EverestSqlKeyStoreError> for Error {
+impl From<EverestSqlKeyStoreError> for KeyStoreError {
     fn from(e: EverestSqlKeyStoreError) -> Self {
         Self::KeyStoreError(format!("EverestSqlKeyStoreError {:?}", e))
     }
@@ -55,7 +54,7 @@ fn init_key_store(connection: &Connection) -> KeyStoreResult<()> {
         )
         .map_err(|e| {
             log::error!("SQL ERROR: {:?}", e);
-            Error::WriteError(format!("SQLite create table error {:?}", e))
+            KeyStoreError::WriteError(format!("SQLite create table error {:?}", e))
         })?;
     Ok(())
 }
@@ -127,12 +126,13 @@ impl KeyStore {
             )
             .map_err(|e| {
                 log::error!("SQL ERROR: {:?}", e);
-                Error::WriteError(format!("SQLite write error {:?}", e))
+                KeyStoreError::WriteError(format!("SQLite write error {:?}", e))
             })?;
         Ok(())
     }
 
-    pub(crate) fn internal_read<V: KeyStoreValue>(
+    /// Retrieve a value from the key store.
+    pub fn unsafe_read<V: KeyStoreValue>(
         &self,
         k: &<KeyStore as KeyStoreTrait>::KeyStoreId,
     ) -> KeyStoreResult<(V, Status)> {
@@ -148,7 +148,7 @@ impl KeyStore {
             )
             .map_err(|e| {
                 log::error!("SQL ERROR: {:?}", e);
-                Error::ReadError(format!("SQLite read error {:?}", e))
+                KeyStoreError::ReadError(format!("SQLite read error {:?}", e))
             })?;
         Ok((V::deserialize(&mut result.0)?, result.1 .0))
     }
@@ -157,10 +157,10 @@ impl KeyStore {
         &self,
         k: &<KeyStore as KeyStoreTrait>::KeyStoreId,
     ) -> KeyStoreResult<V> {
-        let (v, status) = self.internal_read(k)?;
+        let (v, status) = self.unsafe_read(k)?;
         match status {
             Status::Extractable | Status::UnconfirmedExtractable => Ok(v),
-            Status::Hidden | Status::UnconfirmedHidden => Err(Error::ForbiddenExtraction(format!(
+            Status::Hidden | Status::UnconfirmedHidden => Err(KeyStoreError::ForbiddenExtraction(format!(
                 "The value is {:?}",
                 status
             ))),
@@ -183,12 +183,12 @@ impl KeyStore {
             )
             .map_err(|e| {
                 log::error!("SQL ERROR: {:?}", e);
-                Error::UpdateError(format!("SQLite update error {:?}", e))
+                KeyStoreError::UpdateError(format!("SQLite update error {:?}", e))
             })?;
         if updated_rows == 1 {
             Ok(())
         } else {
-            Err(Error::UpdateError(format!("No row was updated")))
+            Err(KeyStoreError::UpdateError(format!("No row was updated")))
         }
     }
 
@@ -204,13 +204,13 @@ impl KeyStore {
             )
             .map_err(|e| {
                 log::error!("SQL ERROR: {:?}", e);
-                Error::DeleteError(format!("SQLite delete error {:?}", e))
+                KeyStoreError::DeleteError(format!("SQLite delete error {:?}", e))
             })?;
         Ok(())
     }
 }
 
-pub(crate) type KeyStoreId = [u8; 32];
+pub type KeyStoreId = [u8; 32];
 
 impl KeyStoreTrait for KeyStore {
     type KeyStoreId = KeyStoreId;

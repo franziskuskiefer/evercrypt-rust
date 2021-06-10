@@ -195,7 +195,7 @@ fn extract_unsafe(
     salt: &[u8],
 ) -> Result<Secret, openmls_crypto::errors::Error> {
     let mode = hmac_type(hash)?;
-    let (ikm_secret, _status): (Secret, Status) = ks.internal_read(ikm).map_err(|e| {
+    let (ikm_secret, _status): (Secret, Status) = ks.unsafe_read(ikm).map_err(|e| {
         openmls_crypto::errors::Error::KeyStoreError(format!("Key store error {:?}", e))
     })?;
     let prk = hkdf::extract(mode, salt, ikm_secret.as_slice());
@@ -287,7 +287,7 @@ impl Seal for Aead {
         aad: &[u8],
         nonce: &[u8],
     ) -> Result<openmls_crypto::aead::CiphertextTag, openmls_crypto::errors::Error> {
-        let (key, _status): (Secret, Status) = ks.internal_read(key_id)?;
+        let (key, _status): (Secret, Status) = ks.unsafe_read(key_id)?;
         if !key.compatible(aead) {
             return Err(openmls_crypto::errors::Error::SymmetricKeyError(
                 SymmetricKeyError::InvalidKey(format!(
@@ -309,7 +309,7 @@ impl Seal for Aead {
         aad: &[u8],
         nonce: &[u8],
     ) -> Result<Vec<u8>, openmls_crypto::errors::Error> {
-        let (key, _status): (Secret, Status) = ks.internal_read(key_id)?;
+        let (key, _status): (Secret, Status) = ks.unsafe_read(key_id)?;
         if !key.compatible(aead) {
             return Err(openmls_crypto::errors::Error::SymmetricKeyError(
                 SymmetricKeyError::InvalidKey(format!(
@@ -381,7 +381,7 @@ impl Open for Aead {
         aad: &[u8],
         nonce: &[u8],
     ) -> Result<Plaintext, openmls_crypto::errors::Error> {
-        let (key, _status): (Secret, Status) = key_store.internal_read(key_id)?;
+        let (key, _status): (Secret, Status) = key_store.unsafe_read(key_id)?;
         let mode = aead_type(aead)?;
         let pt = aead::decrypt(
             mode,
@@ -403,7 +403,7 @@ impl Open for Aead {
         aad: &[u8],
         nonce: &[u8],
     ) -> Result<Plaintext, openmls_crypto::errors::Error> {
-        let (key, _status): (Secret, Status) = key_store.internal_read(key_id)?;
+        let (key, _status): (Secret, Status) = key_store.unsafe_read(key_id)?;
         let mode = aead_type(aead)?;
         let pt = aead::decrypt_combined(mode, key.as_slice(), cipher_text, nonce, aad)
             .map_err(|e| Error::DecryptionError(format!("Decryption encrypting: {:?}", e)))?;
@@ -453,7 +453,7 @@ impl Sign for Evercrypt {
         payload: &[u8],
         hash: impl Into<Option<HashType>>,
     ) -> Result<Signature, openmls_crypto::errors::Error> {
-        let (sk, _status): (PrivateKey, Status) = key_store.internal_read(key_id)?;
+        let (sk, _status): (PrivateKey, Status) = key_store.unsafe_read(key_id)?;
         let hash = hash.into();
         let evercrypt_hash = evercrypt_hash_type(hash);
         let signature_mode = evercrypt_signature_type(sk.key_type())?;
@@ -487,7 +487,7 @@ impl Verify for Evercrypt {
         payload: &[u8],
         hash: impl Into<Option<HashType>>,
     ) -> Result<(), openmls_crypto::errors::Error> {
-        let (pk, _status): (PublicKey, Status) = key_store.internal_read(key_id)?;
+        let (pk, _status): (PublicKey, Status) = key_store.unsafe_read(key_id)?;
         Self::verify_with_pk(&pk, signature, payload, hash)
     }
 

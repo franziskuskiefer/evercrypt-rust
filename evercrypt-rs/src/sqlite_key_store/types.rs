@@ -61,7 +61,6 @@ impl PrivateKey {
     }
 
     /// Get the raw byte slice of this key.
-    #[cfg(feature = "hazmat")]
     pub fn as_slice(&self) -> &[u8] {
         self.value.as_slice()
     }
