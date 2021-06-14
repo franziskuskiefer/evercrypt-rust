@@ -9,22 +9,12 @@
 )]
 
 use crypto_algorithms::AsymmetricKeyType;
-use openmls_crypto::keys::PublicKey;
 use tls_codec::{Deserialize, SecretTlsVecU16, Serialize, TlsDeserialize, TlsSerialize};
 use zeroize::Zeroize;
 
-use key_store::{traits::KeyStoreValue, KeyStoreResult};
+use key_store::traits::KeyStoreValue;
 
-/// Compare two byte slices in a way that's hopefully not optimised out by the
-/// compiler.
-#[inline]
-pub(crate) fn equal_ct(a: &[u8], b: &[u8]) -> bool {
-    let mut diff = 0u8;
-    for (l, r) in a.iter().zip(b.iter()) {
-        diff |= l ^ r;
-    }
-    diff == 0
-}
+use super::{util::equal_ct, KeyStoreError};
 
 /// # Private key
 ///
@@ -89,12 +79,67 @@ impl PartialEq for PrivateKey {
     }
 }
 
+/// FIXME: remove unwraps
 impl KeyStoreValue for PrivateKey {
-    fn serialize(&self) -> KeyStoreResult<Vec<u8>> {
+    type Error = KeyStoreError;
+    type SerializedValue = Vec<u8>;
+
+    fn serialize(&self) -> Result<Vec<u8>, KeyStoreError> {
         Ok(self.tls_serialize_detached().unwrap())
     }
 
-    fn deserialize(raw: &mut [u8]) -> KeyStoreResult<Self> {
+    fn deserialize(raw: &mut [u8]) -> Result<Self, KeyStoreError> {
+        // XXX: can we do this without copy please?
+        Ok(Self::tls_deserialize(&mut raw.as_ref()).unwrap())
+    }
+}
+
+/// # Public key
+///
+/// A public key is a byte vector with an associated `AsymmetricKeyType` and an
+/// arbitrary label.
+#[cfg_attr(
+    feature = "serialization",
+    derive(serde::Serialize, serde::Deserialize)
+)]
+#[derive(Eq, PartialEq, Zeroize, Clone, Debug, TlsSerialize, TlsDeserialize)]
+#[zeroize(drop)]
+pub struct PublicKey {
+    value: SecretTlsVecU16<u8>,
+    key_type: AsymmetricKeyType,
+    label: SecretTlsVecU16<u8>,
+}
+
+impl PublicKey {
+    /// Create a new public key from the raw byte values.
+    pub fn from(key_type: AsymmetricKeyType, value: &[u8], label: &[u8]) -> Self {
+        Self {
+            value: value.to_vec().into(),
+            key_type,
+            label: label.to_vec().into(),
+        }
+    }
+
+    /// Get the raw public key bytes as byte slice.
+    pub fn as_slice(&self) -> &[u8] {
+        self.value.as_slice()
+    }
+
+    /// Get the [`AsymmetricKeyType`] of this key.
+    pub fn key_type(&self) -> AsymmetricKeyType {
+        self.key_type
+    }
+}
+
+impl KeyStoreValue for PublicKey {
+    type Error = KeyStoreError;
+    type SerializedValue = Vec<u8>;
+
+    fn serialize(&self) -> Result<Vec<u8>, KeyStoreError> {
+        Ok(self.tls_serialize_detached()?)
+    }
+
+    fn deserialize(raw: &mut [u8]) -> Result<Self, KeyStoreError> {
         // XXX: can we do this without copy please?
         Ok(Self::tls_deserialize(&mut raw.as_ref()).unwrap())
     }

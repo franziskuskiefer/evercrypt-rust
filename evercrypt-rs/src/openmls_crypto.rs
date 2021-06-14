@@ -1,10 +1,14 @@
 use std::convert::TryInto;
 
 use crate::{
-    aead, digest as evercrypt_digest, ed25519, hkdf, hmac, p256,
+    aead,
+    digest::{self as evercrypt_digest, Digest},
+    ed25519, hkdf, hmac,
+    openmls_crypto::errors::{AsymmetricKeyError, SymmetricKeyError},
+    p256,
     prelude::{p256_ecdsa_random_nonce, DigestMode},
     signature,
-    sqlite_key_store::{self, KeyStore, PrivateKey},
+    sqlite_key_store::{self, KeyStore, PrivateKey, PublicKey},
     x25519,
 };
 use crypto_algorithms::{
@@ -12,18 +16,19 @@ use crypto_algorithms::{
 };
 use key_store::{traits::KeyStore as KeyStoreTrait, types::Status};
 use openmls_crypto::{
-    aead::{CiphertextTag, Open, Plaintext, Seal},
-    errors::SymmetricKeyError,
-    errors::{AsymmetricKeyError, Error},
+    aead::{Open, Seal},
     hash::{Hash, Hasher},
     hkdf::HkdfDerive,
     key_generation::GenerateKeys,
-    keys::PublicKey,
-    secret::Secret,
-    signature::{Sign, Signature, Verify},
+    signature::{Sign, Verify},
     Supports,
 };
 use sqlite_key_store::KeyStoreId;
+
+pub mod errors;
+pub mod secret;
+use errors::Error;
+use secret::*;
 
 pub struct Evercrypt {}
 
@@ -47,7 +52,7 @@ impl Supports for Evercrypt {
 }
 
 #[inline]
-fn hash_type_to_evercrypt(hash: HashType) -> Result<DigestMode, openmls_crypto::errors::Error> {
+fn hash_type_to_evercrypt(hash: HashType) -> Result<DigestMode, Error> {
     Ok(match hash {
         HashType::Sha1 => DigestMode::Sha1,
         HashType::Sha2_224 => DigestMode::Sha224,
@@ -59,9 +64,10 @@ fn hash_type_to_evercrypt(hash: HashType) -> Result<DigestMode, openmls_crypto::
         HashType::Sha3_384 => DigestMode::Sha3_384,
         HashType::Sha3_512 => DigestMode::Sha3_512,
         _ => {
-            return Err(openmls_crypto::errors::Error::UnsupportedAlgorithm(
-                format!("{:?} is not supported by evercrypt", hash),
-            ))
+            return Err(Error::UnsupportedAlgorithm(format!(
+                "{:?} is not supported by evercrypt",
+                hash
+            )))
         }
     })
 }
@@ -72,29 +78,39 @@ impl From<crate::digest::Error> for Error {
     }
 }
 
-impl Hash for Evercrypt {
-    type StatefulHasher = crate::digest::Digest;
+/// A wrapper for [`Digest`].
+pub struct OpenMlsHasher(Digest);
 
-    fn hash(hash: HashType, data: &[u8]) -> Result<Vec<u8>, openmls_crypto::errors::Error> {
+impl Hash for Evercrypt {
+    type StatefulHasher = OpenMlsHasher;
+    type Error = Error;
+    type Digest = Vec<u8>;
+
+    fn hash(hash: HashType, data: &[u8]) -> Result<Vec<u8>, Error> {
         Ok(crate::digest::hash(hash_type_to_evercrypt(hash)?, data))
     }
 
-    fn hasher(hash: HashType) -> Result<Self::StatefulHasher, openmls_crypto::errors::Error> {
-        crate::digest::Digest::new(hash_type_to_evercrypt(hash)?).map_err(|e| e.into())
+    fn hasher(hash: HashType) -> Result<Self::StatefulHasher, Error> {
+        Digest::new(hash_type_to_evercrypt(hash)?)
+            .map_err(|e| e.into())
+            .map(|h| OpenMlsHasher(h))
     }
 }
 
-impl Hasher for crate::digest::Digest {
-    fn update(&mut self, data: &[u8]) -> Result<(), openmls_crypto::errors::Error> {
-        self.update(data).map_err(|e| e.into())
+impl Hasher for OpenMlsHasher {
+    type Error = Error;
+    type Digest = Vec<u8>;
+
+    fn update(&mut self, data: &[u8]) -> Result<(), Error> {
+        self.0.update(data).map_err(|e| e.into())
     }
 
-    fn finish(&mut self) -> Result<Vec<u8>, openmls_crypto::errors::Error> {
-        self.finish().map_err(|e| e.into())
+    fn finish(mut self) -> Result<Vec<u8>, Error> {
+        self.0.finish().map_err(|e| e.into())
     }
 }
 
-impl From<p256::Error> for openmls_crypto::errors::Error {
+impl From<p256::Error> for Error {
     fn from(e: p256::Error) -> Self {
         Self::AsymmetricKeyError(AsymmetricKeyError::CryptoLibError(format!(
             "Hashing error {:?}",
@@ -106,6 +122,8 @@ impl From<p256::Error> for openmls_crypto::errors::Error {
 impl GenerateKeys for Evercrypt {
     type KeyStoreType = KeyStore;
     type KeyStoreIndex = KeyStoreId;
+    type PublicKey = PublicKey;
+    type Error = Error;
 
     fn new_secret(
         key_store: &Self::KeyStoreType,
@@ -113,22 +131,15 @@ impl GenerateKeys for Evercrypt {
         status: Status,
         k: &Self::KeyStoreIndex,
         label: &[u8],
-    ) -> Result<(), openmls_crypto::errors::Error> {
+    ) -> Result<(), Error> {
         if !Self::symmetric_key_types().contains(&key_type) {
-            return Err(openmls_crypto::errors::Error::UnsupportedSecretType(
-                key_type,
-            ));
+            return Err(Error::UnsupportedSecretType(key_type));
         }
         let mut randomness = rand::thread_rng();
         let secret = Secret::random_bor(&mut randomness, key_type, label);
         key_store
             .store_with_status(k, &secret, status)
-            .map_err(|e| {
-                openmls_crypto::errors::Error::KeyStoreError(format!(
-                    "Key store write error {:?}",
-                    e
-                ))
-            })
+            .map_err(|e| Error::KeyStoreError(format!("Key store write error {:?}", e)))
     }
 
     fn new_key_pair(
@@ -136,7 +147,7 @@ impl GenerateKeys for Evercrypt {
         key_type: AsymmetricKeyType,
         status: Status,
         label: &[u8],
-    ) -> Result<(PublicKey, Self::KeyStoreIndex), openmls_crypto::errors::Error> {
+    ) -> Result<(PublicKey, Self::KeyStoreIndex), Error> {
         let (public_key, private_key) = match key_type {
             AsymmetricKeyType::KemKey(KemKeyType::X25519) => {
                 let private_key = x25519::key_gen();
@@ -160,7 +171,7 @@ impl GenerateKeys for Evercrypt {
                 let private_key = PrivateKey::from(key_type, &private_key, label, &public_key);
                 (public_key, private_key)
             }
-            _ => return Err(openmls_crypto::errors::Error::UnsupportedKeyType(key_type)),
+            _ => return Err(Error::UnsupportedKeyType(key_type)),
         };
         let mut sha256 = Self::hasher(HashType::Sha2_256)?;
         sha256.update(label)?;
@@ -169,22 +180,18 @@ impl GenerateKeys for Evercrypt {
         id.clone_from_slice(&sha256.finish()?);
         key_store
             .store_with_status(&id, &private_key, status)
-            .map_err(|e| {
-                openmls_crypto::errors::Error::KeyStoreError(format!("Key store error {:?}", e))
-            })?;
+            .map_err(|e| Error::KeyStoreError(format!("Key store error {:?}", e)))?;
         Ok((public_key, id))
     }
 }
 
-fn hmac_type(hash: HashType) -> Result<hmac::Mode, openmls_crypto::errors::Error> {
+fn hmac_type(hash: HashType) -> Result<hmac::Mode, Error> {
     match hash {
         HashType::Sha1 => Ok(hmac::Mode::Sha1),
         HashType::Sha2_256 => Ok(hmac::Mode::Sha256),
         HashType::Sha2_384 => Ok(hmac::Mode::Sha384),
         HashType::Sha2_512 => Ok(hmac::Mode::Sha512),
-        _ => Err(openmls_crypto::errors::Error::UnsupportedAlgorithm(
-            format!("{:?}", hash),
-        )),
+        _ => Err(Error::UnsupportedAlgorithm(format!("{:?}", hash))),
     }
 }
 
@@ -193,24 +200,24 @@ fn extract_unsafe(
     hash: HashType,
     ikm: &KeyStoreId,
     salt: &[u8],
-) -> Result<Secret, openmls_crypto::errors::Error> {
+) -> Result<Secret, Error> {
     let mode = hmac_type(hash)?;
-    let (ikm_secret, _status): (Secret, Status) = ks.unsafe_read(ikm).map_err(|e| {
-        openmls_crypto::errors::Error::KeyStoreError(format!("Key store error {:?}", e))
-    })?;
+    let (ikm_secret, _status): (Secret, Status) = ks
+        .unsafe_read(ikm)
+        .map_err(|e| Error::KeyStoreError(format!("Key store error {:?}", e)))?;
     let prk = hkdf::extract(mode, salt, ikm_secret.as_slice());
     let prk_len = prk.len();
     Secret::try_from(
         prk,
         SymmetricKeyType::Any(prk_len.try_into().map_err(|_| {
-            openmls_crypto::errors::Error::InvalidLength(format!(
+            Error::InvalidLength(format!(
                 "HKDF PRK is too long ({}) for a secret (u16)",
                 prk_len
             ))
         })?),
         b"HKDF-PRK",
     )
-    .map_err(|e| openmls_crypto::errors::Error::KeyStoreError(format!("Key store error {:?}", e)))
+    .map_err(|e| Error::KeyStoreError(format!("Key store error {:?}", e)))
 }
 
 fn expand_unsafe(
@@ -218,11 +225,11 @@ fn expand_unsafe(
     prk: Secret,
     info: &[u8],
     out_len: usize,
-) -> Result<Secret, openmls_crypto::errors::Error> {
+) -> Result<Secret, Error> {
     let mode = hmac_type(hash)?;
     let key = hkdf::expand(mode, prk.as_slice(), info, out_len);
     if key.is_empty() {
-        return Err(openmls_crypto::errors::Error::InvalidLength(format!(
+        return Err(Error::InvalidLength(format!(
             "Invalid HKDF output length {}",
             out_len
         )));
@@ -231,19 +238,21 @@ fn expand_unsafe(
     Secret::try_from(
         key,
         SymmetricKeyType::Any(key_len.try_into().map_err(|_| {
-            openmls_crypto::errors::Error::InvalidLength(format!(
+            Error::InvalidLength(format!(
                 "HKDF key is too long ({}) for a secret (u16)",
                 key_len
             ))
         })?),
         b"HKDF-KEY",
     )
-    .map_err(|e| openmls_crypto::errors::Error::KeyStoreError(format!("Key store error {:?}", e)))
+    .map_err(|e| Error::KeyStoreError(format!("Key store error {:?}", e)))
 }
 
 impl HkdfDerive for Evercrypt {
     type KeyStoreType = KeyStore;
     type KeyStoreIndex = KeyStoreId;
+    type Secret = Secret;
+    type Error = Error;
 
     fn hkdf(
         key_store: &Self::KeyStoreType,
@@ -253,23 +262,94 @@ impl HkdfDerive for Evercrypt {
         info: &[u8],
         out_len: usize,
         okm: &Self::KeyStoreIndex,
-    ) -> Result<(), openmls_crypto::errors::Error> {
+    ) -> Result<(), Error> {
+        Self::hkdf_with_status(
+            key_store,
+            ikm,
+            hash,
+            salt,
+            info,
+            out_len,
+            okm,
+            Status::Hidden,
+        )
+    }
+
+    fn extract(
+        key_store: &Self::KeyStoreType,
+        ikm: &Self::KeyStoreIndex,
+        hash: HashType,
+        salt: &[u8],
+        okm: &Self::KeyStoreIndex,
+    ) -> Result<(), Self::Error> {
+        Self::extract_with_status(key_store, ikm, hash, salt, okm, Status::Hidden)
+    }
+
+    fn expand(
+        key_store: &Self::KeyStoreType,
+        prk: &Self::KeyStoreIndex,
+        hash: HashType,
+        info: &[u8],
+        out_len: usize,
+        okm: &Self::KeyStoreIndex,
+    ) -> Result<(), Self::Error> {
+        Self::expand_with_status(key_store, prk, hash, info, out_len, okm, Status::Hidden)
+    }
+
+    fn hkdf_with_status(
+        key_store: &Self::KeyStoreType,
+        ikm: &Self::KeyStoreIndex,
+        hash: HashType,
+        salt: &[u8],
+        info: &[u8],
+        out_len: usize,
+        okm: &Self::KeyStoreIndex,
+        status: Status,
+    ) -> Result<(), Self::Error> {
         let prk = extract_unsafe(key_store, hash, ikm, salt)?;
         let key = expand_unsafe(hash, prk, info, out_len)?;
         key_store
-            .store(okm, &key)
-            .map_err(|e| openmls_crypto::errors::Error::from(e))
+            .store_with_status(okm, &key, status)
+            .map_err(|e| Error::from(e))
+    }
+
+    fn extract_with_status(
+        key_store: &Self::KeyStoreType,
+        ikm: &Self::KeyStoreIndex,
+        hash: HashType,
+        salt: &[u8],
+        okm: &Self::KeyStoreIndex,
+        status: Status,
+    ) -> Result<(), Self::Error> {
+        let prk = extract_unsafe(key_store, hash, ikm, salt)?;
+        key_store
+            .store_with_status(okm, &prk, status)
+            .map_err(|e| Error::from(e))
+    }
+
+    fn expand_with_status(
+        key_store: &Self::KeyStoreType,
+        prk: &Self::KeyStoreIndex,
+        hash: HashType,
+        info: &[u8],
+        out_len: usize,
+        okm: &Self::KeyStoreIndex,
+        status: Status,
+    ) -> Result<(), Self::Error> {
+        let (prk, _status): (Secret, Status) = key_store.unsafe_read(prk)?;
+        let key = expand_unsafe(hash, prk, info, out_len)?;
+        key_store
+            .store_with_status(okm, &key, status)
+            .map_err(|e| Error::from(e))
     }
 }
 
-fn aead_type(aead: AeadType) -> Result<aead::Mode, openmls_crypto::errors::Error> {
+fn aead_type(aead: AeadType) -> Result<aead::Mode, Error> {
     match aead {
         AeadType::Aes128Gcm => Ok(aead::Mode::Aes128Gcm),
         AeadType::Aes256Gcm => Ok(aead::Mode::Aes256Gcm),
         AeadType::ChaCha20Poly1305 => Ok(aead::Mode::Chacha20Poly1305),
-        AeadType::HpkeExport => Err(openmls_crypto::errors::Error::UnsupportedAlgorithm(
-            format!("HPKE Export AEAD"),
-        )),
+        AeadType::HpkeExport => Err(Error::UnsupportedAlgorithm(format!("HPKE Export AEAD"))),
     }
 }
 
@@ -278,6 +358,9 @@ pub struct Aead {}
 impl Seal for Aead {
     type KeyStoreType = KeyStore;
     type KeyStoreIndex = KeyStoreId;
+    type Error = Error;
+    type CiphertextTag = Vec<u8>;
+    type Tag = Vec<u8>;
 
     fn seal(
         ks: &Self::KeyStoreType,
@@ -286,36 +369,12 @@ impl Seal for Aead {
         msg: &[u8],
         aad: &[u8],
         nonce: &[u8],
-    ) -> Result<openmls_crypto::aead::CiphertextTag, openmls_crypto::errors::Error> {
+    ) -> Result<Vec<u8>, Error> {
         let (key, _status): (Secret, Status) = ks.unsafe_read(key_id)?;
         if !key.compatible(aead) {
-            return Err(openmls_crypto::errors::Error::SymmetricKeyError(
-                SymmetricKeyError::InvalidKey(format!(
-                    "Key is not compatible with the requested AEAD."
-                )),
-            ));
-        }
-        let mode = aead_type(aead)?;
-        let (ct, tag) = aead::encrypt(mode, key.as_slice(), msg, nonce, aad)
-            .map_err(|e| Error::EncryptionError(format!("Error encrypting: {:?}", e)))?;
-        Ok((ct, tag))
-    }
-
-    fn seal_combined(
-        ks: &Self::KeyStoreType,
-        key_id: &Self::KeyStoreIndex,
-        aead: AeadType,
-        msg: &[u8],
-        aad: &[u8],
-        nonce: &[u8],
-    ) -> Result<Vec<u8>, openmls_crypto::errors::Error> {
-        let (key, _status): (Secret, Status) = ks.unsafe_read(key_id)?;
-        if !key.compatible(aead) {
-            return Err(openmls_crypto::errors::Error::SymmetricKeyError(
-                SymmetricKeyError::InvalidKey(format!(
-                    "Key is not compatible with the requested AEAD."
-                )),
-            ));
+            return Err(Error::SymmetricKeyError(SymmetricKeyError::InvalidKey(
+                format!("Key is not compatible with the requested AEAD."),
+            )));
         }
         let mode = aead_type(aead)?;
         let ct = aead::encrypt_combined(mode, key.as_slice(), msg, nonce, aad)
@@ -330,12 +389,19 @@ impl Seal for Aead {
         msg: &mut [u8],
         aad: &[u8],
         nonce: &[u8],
-    ) -> Result<Vec<u8>, openmls_crypto::errors::Error> {
+    ) -> Result<Self::Tag, Error> {
         // We can't do this in evercrypt.
-        let ct = Self::seal(ks, key_id, aead, msg, aad, nonce)?;
-        let (ct, tag) = ct.into();
+        let (key, _status): (Secret, Status) = ks.unsafe_read(key_id)?;
+        if !key.compatible(aead) {
+            return Err(Error::SymmetricKeyError(SymmetricKeyError::InvalidKey(
+                format!("Key is not compatible with the requested AEAD."),
+            )));
+        }
+        let mode = aead_type(aead)?;
+        let (ct, tag) = aead::encrypt(mode, key.as_slice(), msg, nonce, aad)
+            .map_err(|e| Error::EncryptionError(format!("Error encrypting: {:?}", e)))?;
         if ct.len() != msg.len() {
-            return Err(openmls_crypto::errors::Error::InvalidLength(format!(
+            return Err(Error::InvalidLength(format!(
                 "Cipher text has length {}. Message was {}.",
                 ct.len(),
                 msg.len()
@@ -344,65 +410,23 @@ impl Seal for Aead {
         msg.clone_from_slice(&ct);
         Ok(tag)
     }
-
-    fn seal_in_place_combined(
-        ks: &Self::KeyStoreType,
-        key_id: &Self::KeyStoreIndex,
-        aead: AeadType,
-        msg: &mut [u8],
-        aad: &[u8],
-        nonce: &[u8],
-    ) -> Result<(), openmls_crypto::errors::Error> {
-        // We can't do this in evercrypt.
-        let ct = Self::seal(ks, key_id, aead, msg, aad, nonce)?;
-        let (mut ct, mut tag) = ct.into();
-        ct.append(&mut tag);
-        if ct.len() != msg.len() {
-            return Err(openmls_crypto::errors::Error::InvalidLength(format!(
-                "Cipher text has length {}. Message was {}.",
-                ct.len(),
-                msg.len()
-            )));
-        }
-        msg.clone_from_slice(&ct);
-        Ok(())
-    }
 }
 
 impl Open for Aead {
     type KeyStoreType = KeyStore;
     type KeyStoreIndex = KeyStoreId;
+    type Error = Error;
+    type CiphertextTag = Vec<u8>;
+    type Plaintext = Vec<u8>;
 
     fn open(
         key_store: &Self::KeyStoreType,
         key_id: &Self::KeyStoreIndex,
         aead: AeadType,
-        cipher_text: &CiphertextTag,
+        cipher_text: &Self::CiphertextTag,
         aad: &[u8],
         nonce: &[u8],
-    ) -> Result<Plaintext, openmls_crypto::errors::Error> {
-        let (key, _status): (Secret, Status) = key_store.unsafe_read(key_id)?;
-        let mode = aead_type(aead)?;
-        let pt = aead::decrypt(
-            mode,
-            key.as_slice(),
-            &cipher_text.0,
-            &cipher_text.1,
-            nonce,
-            aad,
-        )
-        .map_err(|e| Error::DecryptionError(format!("Decryption encrypting: {:?}", e)))?;
-        Ok(pt)
-    }
-
-    fn open_combined(
-        key_store: &Self::KeyStoreType,
-        key_id: &Self::KeyStoreIndex,
-        aead: AeadType,
-        cipher_text: &[u8],
-        aad: &[u8],
-        nonce: &[u8],
-    ) -> Result<Plaintext, openmls_crypto::errors::Error> {
+    ) -> Result<Self::Plaintext, Error> {
         let (key, _status): (Secret, Status) = key_store.unsafe_read(key_id)?;
         let mode = aead_type(aead)?;
         let pt = aead::decrypt_combined(mode, key.as_slice(), cipher_text, nonce, aad)
@@ -411,9 +435,7 @@ impl Open for Aead {
     }
 }
 
-fn evercrypt_signature_type(
-    key_type: AsymmetricKeyType,
-) -> Result<signature::Mode, openmls_crypto::errors::Error> {
+fn evercrypt_signature_type(key_type: AsymmetricKeyType) -> Result<signature::Mode, Error> {
     match key_type {
         AsymmetricKeyType::SignatureKey(SignatureKeyType::Ed25519) => Ok(signature::Mode::Ed25519),
         AsymmetricKeyType::SignatureKey(SignatureKeyType::EcdsaP256Sha256)
@@ -446,13 +468,15 @@ fn evercrypt_hash_type(hash: impl Into<Option<HashType>>) -> Option<crate::prelu
 impl Sign for Evercrypt {
     type KeyStoreType = KeyStore;
     type KeyStoreIndex = KeyStoreId;
+    type Signature = Vec<u8>;
+    type Error = Error;
 
     fn sign(
         key_store: &Self::KeyStoreType,
         key_id: &Self::KeyStoreIndex,
         payload: &[u8],
         hash: impl Into<Option<HashType>>,
-    ) -> Result<Signature, openmls_crypto::errors::Error> {
+    ) -> Result<Self::Signature, Error> {
         let (sk, _status): (PrivateKey, Status) = key_store.unsafe_read(key_id)?;
         let hash = hash.into();
         let evercrypt_hash = evercrypt_hash_type(hash);
@@ -479,6 +503,8 @@ impl Sign for Evercrypt {
 impl Verify for Evercrypt {
     type KeyStoreType = KeyStore;
     type KeyStoreIndex = KeyStoreId;
+    type PublicKey = PublicKey;
+    type Error = Error;
 
     fn verify(
         key_store: &Self::KeyStoreType,
@@ -486,7 +512,7 @@ impl Verify for Evercrypt {
         signature: &[u8],
         payload: &[u8],
         hash: impl Into<Option<HashType>>,
-    ) -> Result<(), openmls_crypto::errors::Error> {
+    ) -> Result<(), Error> {
         let (pk, _status): (PublicKey, Status) = key_store.unsafe_read(key_id)?;
         Self::verify_with_pk(&pk, signature, payload, hash)
     }
@@ -496,7 +522,7 @@ impl Verify for Evercrypt {
         signature: &[u8],
         payload: &[u8],
         hash: impl Into<Option<HashType>>,
-    ) -> Result<(), openmls_crypto::errors::Error> {
+    ) -> Result<(), Error> {
         let mode = evercrypt_signature_type(key.key_type())?;
         let hash = evercrypt_hash_type(hash);
         let valid = signature::verify(mode, hash, key.as_slice(), signature, payload)

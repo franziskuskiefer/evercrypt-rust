@@ -1,8 +1,4 @@
-use std::{
-    convert::TryFrom,
-    path::Path,
-    sync::{Mutex, PoisonError},
-};
+use std::{convert::TryFrom, path::Path, sync::Mutex};
 
 use key_store::traits::KeyStoreValue;
 use rusqlite::{
@@ -11,36 +7,18 @@ use rusqlite::{
     Connection, OpenFlags, ToSql,
 };
 
+mod errors;
 mod types;
-pub use key_store::{
-    traits::KeyStore as KeyStoreTrait, types::Status, Error as KeyStoreError, KeyStoreResult,
-};
-pub use types::PrivateKey;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-/// Errors that can occur in the everest sqlite key store.
-pub enum EverestSqlKeyStoreError {
-    /// Mutex poison error.
-    MutexError(String),
-}
-
-impl<Guard> From<PoisonError<Guard>> for EverestSqlKeyStoreError {
-    fn from(e: PoisonError<Guard>) -> Self {
-        Self::MutexError(format!("Sync poison error {}", e))
-    }
-}
-
-impl From<EverestSqlKeyStoreError> for KeyStoreError {
-    fn from(e: EverestSqlKeyStoreError) -> Self {
-        Self::KeyStoreError(format!("EverestSqlKeyStoreError {:?}", e))
-    }
-}
+pub(crate) mod util;
+pub use errors::*;
+pub use key_store::{traits::KeyStore as KeyStoreTrait, types::Status};
+pub use types::{PrivateKey, PublicKey};
 
 pub struct KeyStore {
     sql: Mutex<Connection>,
 }
 
-fn init_key_store(connection: &Connection) -> KeyStoreResult<()> {
+fn init_key_store(connection: &Connection) -> Result<(), KeyStoreError> {
     let _ = connection
         .execute(
             "CREATE TABLE secrets (
@@ -92,7 +70,7 @@ struct SqlKeyStoreId<'a>(&'a KeyStoreId);
 
 impl<'a> ToSql for SqlKeyStoreId<'a> {
     fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
-        Ok(ToSqlOutput::from(self.0.to_vec()))
+        Ok(ToSqlOutput::from(&self.0[..]))
     }
 }
 
@@ -114,15 +92,16 @@ impl KeyStore {
         k: &<KeyStore as KeyStoreTrait>::KeyStoreId,
         v: &impl KeyStoreValue,
         status: Status,
-    ) -> KeyStoreResult<()> {
-        let connection = self
-            .sql
-            .lock()
-            .map_err(|e| EverestSqlKeyStoreError::from(e))?;
+    ) -> Result<(), KeyStoreError> {
+        let connection = self.sql.lock().map_err(|e| KeyStoreError::from(e))?;
+        let v = v
+            .serialize()
+            .map_err(|e| KeyStoreError::TlsCodecError(format!("Error serializing value {:?}", e)))?
+            .into();
         connection
             .execute(
                 "INSERT INTO secrets (label, value, status) VALUES (?1, ?2, ?3)",
-                params![SqlKeyStoreId(k), v.serialize()?, status as u8],
+                params![SqlKeyStoreId(k), v, status as u8],
             )
             .map_err(|e| {
                 log::error!("SQL ERROR: {:?}", e);
@@ -132,14 +111,13 @@ impl KeyStore {
     }
 
     /// Retrieve a value from the key store.
+    ///
+    /// ☣️ Note that his ignores the [`Status`] of the value and just returns it.
     pub fn unsafe_read<V: KeyStoreValue>(
         &self,
         k: &<KeyStore as KeyStoreTrait>::KeyStoreId,
-    ) -> KeyStoreResult<(V, Status)> {
-        let connection = self
-            .sql
-            .lock()
-            .map_err(|e| EverestSqlKeyStoreError::from(e))?;
+    ) -> Result<(V, Status), KeyStoreError> {
+        let connection = self.sql.lock().map_err(|e| KeyStoreError::from(e))?;
         let mut result: (Vec<u8>, SqlStatus) = connection
             .query_row(
                 "SELECT value, status FROM secrets WHERE label = ?1",
@@ -150,20 +128,22 @@ impl KeyStore {
                 log::error!("SQL ERROR: {:?}", e);
                 KeyStoreError::ReadError(format!("SQLite read error {:?}", e))
             })?;
-        Ok((V::deserialize(&mut result.0)?, result.1 .0))
+        let out = V::deserialize(&mut result.0).map_err(|e| {
+            KeyStoreError::TlsCodecError(format!("Error deserializing value {:?}", e))
+        })?;
+        Ok((out, result.1 .0))
     }
 
     fn _read<V: KeyStoreValue>(
         &self,
         k: &<KeyStore as KeyStoreTrait>::KeyStoreId,
-    ) -> KeyStoreResult<V> {
+    ) -> Result<V, KeyStoreError> {
         let (v, status) = self.unsafe_read(k)?;
         match status {
             Status::Extractable | Status::UnconfirmedExtractable => Ok(v),
-            Status::Hidden | Status::UnconfirmedHidden => Err(KeyStoreError::ForbiddenExtraction(format!(
-                "The value is {:?}",
-                status
-            ))),
+            Status::Hidden | Status::UnconfirmedHidden => Err(KeyStoreError::ForbiddenExtraction(
+                format!("The value is {:?}", status),
+            )),
         }
     }
 
@@ -171,15 +151,16 @@ impl KeyStore {
         &self,
         k: &<KeyStore as KeyStoreTrait>::KeyStoreId,
         v: &impl KeyStoreValue,
-    ) -> KeyStoreResult<()> {
-        let connection = self
-            .sql
-            .lock()
-            .map_err(|e| EverestSqlKeyStoreError::from(e))?;
+    ) -> Result<(), KeyStoreError> {
+        let connection = self.sql.lock().map_err(|e| KeyStoreError::from(e))?;
+        let v = v
+            .serialize()
+            .map_err(|e| KeyStoreError::TlsCodecError(format!("Error serializing value {:?}", e)))?
+            .into();
         let updated_rows = connection
             .execute(
                 "UPDATE secrets SET value = ?1 WHERE label = ?2",
-                params![v.serialize()?, SqlKeyStoreId(k)],
+                params![v, SqlKeyStoreId(k)],
             )
             .map_err(|e| {
                 log::error!("SQL ERROR: {:?}", e);
@@ -192,11 +173,8 @@ impl KeyStore {
         }
     }
 
-    fn _delete(&self, k: &<KeyStore as KeyStoreTrait>::KeyStoreId) -> KeyStoreResult<()> {
-        let connection = self
-            .sql
-            .lock()
-            .map_err(|e| EverestSqlKeyStoreError::from(e))?;
+    fn _delete(&self, k: &<KeyStore as KeyStoreTrait>::KeyStoreId) -> Result<(), KeyStoreError> {
+        let connection = self.sql.lock().map_err(|e| KeyStoreError::from(e))?;
         connection
             .execute(
                 "DELETE FROM secrets WHERE label = ?1",
@@ -214,29 +192,30 @@ pub type KeyStoreId = [u8; 32];
 
 impl KeyStoreTrait for KeyStore {
     type KeyStoreId = KeyStoreId;
-
-    fn store(&self, k: &Self::KeyStoreId, v: &impl KeyStoreValue) -> KeyStoreResult<()> {
-        self._store(k, v, Status::Extractable)
-    }
-
-    fn read<V: KeyStoreValue>(&self, k: &Self::KeyStoreId) -> KeyStoreResult<V> {
-        self._read(k)
-    }
-
-    fn update(&self, k: &Self::KeyStoreId, v: &impl KeyStoreValue) -> KeyStoreResult<()> {
-        self._update(k, v)
-    }
-
-    fn delete(&self, k: &Self::KeyStoreId) -> KeyStoreResult<()> {
-        self._delete(k)
-    }
+    type Error = KeyStoreError;
 
     fn store_with_status(
         &self,
         k: &Self::KeyStoreId,
         v: &impl KeyStoreValue,
         s: Status,
-    ) -> KeyStoreResult<()> {
+    ) -> Result<(), KeyStoreError> {
         self._store(k, v, s)
+    }
+
+    fn store(&self, k: &Self::KeyStoreId, v: &impl KeyStoreValue) -> Result<(), KeyStoreError> {
+        self._store(k, v, Status::Extractable)
+    }
+
+    fn read<V: KeyStoreValue>(&self, k: &Self::KeyStoreId) -> Result<V, KeyStoreError> {
+        self._read(k)
+    }
+
+    fn update(&self, k: &Self::KeyStoreId, v: &impl KeyStoreValue) -> Result<(), KeyStoreError> {
+        self._update(k, v)
+    }
+
+    fn delete(&self, k: &Self::KeyStoreId) -> Result<(), KeyStoreError> {
+        self._delete(k)
     }
 }

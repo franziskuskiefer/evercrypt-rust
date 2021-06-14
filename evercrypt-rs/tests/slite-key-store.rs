@@ -2,12 +2,12 @@
 mod sqlite_keystore_tests {
 
     use crypto_algorithms::{AeadType, SymmetricKeyType};
-    use evercrypt::{openmls_crypto::Aead, sqlite_key_store::KeyStore};
-    use key_store::{traits::KeyStore as KeyStoreTrait, Error, KeyStoreResult};
-    use openmls_crypto::{
-        aead::{Open, Seal},
-        secret::Secret,
+    use evercrypt::{
+        openmls_crypto::{secret::Secret, Aead},
+        sqlite_key_store::{KeyStore, KeyStoreError},
     };
+    use key_store::traits::KeyStore as KeyStoreTrait;
+    use openmls_crypto::aead::{Open, Seal};
 
     #[test]
     fn basic_key_store() {
@@ -32,9 +32,9 @@ mod sqlite_keystore_tests {
         assert_eq!(secret, secret_again);
 
         ks.delete(&id2).unwrap();
-        let secret_again: KeyStoreResult<Secret> = ks.read(&id2);
+        let secret_again: Result<Secret, KeyStoreError> = ks.read(&id2);
         assert_eq!(
-            Error::ReadError("SQLite read error QueryReturnedNoRows".to_owned()),
+            KeyStoreError::ReadError("SQLite read error QueryReturnedNoRows".to_owned()),
             secret_again.err().unwrap()
         );
 
@@ -46,7 +46,7 @@ mod sqlite_keystore_tests {
         assert_eq!(secret2, secret_again);
 
         // AEAD
-        let ctxt_tag = Aead::seal_combined(
+        let ctxt_tag = Aead::seal(
             &ks,
             &id,
             AeadType::Aes256Gcm,
@@ -56,7 +56,7 @@ mod sqlite_keystore_tests {
         )
         .unwrap();
 
-        let msg = Aead::open_combined(
+        let msg = Aead::open(
             &ks,
             &id,
             AeadType::Aes256Gcm,
