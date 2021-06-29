@@ -25,7 +25,7 @@ sqlite-key-store = ["key_store", "rusqlite", "tls_codec", "crypto_algorithms", "
 
 [dependencies]
 log = "0.4"
-evercrypt-sys = { version = "0.0.9", git = "https://github.com/franziskuskiefer/evercrypt-rust" }
+evercrypt-sys = { version = "0.0.9", git = "https://github.com/franziskuskiefer/evercrypt-rust", branch = "openmls-keystore" }
 aes-gcm = { version = "0.8", optional = true }
 rand = { version = "0.8", optional = true }
 rand_core = { version = "0.6", optional = true }
