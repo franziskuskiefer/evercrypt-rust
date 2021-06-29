@@ -9,7 +9,7 @@
 )]
 
 use crypto_algorithms::AsymmetricKeyType;
-use tls_codec::{Deserialize, SecretTlsVecU16, Serialize, TlsDeserialize, TlsSerialize};
+use tls_codec::{Deserialize, SecretTlsVecU16, Serialize, TlsDeserialize, TlsSerialize, TlsSize};
 use zeroize::Zeroize;
 
 use key_store::traits::KeyStoreValue;

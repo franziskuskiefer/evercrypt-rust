@@ -1,4 +1,3 @@
-
 /// Convert a byte slice into a hex string
 #[inline]
 pub(crate) fn bytes_to_hex(bytes: &[u8]) -> String {

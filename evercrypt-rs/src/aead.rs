@@ -326,16 +326,16 @@ impl Aead {
     fn encrypt_rs(&self, msg: &[u8], iv: &[u8], aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
         let ctxt_tag = match self.op_mode {
             OpMode::RustCryptoAes128 => Aes128Gcm::new(GenericArray::from_slice(&self.key))
-                .encrypt((&iv[..]).into(), Payload { msg: msg, aad: aad }),
+                .encrypt(iv.into(), Payload { msg, aad }),
             OpMode::RustCryptoAes256 => Aes256Gcm::new(GenericArray::from_slice(&self.key))
-                .encrypt((&iv[..]).into(), Payload { msg: msg, aad: aad }),
+                .encrypt(iv.into(), Payload { msg, aad }),
             _ => return Err(Error::UnsupportedConfig),
         };
         match ctxt_tag {
             Ok(mut c) => {
                 let tag = c.split_off(c.len() - self.tag_size());
                 debug_assert!(tag.len() == self.tag_size());
-                Ok((c, tag.try_into().map_err(|_| Error::Decrypting)?))
+                Ok((c, tag))
             }
             Err(_) => Err(Error::Encrypting),
         }
@@ -351,18 +351,18 @@ impl Aead {
         let msg = match self.op_mode {
             OpMode::RustCryptoAes128 => Aes128Gcm::new(GenericArray::from_slice(&self.key))
                 .decrypt(
-                    (&iv[..]).into(),
+                    iv.into(),
                     Payload {
                         msg: &p_in[..],
-                        aad: aad,
+                        aad,
                     },
                 ),
             OpMode::RustCryptoAes256 => Aes256Gcm::new(GenericArray::from_slice(&self.key))
                 .decrypt(
-                    (&iv[..]).into(),
+                    iv.into(),
                     Payload {
                         msg: &p_in[..],
-                        aad: aad,
+                        aad,
                     },
                 ),
             _ => return Err(Error::UnsupportedConfig),
