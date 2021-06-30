@@ -1,8 +1,0 @@
-[workspace]
-members = [
-    "evercrypt-rs",
-    "evercrypt-sys",
-]
-
-[patch.crates-io]
-evercrypt-sys = { path = "evercrypt-sys" }

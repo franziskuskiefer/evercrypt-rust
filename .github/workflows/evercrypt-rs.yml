@@ -5,6 +5,10 @@ on: [push, pull_request]
 env:
   CARGO_TERM_COLOR: always
 
+defaults:
+  run:
+    working-directory: evercrypt-rs
+
 jobs:
   build:
     strategy:
@@ -44,34 +48,22 @@ jobs:
           cargo build --release --target aarch64-apple-ios --tests --verbose --features rust-crypto-aes
       - if: matrix.os == 'ubuntu-latest'
         name: Test evercrypt-rs
-        run: |
-          cd evercrypt-rs
-          cargo test --verbose
+        run: cargo test --verbose
       - name: Build (no-default-features)
-        run: |
-          cd evercrypt-rs
-          cargo build --verbose --no-default-features
+        run: cargo build --verbose --no-default-features
       - if: matrix.os == 'ubuntu-latest'
         name: Build & Test 32-bit Linux
-        run: |
-          cd evercrypt-rs
-          cargo test --verbose --features rust-crypto-aes
+        run: cargo test --verbose --features rust-crypto-aes
       - name: Test (rust-crypto-aes)
-        run: |
-          cd evercrypt-rs
-          cargo test --verbose --features rust-crypto-aes
+        run: cargo test --verbose --features rust-crypto-aes
       - name: Test (all-features)
-        run: |
-          cd evercrypt-rs
-          cargo test --verbose --all-features
+        run: cargo test --verbose --all-features
       - name: Release (all-features)
         run: |
-          cd evercrypt-rs
           cargo clean
           cargo test --release --verbose --all-features
       - name: Benchmark (rust-crypto-aes)
         run: |
-          cd evercrypt-rs
           cargo bench --verbose --features rust-crypto-aes
   fuzz:
     strategy:
@@ -95,10 +87,6 @@ jobs:
           crate: cargo-fuzz
           version: latest
       - name: Fuzz AEAD
-        run: |
-          cd evercrypt-rs
-          cargo fuzz run aead -- -runs=1000000
+        run: cargo fuzz run aead -- -runs=1000000
       - name: Fuzz ECDH
-        run: |
-          cd evercrypt-rs
-          cargo fuzz run ecdh -- -runs=100000
+        run: cargo fuzz run ecdh -- -runs=100000

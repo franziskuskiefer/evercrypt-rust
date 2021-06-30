@@ -1,12 +1,14 @@
 # Evercrypt & HACL Rust bindings
 
-![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)
-[![codecov](https://codecov.io/gh/franziskuskiefer/evercrypt-rust/branch/main/graph/badge.svg?token=RO2Q0YTSNY)](https://codecov.io/gh/franziskuskiefer/evercrypt-rust/)
-![Maturity Level](https://img.shields.io/badge/maturity-beta-orange.svg)
+![Maturity Level][maturity-badge]
+[![Build & Test][github-actions-badge]][github-actions-link]
+[![ARM Build][drone-badge]][drone-link]
+[![codecov][codecov-badge]][codecov-link]
 
 High-level [evercrypt](https://github.com/project-everest/hacl-star) bindings crates.
 
-**⚠️ Note:** This crate is still work in progress. Don't use in production.
+**⚠️ Note:** This crate is still work in progress.
+Don't use in production just yet.
 
 ## Features
 
@@ -24,16 +26,17 @@ To provide AES for other platforms the Evercrypt crate uses the [RustCrypto](htt
 Currently only Linux x64 and MacOS are supported.
 Windows builds are on the To Do list and should be supported in future.
 
-| Platform    | Supported |                                                                                                           Status                                                                                                           |
-| :---------- | :-------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| MacOS       |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| iOS         |    ✅     |    [![Build](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain)     |
-| Arm64 MacOS |    ✅     |    [![Build](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain)     |
-| Linux x64   |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| Linux x86   |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| Windows x64 |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| Arm64 Linux |    ✅     |                                  [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                   |
-| Arm32 Linux |    ✅     |                                  [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                   |
+| Platform             | Supported |
+| :------------------- | :-------: |
+| MacOS                |    ✅     |
+| MacOS Arm64          |    ✅     |
+| iOS                  |    ✅     |
+| iOS Simulator x86_64 |    ❌     |
+| Linux x64            |    ✅     |
+| Linux x86            |    ✅     |
+| Windows x64          |    ✅     |
+| Arm64 Linux          |    ✅     |
+| Arm32 Linux          |    ✅     |
 
 ## Benchmarks
 
@@ -44,3 +47,11 @@ To run benchmarks use `cargo bench`.
 All primitives are tested against the [Wycheproof](https://github.com/google/wycheproof) test vectors.
 They can be run with `cargo test`.
 This will also run automatically generated binding tests from bindgen.
+
+[maturity-badge]: https://img.shields.io/badge/maturity-beta-orange.svg?style=for-the-badge
+[github-actions-badge]: https://img.shields.io/github/workflow/status/franziskuskiefer/evercrypt-rust/Build%20&%20Test?label=build%20%26%20tests&logo=github&style=for-the-badge
+[github-actions-link]: https://github.com/franziskuskiefer/evercrypt-rust/actions/workflows/evercrypt-rs.yml?query=branch%3Amain
+[drone-badge]: https://img.shields.io/drone/build/franziskuskiefer/evercrypt-rust?label=ARM%20BUILD&style=for-the-badge
+[drone-link]: https://cloud.drone.io/franziskuskiefer/evercrypt-rust
+[codecov-badge]: https://img.shields.io/codecov/c/github/franziskuskiefer/evercrypt-rust?style=for-the-badge&token=RO2Q0YTSNY
+[codecov-link]: https://codecov.io/gh/franziskuskiefer/evercrypt-rust/

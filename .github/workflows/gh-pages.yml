@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    working-directory: evercrypt-rs
+
 jobs:
   rustdoc:
     runs-on: ubuntu-latest
