@@ -1,7 +1,8 @@
 # evercrypt-sys
 
-![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)
-![Maturity Level](https://img.shields.io/badge/maturity-beta-orange.svg)
+![Maturity Level][maturity-badge]
+[![Build & Test][github-actions-badge]][github-actions-link]
+[![ARM Build][drone-badge]][drone-link]
 
 Rust wrapper for [hacl-star and evercrypt](https://github.com/project-everest/hacl-star/).
 
@@ -13,19 +14,26 @@ Run `build-evercrypt.sh` in order to build the `gcc-compatible` dist (this requi
 
 ### Platforms
 
-| Platform    | Supported |                                                                                                           Status                                                                                                           |
-| :---------- | :-------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| MacOS       |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| iOS         |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| Arm64 MacOS |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| Linux x64   |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| Linux x86   |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| Windows x64 |    ✅     | [![Build & Test](https://github.com/franziskuskiefer/evercrypt-rust/workflows/Build%20&%20Test/badge.svg)](https://github.com/franziskuskiefer/evercrypt-rust/actions?query=workflow%3A%22Build+%26+Test%22+branch%3Amain) |
-| Arm64 Linux |    ✅     |                                  [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                   |
-| Arm32 Linux |    ✅     |                                  [![Build Status](https://cloud.drone.io/api/badges/franziskuskiefer/evercrypt-rust/status.svg)](https://cloud.drone.io/franziskuskiefer/evercrypt-rust)                                   |
+| Platform             | Supported |
+| :------------------- | :-------: |
+| MacOS                |    ✅     |
+| MacOS Arm64          |    ✅     |
+| iOS                  |    ✅     |
+| iOS Simulator x86_64 |    ❌     |
+| Linux x64            |    ✅     |
+| Linux x86            |    ✅     |
+| Windows x64          |    ✅     |
+| Arm64 Linux          |    ✅     |
+| Arm32 Linux          |    ✅     |
 
 #### Building on Windows
 
 To build `evercrypt` and `evercrypt-sys` on Windows ensure path for the `VsDevCmd.bat`
 called in in `hacl-build.bat` is correct on your system.
 The build has only been tested with VisualStudio 2019.
+
+[maturity-badge]: https://img.shields.io/badge/maturity-beta-orange.svg?style=for-the-badge
+[github-actions-badge]: https://img.shields.io/github/workflow/status/franziskuskiefer/evercrypt-rust/Build%20&%20Test?label=build%20%26%20tests&logo=github&style=for-the-badge
+[github-actions-link]: https://github.com/franziskuskiefer/evercrypt-rust/actions/workflows/evercrypt-rs.yml?query=branch%3Amain
+[drone-badge]: https://img.shields.io/drone/build/franziskuskiefer/evercrypt-rust?label=ARM%20BUILD&style=for-the-badge
+[drone-link]: https://cloud.drone.io/franziskuskiefer/evercrypt-rust
