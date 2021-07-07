@@ -203,7 +203,7 @@ fn rebuild(home_dir: &Path, out_dir: &Path) -> bool {
     let hacl_revision = if hacl_revision.is_empty() || hacl_revision.len() < 42 {
         String::new()
     } else {
-        String::from_utf8(hacl_revision.clone()[1..41].to_vec()).unwrap()
+        String::from_utf8(hacl_revision[1..41].to_vec()).unwrap()
     };
     match File::open(config_file.clone()) {
         Ok(mut file) => {
@@ -216,16 +216,16 @@ fn rebuild(home_dir: &Path, out_dir: &Path) -> bool {
                 // We need to rebuild and write the new revision to the config.
                 drop(file);
                 let mut new_file = File::create(config_file).unwrap();
-                new_file.write(&hacl_revision.into_bytes()).unwrap();
+                new_file.write_all(&hacl_revision.into_bytes()).unwrap();
                 return true;
             }
-            return false;
+            false
         }
         Err(_) => {
             // The file doesn't exist. Write it and build.
             let mut new_file = File::create(config_file).unwrap();
-            new_file.write(&hacl_revision.into_bytes()).unwrap();
-            return true;
+            new_file.write_all(&hacl_revision.into_bytes()).unwrap();
+            true
         }
     }
 }
@@ -274,7 +274,7 @@ fn create_bindings(hacl_dir: &Path, hacl_src_path_str: &str, home_dir: &Path) {
     // let bindings_path = out_path.join("bindings.rs");
     let home_bindings = home_dir.join("src/bindings/bindings.rs");
     bindings
-        .write_to_file(home_bindings.clone())
+        .write_to_file(home_bindings)
         .expect("Couldn't write bindings!");
 }
 
@@ -344,10 +344,10 @@ fn main() {
 
     // Build hacl/evercrypt
     // Always rebuild on windows for now. TODO: fix rebuild check on Windows.
-    if build_config.windows || rebuild(home_dir, &out_path) {
+    if build_config.windows || rebuild(home_dir, out_path) {
         // Only rebuild if the hacl revision changed.
-        copy_hacl_to_out(&out_path, &hacl_src_path);
-        build_hacl(&hacl_src_path, &build_config);
+        copy_hacl_to_out(out_path, &hacl_src_path);
+        build_hacl(&hacl_src_path, build_config);
     }
 
     // Generate new bindings. This is a no-op on Windows.
