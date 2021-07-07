@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Mode","The HMAC mode defining the used hash function."]],"fn":[["get_tag_size",""],["hmac","Compute the HMAC value with the given `mode` and `key` on `data` with an output tag length of `tag_length`. Returns a vector of length `tag_length`."],["tag_size","Get the tag size for a given mode."]]});
