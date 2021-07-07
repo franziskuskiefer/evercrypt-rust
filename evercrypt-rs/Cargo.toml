@@ -1,6 +1,6 @@
 [package]
 name = "evercrypt"
-version = "0.0.10"
+version = "0.0.9"
 authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
