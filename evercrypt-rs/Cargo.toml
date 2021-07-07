@@ -22,7 +22,7 @@ random = ["rand", "rand_core"]
 serialization = ["serde", "serde_json"]
 
 [dependencies]
-evercrypt-sys = { version = "0.0.9", path = "../evercrypt-sys" }
+evercrypt-sys = { version = "0.0.8", path = "../evercrypt-sys" }
 aes-gcm = { version = "0.8", optional = true }
 rand = { version = "0.8", optional = true }
 rand_core = { version = "0.6", optional = true }
