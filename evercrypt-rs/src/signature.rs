@@ -101,6 +101,12 @@ pub fn verify(
 ) -> Result<bool, Error> {
     match mode {
         Mode::Ed25519 => {
+            if signature.len() != 64 {
+                return Err(Error::InvalidSignature);
+            }
+            if pk.len() != 32 {
+                return Err(Error::InvalidPoint);
+            }
             let mut key = [0u8; 32];
             key.clone_from_slice(pk);
             let mut sig = [0u8; 64];
