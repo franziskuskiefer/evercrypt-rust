@@ -19,11 +19,13 @@ use openmls_crypto::{
     hkdf::HkdfDerive,
     key_generation::GenerateKeys,
     keys::PublicKey,
-    secret::Secret,
     signature::{Sign, Signature, Verify},
     Supports,
 };
 use sqlite_key_store::KeyStoreId;
+
+mod secret;
+use secret::*;
 
 pub struct Evercrypt {}
 
@@ -244,6 +246,7 @@ fn expand_unsafe(
 impl HkdfDerive for Evercrypt {
     type KeyStoreType = KeyStore;
     type KeyStoreIndex = KeyStoreId;
+    type Secret = secret::Secret;
 
     fn hkdf(
         key_store: &Self::KeyStoreType,
