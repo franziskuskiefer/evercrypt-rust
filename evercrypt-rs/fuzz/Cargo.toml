@@ -34,3 +34,9 @@ name = "aead"
 path = "fuzz_targets/aead.rs"
 test = false
 doc = false
+
+[[bin]]
+name = "ed25519"
+path = "fuzz_targets/ed25519.rs"
+test = false
+doc = false

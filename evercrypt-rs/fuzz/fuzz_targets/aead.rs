@@ -28,4 +28,17 @@ fuzz_target!(|data: &[u8]| {
             assert_eq!(ptxt, data);
         }
     }
+
+    // Check keys
+    for &mode in modes.iter() {
+        let aead = Aead::init(mode).unwrap();
+        let _aead = aead.set_key(data);
+    }
+
+    // Check nonce
+    for &mode in modes.iter() {
+        let mut aead = Aead::init(mode).unwrap();
+        aead.set_random_key().unwrap();
+        let _enc = aead.encrypt(data, data, &[]);
+    }
 });
