@@ -89,4 +89,6 @@ jobs:
       - name: Fuzz AEAD
         run: cargo fuzz run aead -- -runs=1000000
       - name: Fuzz ECDH
-        run: cargo fuzz run ecdh -- -runs=100000
+        run: cargo fuzz run ecdh -- -runs=100000 -rss_limit_mb=4096 -max_len=2048
+      - name: Fuzz Ed25519
+        run: cargo fuzz run ed25519 -- -runs=100000 -max_len=2048
