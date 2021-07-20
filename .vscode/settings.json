@@ -1,0 +1,7 @@
+{
+    "cmake.configureOnOpen": false,
+    "rust-analyzer.linkedProjects": [
+        "./evercrypt-sys/Cargo.toml",
+        "./evercrypt-rs/Cargo.toml"
+    ]
+}
