@@ -2,7 +2,9 @@ use std::fmt::Debug;
 
 use crypto_algorithms::{AeadType, SymmetricKeyType};
 use rand::{CryptoRng, RngCore};
-use tls_codec::{Deserialize, SecretTlsVecU16, Serialize, TlsDeserialize, TlsSerialize, TlsSize};
+use tls_codec::{
+    Deserialize, SecretTlsVecU16, Serialize, Size, TlsDeserialize, TlsSerialize, TlsSize,
+};
 use zeroize::Zeroize;
 
 use key_store::traits::KeyStoreValue;
@@ -11,7 +13,7 @@ use crate::sqlite_key_store::util::{bytes_to_hex, equal_ct};
 
 use super::errors::SymmetricKeyError;
 
-#[derive(Eq, Zeroize, TlsDeserialize, TlsSerialize)]
+#[derive(Eq, Zeroize, TlsDeserialize, TlsSerialize, TlsSize)]
 #[zeroize(drop)]
 pub struct Secret {
     value: SecretTlsVecU16<u8>,

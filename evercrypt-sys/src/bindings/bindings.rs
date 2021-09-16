@@ -38,6 +38,9 @@ pub const Spec_Agile_AEAD_AES128_CCM8: u32 = 5;
 pub const Spec_Agile_AEAD_AES256_CCM8: u32 = 6;
 pub const Spec_Frodo_Params_SHAKE128: u32 = 0;
 pub const Spec_Frodo_Params_AES128: u32 = 1;
+pub type __uint8_t = ::std::os::raw::c_uchar;
+pub type __uint32_t = ::std::os::raw::c_uint;
+pub type __uint64_t = ::std::os::raw::c_ulong;
 pub type C_String_t = *const ::std::os::raw::c_char;
 extern "C" {
     pub fn EverCrypt_AutoConfig2_has_shaext() -> bool;

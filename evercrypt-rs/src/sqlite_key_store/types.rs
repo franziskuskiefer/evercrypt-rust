@@ -9,7 +9,9 @@
 )]
 
 use crypto_algorithms::AsymmetricKeyType;
-use tls_codec::{Deserialize, SecretTlsVecU16, Serialize, TlsDeserialize, TlsSerialize, TlsSize};
+use tls_codec::{
+    Deserialize, SecretTlsVecU16, Serialize, Size, TlsDeserialize, TlsSerialize, TlsSize,
+};
 use zeroize::Zeroize;
 
 use key_store::traits::KeyStoreValue;
@@ -25,7 +27,7 @@ use super::{util::equal_ct, KeyStoreError};
     feature = "serialization",
     derive(serde::Serialize, serde::Deserialize)
 )]
-#[derive(Eq, Zeroize, TlsSerialize, TlsDeserialize)]
+#[derive(Eq, Zeroize, TlsSerialize, TlsDeserialize, TlsSize)]
 #[zeroize(drop)]
 pub struct PrivateKey {
     value: SecretTlsVecU16<u8>,
@@ -102,7 +104,7 @@ impl KeyStoreValue for PrivateKey {
     feature = "serialization",
     derive(serde::Serialize, serde::Deserialize)
 )]
-#[derive(Eq, PartialEq, Zeroize, Clone, Debug, TlsSerialize, TlsDeserialize)]
+#[derive(Eq, PartialEq, Zeroize, Clone, Debug, TlsSerialize, TlsDeserialize, TlsSize)]
 #[zeroize(drop)]
 pub struct PublicKey {
     value: SecretTlsVecU16<u8>,
