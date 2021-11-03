@@ -1,8 +1,8 @@
 [package]
 name = "evercrypt-sys"
-version = "0.0.8"
+version = "0.0.9"
 authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
-edition = "2018"
+edition = "2021"
 build = "build.rs"
 categories = ["cryptography", "api-bindings"]
 links = "evercrypt"

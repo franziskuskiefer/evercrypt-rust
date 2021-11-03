@@ -4,6 +4,7 @@
 [![Build & Test][github-actions-badge]][github-actions-link]
 [![ARM Build][drone-badge]][drone-link]
 [![codecov][codecov-badge]][codecov-link]
+![Rust Version][rustc-image]
 
 High-level [evercrypt](https://github.com/project-everest/hacl-star) bindings crates.
 
@@ -55,3 +56,4 @@ This will also run automatically generated binding tests from bindgen.
 [drone-link]: https://cloud.drone.io/franziskuskiefer/evercrypt-rust
 [codecov-badge]: https://img.shields.io/codecov/c/github/franziskuskiefer/evercrypt-rust?style=for-the-badge&token=RO2Q0YTSNY
 [codecov-link]: https://codecov.io/gh/franziskuskiefer/evercrypt-rust/
+[rustc-image]: https://img.shields.io/badge/rustc-1.56+-blue.svg?style=for-the-badge

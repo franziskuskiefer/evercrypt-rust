@@ -1,8 +1,8 @@
 [package]
 name = "evercrypt"
-version = "0.0.10"
+version = "0.0.11"
 authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "MPL-2.0"
 documentation = "https://www.franziskuskiefer.de/evercrypt-rust"
 description = "Crypto library using formally verified code from HACL/Evercrypt"
@@ -22,7 +22,7 @@ random = ["rand", "rand_core"]
 serialization = ["serde", "serde_json"]
 
 [dependencies]
-evercrypt-sys = { version = "0.0.8", path = "../evercrypt-sys" }
+evercrypt-sys = { version = "0.0.9", path = "../evercrypt-sys" }
 aes-gcm = { version = "0.8", optional = true }
 rand = { version = "0.8", optional = true }
 rand_core = { version = "0.6", optional = true }

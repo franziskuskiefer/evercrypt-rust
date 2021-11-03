@@ -3,6 +3,7 @@
 ![Maturity Level][maturity-badge]
 [![Build & Test][github-actions-badge]][github-actions-link]
 [![ARM Build][drone-badge]][drone-link]
+![Rust Version][rustc-image]
 
 Rust wrapper for [hacl-star and evercrypt](https://github.com/project-everest/hacl-star/).
 
@@ -37,3 +38,4 @@ The build has only been tested with VisualStudio 2019.
 [github-actions-link]: https://github.com/franziskuskiefer/evercrypt-rust/actions/workflows/evercrypt-rs.yml?query=branch%3Amain
 [drone-badge]: https://img.shields.io/drone/build/franziskuskiefer/evercrypt-rust?label=ARM%20BUILD&style=for-the-badge
 [drone-link]: https://cloud.drone.io/franziskuskiefer/evercrypt-rust
+[rustc-image]: https://img.shields.io/badge/rustc-1.56+-blue.svg?style=for-the-badge
