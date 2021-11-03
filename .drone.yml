@@ -19,24 +19,24 @@ steps:
   - cargo test --verbose --features rust-crypto-aes
   - cargo test --verbose --all-features
 
----
-kind: pipeline
-type: docker
-name: arm
+# ---
+# kind: pipeline
+# type: docker
+# name: arm
 
-platform:
-  arch: arm
+# platform:
+#   arch: arm
 
-steps:
-- name: test
-  image: rust:latest
-  commands:
-  - apt-get update -qq --yes && apt-get install -qq --yes clang
-  - git submodule update --init --recursive
-  - cd evercrypt-sys
-  - cargo build --verbose
-  - cargo test --verbose
-  - cd ../evercrypt-rs
-  - cargo build --verbose --features rust-crypto-aes
-  - cargo test --verbose --features rust-crypto-aes
-  - cargo test --verbose --all-features
+# steps:
+# - name: test
+#   image: rust:latest
+#   commands:
+#   - apt-get update -qq --yes && apt-get install -qq --yes clang
+#   - git submodule update --init --recursive
+#   - cd evercrypt-sys
+#   - cargo build --verbose
+#   - cargo test --verbose
+#   - cd ../evercrypt-rs
+#   - cargo build --verbose --features rust-crypto-aes
+#   - cargo test --verbose --features rust-crypto-aes
+#   - cargo test --verbose --all-features
