@@ -25,6 +25,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: 1.56
+          override: true
       - if: matrix.os == 'ubuntu-latest'
         run: sudo apt -y install pkg-config
       - if: matrix.os == 'macos-latest'
