@@ -191,10 +191,7 @@ fn hacl_aes_available() -> bool {
 }
 
 fn alg_is_aes(alg: Mode) -> bool {
-    match alg {
-        Mode::Aes128Gcm | Mode::Aes256Gcm => true,
-        _ => false,
-    }
+    matches!(alg, Mode::Aes128Gcm | Mode::Aes256Gcm)
 }
 
 fn op_mode(alg: Mode) -> Result<OpMode, Error> {

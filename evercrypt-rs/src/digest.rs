@@ -266,10 +266,10 @@ pub const fn digest_size(mode: Mode) -> usize {
 /// Check if we do SHA3, which is not in the agile API and hence has to be
 /// handled differently.
 const fn is_sha3(alg: Mode) -> bool {
-    match alg {
-        Mode::Sha3_224 | Mode::Sha3_256 | Mode::Sha3_384 | Mode::Sha3_512 => true,
-        _ => false,
-    }
+    matches!(
+        alg,
+        Mode::Sha3_224 | Mode::Sha3_256 | Mode::Sha3_384 | Mode::Sha3_512
+    )
 }
 
 /// The digest struct for stateful hashing.
