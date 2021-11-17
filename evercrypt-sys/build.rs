@@ -266,6 +266,8 @@ fn create_bindings(hacl_dir: &Path, hacl_src_path_str: &str, home_dir: &Path) {
         // Block everything we don't need or define ourselves.
         .blocklist_type("Hacl_Streaming_.*")
         .blocklist_type("EverCrypt_AEAD_state_s.*")
+        // Disable tests to avoid warnings and keep it portable
+        .layout_tests(false)
         // Generate bindings
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
