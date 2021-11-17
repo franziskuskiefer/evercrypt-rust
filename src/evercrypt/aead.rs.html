@@ -588,6 +588,10 @@
 <span id="588">588</span>
 <span id="589">589</span>
 <span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Authenticated Encryption with Associated Data (AEAD)</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This module implements AES-GCM 128 and 256, and Chacha20Poly1305.</span>
@@ -599,8 +603,10 @@
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! use evercrypt::aead::{Aead, Mode, Error};</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let key = [0x5b, 0x96, 0x04, 0xfe, 0x14, 0xea, 0xdb, 0xa9, 0x31, 0xb0, 0xcc, 0xf3, 0x48, 0x43, 0xda, 0xb9];</span>
-<span class="doccomment">//! let cipher = match Aead::new(Mode::Aes128Gcm, &amp;key) {</span>
+<span class="doccomment">//! let key = [0x5b, 0x96, 0x04, 0xfe, 0x14, 0xea, 0xdb, 0xa9, 0x31, 0xb0, 0xcc,</span>
+<span class="doccomment">//!            0xf3, 0x48, 0x43, 0xda, 0xb9, 0x5b, 0x96, 0x04, 0xfe, 0x14, 0xea,</span>
+<span class="doccomment">//!            0xdb, 0xa9, 0x31, 0xb0, 0xcc, 0xf3, 0x48, 0x43, 0xda, 0xb9];</span>
+<span class="doccomment">//! let cipher = match Aead::new(Mode::Chacha20Poly1305, &amp;key) {</span>
 <span class="doccomment">//!    Ok(c) =&gt; c,</span>
 <span class="doccomment">//!    Err(e) =&gt; panic!(&quot;Error instantiating AEAD.\n{:?}&quot;, e),</span>
 <span class="doccomment">//! };</span>
@@ -626,17 +632,19 @@
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! use evercrypt::aead::{self, Mode};</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let key = [0x5b, 0x96, 0x04, 0xfe, 0x14, 0xea, 0xdb, 0xa9, 0x31, 0xb0, 0xcc, 0xf3, 0x48, 0x43, 0xda, 0xb9];</span>
+<span class="doccomment">//! let key = [0x5b, 0x96, 0x04, 0xfe, 0x14, 0xea, 0xdb, 0xa9, 0x31, 0xb0, 0xcc,</span>
+<span class="doccomment">//!            0xf3, 0x48, 0x43, 0xda, 0xb9, 0x5b, 0x96, 0x04, 0xfe, 0x14, 0xea,</span>
+<span class="doccomment">//!            0xdb, 0xa9, 0x31, 0xb0, 0xcc, 0xf3, 0x48, 0x43, 0xda, 0xb9];</span>
 <span class="doccomment">//! let iv = [0x02, 0x83, 0x18, 0xab, 0xc1, 0x82, 0x40, 0x29, 0x13, 0x81, 0x41, 0xa2];</span>
 <span class="doccomment">//! let msg = [0x00, 0x1d, 0x0c, 0x23, 0x12, 0x87, 0xc1, 0x18, 0x27, 0x84, 0x55, 0x4c, 0xa3, 0xa2, 0x19, 0x08];</span>
 <span class="doccomment">//! let aad = [];</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let (ciphertext, tag) = match aead::encrypt(Mode::Aes128Gcm, &amp;key, &amp;msg, &amp;iv, &amp;aad) {</span>
+<span class="doccomment">//! let (ciphertext, tag) = match aead::encrypt(Mode::Chacha20Poly1305, &amp;key, &amp;msg, &amp;iv, &amp;aad) {</span>
 <span class="doccomment">//!    Ok(r) =&gt; r,</span>
 <span class="doccomment">//!    Err(e) =&gt; panic!(&quot;Error encrypting.\n{:?}&quot;, e),</span>
 <span class="doccomment">//! };</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let msg_ = match aead::decrypt(Mode::Aes128Gcm, &amp;key, &amp;ciphertext, &amp;tag, &amp;iv, &amp;aad) {</span>
+<span class="doccomment">//! let msg_ = match aead::decrypt(Mode::Chacha20Poly1305, &amp;key, &amp;ciphertext, &amp;tag, &amp;iv, &amp;aad) {</span>
 <span class="doccomment">//!     Ok(r) =&gt; r,</span>
 <span class="doccomment">//!     Err(e) =&gt; panic!(&quot;Error decrypting.\n{:?}&quot;, e),</span>
 <span class="doccomment">//! };</span>
