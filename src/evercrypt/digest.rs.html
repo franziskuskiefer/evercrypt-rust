@@ -691,10 +691,10 @@
 <span class="doccomment">/// Check if we do SHA3, which is not in the agile API and hence has to be</span>
 <span class="doccomment">/// handled differently.</span>
 <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">is_sha3</span>(<span class="ident">alg</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">match</span> <span class="ident">alg</span> {
-        <span class="ident">Mode::Sha3_224</span> <span class="op">|</span> <span class="ident">Mode::Sha3_256</span> <span class="op">|</span> <span class="ident">Mode::Sha3_384</span> <span class="op">|</span> <span class="ident">Mode::Sha3_512</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-    }
+    <span class="macro">matches!</span>(
+        <span class="ident">alg</span>,
+        <span class="ident">Mode::Sha3_224</span> <span class="op">|</span> <span class="ident">Mode::Sha3_256</span> <span class="op">|</span> <span class="ident">Mode::Sha3_384</span> <span class="op">|</span> <span class="ident">Mode::Sha3_512</span>
+    )
 }
 
 <span class="doccomment">/// The digest struct for stateful hashing.</span>
