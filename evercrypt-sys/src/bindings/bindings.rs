@@ -187,6 +187,32 @@ extern "C" {
     ) -> EverCrypt_Error_error_code;
 }
 extern "C" {
+    pub fn EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
+        k: *mut u8,
+        iv: *mut u8,
+        iv_len: u32,
+        ad: *mut u8,
+        ad_len: u32,
+        plain: *mut u8,
+        plain_len: u32,
+        cipher: *mut u8,
+        tag: *mut u8,
+    ) -> EverCrypt_Error_error_code;
+}
+extern "C" {
+    pub fn EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
+        k: *mut u8,
+        iv: *mut u8,
+        iv_len: u32,
+        ad: *mut u8,
+        ad_len: u32,
+        plain: *mut u8,
+        plain_len: u32,
+        cipher: *mut u8,
+        tag: *mut u8,
+    ) -> EverCrypt_Error_error_code;
+}
+extern "C" {
     pub fn EverCrypt_AEAD_encrypt_expand_aes128_gcm(
         k: *mut u8,
         iv: *mut u8,
@@ -242,6 +268,32 @@ extern "C" {
 extern "C" {
     pub fn EverCrypt_AEAD_decrypt(
         s: *mut EverCrypt_AEAD_state_s,
+        iv: *mut u8,
+        iv_len: u32,
+        ad: *mut u8,
+        ad_len: u32,
+        cipher: *mut u8,
+        cipher_len: u32,
+        tag: *mut u8,
+        dst: *mut u8,
+    ) -> EverCrypt_Error_error_code;
+}
+extern "C" {
+    pub fn EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
+        k: *mut u8,
+        iv: *mut u8,
+        iv_len: u32,
+        ad: *mut u8,
+        ad_len: u32,
+        cipher: *mut u8,
+        cipher_len: u32,
+        tag: *mut u8,
+        dst: *mut u8,
+    ) -> EverCrypt_Error_error_code;
+}
+extern "C" {
+    pub fn EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
+        k: *mut u8,
         iv: *mut u8,
         iv_len: u32,
         ad: *mut u8,
@@ -359,152 +411,6 @@ pub union EverCrypt_Hash_state_s_s__bindgen_ty_1 {
     pub case_SHA2_512_s: *mut u64,
     pub case_Blake2S_s: *mut u32,
     pub case_Blake2B_s: *mut u64,
-}
-#[test]
-fn bindgen_test_layout_EverCrypt_Hash_state_s_s__bindgen_ty_1() {
-    assert_eq!(
-        ::std::mem::size_of::<EverCrypt_Hash_state_s_s__bindgen_ty_1>(),
-        8usize,
-        concat!(
-            "Size of: ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1)
-        )
-    );
-    assert_eq!(
-        ::std::mem::align_of::<EverCrypt_Hash_state_s_s__bindgen_ty_1>(),
-        8usize,
-        concat!(
-            "Alignment of ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<EverCrypt_Hash_state_s_s__bindgen_ty_1>())).case_MD5_s
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1),
-            "::",
-            stringify!(case_MD5_s)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<EverCrypt_Hash_state_s_s__bindgen_ty_1>())).case_SHA1_s
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1),
-            "::",
-            stringify!(case_SHA1_s)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<EverCrypt_Hash_state_s_s__bindgen_ty_1>())).case_SHA2_224_s
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1),
-            "::",
-            stringify!(case_SHA2_224_s)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<EverCrypt_Hash_state_s_s__bindgen_ty_1>())).case_SHA2_256_s
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1),
-            "::",
-            stringify!(case_SHA2_256_s)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<EverCrypt_Hash_state_s_s__bindgen_ty_1>())).case_SHA2_384_s
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1),
-            "::",
-            stringify!(case_SHA2_384_s)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<EverCrypt_Hash_state_s_s__bindgen_ty_1>())).case_SHA2_512_s
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1),
-            "::",
-            stringify!(case_SHA2_512_s)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<EverCrypt_Hash_state_s_s__bindgen_ty_1>())).case_Blake2S_s
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1),
-            "::",
-            stringify!(case_Blake2S_s)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<EverCrypt_Hash_state_s_s__bindgen_ty_1>())).case_Blake2B_s
-                as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(EverCrypt_Hash_state_s_s__bindgen_ty_1),
-            "::",
-            stringify!(case_Blake2B_s)
-        )
-    );
-}
-#[test]
-fn bindgen_test_layout_EverCrypt_Hash_state_s_s() {
-    assert_eq!(
-        ::std::mem::size_of::<EverCrypt_Hash_state_s_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(EverCrypt_Hash_state_s_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<EverCrypt_Hash_state_s_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(EverCrypt_Hash_state_s_s))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<EverCrypt_Hash_state_s_s>())).tag as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(EverCrypt_Hash_state_s_s),
-            "::",
-            stringify!(tag)
-        )
-    );
 }
 pub type EverCrypt_Hash_state_s = EverCrypt_Hash_state_s_s;
 extern "C" {
