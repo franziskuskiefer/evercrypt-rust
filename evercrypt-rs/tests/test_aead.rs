@@ -1,4 +1,9 @@
 mod test_util;
+use evercrypt_sys::evercrypt_bindings::{
+    EverCrypt_AutoConfig2_has_aesni, EverCrypt_AutoConfig2_has_avx,
+    EverCrypt_AutoConfig2_has_movbe, EverCrypt_AutoConfig2_has_pclmulqdq,
+    EverCrypt_AutoConfig2_has_sse,
+};
 use test_util::*;
 
 use evercrypt::aead::{Aead, Error, Mode};
@@ -78,6 +83,13 @@ fn test_wycheproof() {
                 }
                 _ => panic!("Unknown algorithm {:?}", test_vec.algorithm),
             };
+            if !hacl_aes_available()
+                && (algorithm == Mode::Aes128Gcm || algorithm == Mode::Aes256Gcm)
+            {
+                println!("⚠️  AES NOT AVAILABLE ON THIS PLATFORM!");
+                *skipped_tests += testGroup.tests.len();
+                continue;
+            }
             let invalid_iv = if testGroup.ivSize != 96 { true } else { false };
 
             for test in testGroup.tests.iter() {
@@ -155,7 +167,7 @@ fn key_gen_self_test() {
     fn run(algorithm: Mode) {
         let msg = b"Evercrypt rulez";
         let aad = b"associated data";
-        let cipher = Aead::init(algorithm).unwrap();
+        let cipher = Aead::init(algorithm).expect(&format!("{:?} is not available", algorithm));
         let key = cipher.key_gen();
         let nonce = cipher.nonce_gen();
         let cipher = cipher.set_key(&key).unwrap();
@@ -171,7 +183,21 @@ fn key_gen_self_test() {
         };
         assert_eq!(msg[..], msg_decrypted[..]);
     }
-    run(Mode::Aes128Gcm);
-    run(Mode::Aes256Gcm);
+    if hacl_aes_available() {
+        run(Mode::Aes128Gcm);
+        run(Mode::Aes256Gcm);
+    } else {
+        println!("⚠️  AES NOT AVAILABLE ON THIS PLATFORM!")
+    }
     run(Mode::Chacha20Poly1305);
+}
+
+fn hacl_aes_available() -> bool {
+    unsafe {
+        EverCrypt_AutoConfig2_has_pclmulqdq()
+            && EverCrypt_AutoConfig2_has_avx()
+            && EverCrypt_AutoConfig2_has_sse()
+            && EverCrypt_AutoConfig2_has_movbe()
+            && EverCrypt_AutoConfig2_has_aesni()
+    }
 }
