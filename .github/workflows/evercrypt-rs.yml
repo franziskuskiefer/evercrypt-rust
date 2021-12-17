@@ -44,13 +44,13 @@ jobs:
       - name: Apple Silicon Build
         if: matrix.os == 'macos-latest'
         run: |
-          cargo build --target aarch64-apple-darwin --tests --verbose --features rust-crypto-aes
-          cargo build --release --target aarch64-apple-darwin --tests --verbose --features rust-crypto-aes
+          cargo build --target aarch64-apple-darwin --tests --verbose
+          cargo build --release --target aarch64-apple-darwin --tests --verbose
       - name: iOS aarch64
         if: matrix.os == 'macos-latest'
         run: |
-          cargo build --target aarch64-apple-ios --tests --verbose --features rust-crypto-aes
-          cargo build --release --target aarch64-apple-ios --tests --verbose --features rust-crypto-aes
+          cargo build --target aarch64-apple-ios --tests --verbose
+          cargo build --release --target aarch64-apple-ios --tests --verbose
       - if: matrix.os == 'ubuntu-latest'
         name: Test evercrypt-rs
         run: cargo test --verbose
@@ -58,18 +58,16 @@ jobs:
         run: cargo build --verbose --no-default-features
       - if: matrix.os == 'ubuntu-latest'
         name: Build & Test 32-bit Linux
-        run: cargo test --verbose --features rust-crypto-aes
-      - name: Test (rust-crypto-aes)
-        run: cargo test --verbose --features rust-crypto-aes
+        run: cargo test --verbose
       - name: Test (all-features)
         run: cargo test --verbose --all-features
       - name: Release (all-features)
         run: |
           cargo clean
           cargo test --release --verbose --all-features
-      - name: Benchmark (rust-crypto-aes)
+      - name: Benchmark
         run: |
-          cargo bench --verbose --features rust-crypto-aes
+          cargo bench --verbose
   fuzz:
     strategy:
       fail-fast: false

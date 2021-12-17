@@ -15,8 +15,8 @@ steps:
   - cargo build --verbose
   - cargo test --verbose
   - cd ../evercrypt-rs
-  - cargo build --verbose --features rust-crypto-aes
-  - cargo test --verbose --features rust-crypto-aes
+  - cargo build --verbose
+  - cargo test --verbose
   - cargo test --verbose --all-features
 
 # ---

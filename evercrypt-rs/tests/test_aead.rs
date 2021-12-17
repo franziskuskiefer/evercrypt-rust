@@ -114,7 +114,14 @@ fn test_wycheproof() {
                 let exp_tag = hex_str_to_bytes(&test.tag);
                 let key = hex_str_to_bytes(&test.key);
 
-                let cipher = Aead::new(algorithm, &key).unwrap();
+                let cipher = match Aead::new(algorithm, &key) {
+                    Ok(c) => c,
+                    Err(_) => {
+                        println!("⚠️  Skipping {:?} because it's not available.", algorithm);
+                        *skipped_tests += 1;
+                        continue;
+                    }
+                };
                 let (ctxt, tag) = match cipher.encrypt(&msg, &nonce, &aad) {
                     Ok(v) => v,
                     Err(e) => {
@@ -139,6 +146,14 @@ fn test_wycheproof() {
                     ctxt_comb.split_at(ctxt_comb.len() - cipher.tag_size()),
                     (&ctxt[..], &tag[..])
                 );
+                let mut in_place_payload = msg.clone();
+                let tag_in_place = cipher
+                    .encrypt_in_place(&mut in_place_payload, &nonce, &aad)
+                    .unwrap();
+                assert_eq!(
+                    (&in_place_payload[..], &tag_in_place[..]),
+                    (&ctxt[..], &tag[..])
+                );
                 let msg_decrypted = match cipher.decrypt(&ctxt, &tag, &nonce, &aad) {
                     Ok(m) => m,
                     Err(_) => {
@@ -149,6 +164,10 @@ fn test_wycheproof() {
                 assert_eq!(msg, msg_decrypted);
                 let msg_decrypted_comb = cipher.decrypt_combined(&ctxt_comb, &nonce, &aad).unwrap();
                 assert_eq!(msg, msg_decrypted_comb);
+                cipher
+                    .decrypt_in_place(in_place_payload.as_mut_slice(), &tag_in_place, &nonce, &aad)
+                    .unwrap();
+                assert_eq!(msg, in_place_payload);
                 *tests_run += 1;
             }
         }
@@ -167,7 +186,13 @@ fn key_gen_self_test() {
     fn run(algorithm: Mode) {
         let msg = b"Evercrypt rulez";
         let aad = b"associated data";
-        let cipher = Aead::init(algorithm).expect(&format!("{:?} is not available", algorithm));
+        let cipher = match Aead::init(algorithm) {
+            Ok(c) => c,
+            Err(_) => {
+                println!("⚠️  Skipping {:?} because it's not available.", algorithm);
+                return;
+            }
+        };
         let key = cipher.key_gen();
         let nonce = cipher.nonce_gen();
         let cipher = cipher.set_key(&key).unwrap();

@@ -38,9 +38,6 @@ jobs:
       - name: Build (no-default-features)
         working-directory: evercrypt-rs
         run: cargo build --verbose --no-default-features
-      - name: Test w/ rust-crypto-aes
-        working-directory: evercrypt-rs
-        run: cargo test --verbose --features rust-crypto-aes
       - name: Test w/ all-features
         working-directory: evercrypt-rs
         run: cargo test --verbose --all-features

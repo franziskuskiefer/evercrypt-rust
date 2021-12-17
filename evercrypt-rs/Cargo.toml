@@ -1,6 +1,6 @@
 [package]
 name = "evercrypt"
-version = "0.0.11"
+version = "0.1.0-alpha.1"
 authors = ["Franziskus Kiefer <franziskuskiefer@gmail.com>"]
 edition = "2021"
 license = "MPL-2.0"
@@ -14,16 +14,11 @@ crate-type = ["staticlib", "cdylib", "lib"]
 
 [features]
 default = ["random"]
-# HACL doesn't support AES on all platforms yet.
-# We therefore pull in the RustCrypto AES-GCM implementation here as a feature.
-rust-crypto-aes = ["aes-gcm"]
-force-rust-crypto-aes = ["rust-crypto-aes"]
 random = ["rand", "rand_core"]
 serialization = ["serde", "serde_json"]
 
 [dependencies]
 evercrypt-sys = { version = "0.0.9", path = "../evercrypt-sys" }
-aes-gcm = { version = "0.8", optional = true }
 rand = { version = "0.8", optional = true }
 rand_core = { version = "0.6", optional = true }
 serde_json = { version = "1.0", optional = true }

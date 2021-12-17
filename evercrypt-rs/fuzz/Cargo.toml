@@ -14,7 +14,6 @@ libfuzzer-sys = "0.3"
 
 [dependencies.evercrypt]
 path = ".."
-features = [ "rust-crypto-aes" ]
 
 [patch.crates-io]
 evercrypt-sys = { path = "../../evercrypt-sys" }

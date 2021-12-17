@@ -31,11 +31,6 @@ By default the Evercrypt crate includes the `random` feature that allows generat
 But this is not verified code and uses the [rand](https://crates.io/crates/rand) crate. It can be disabled with `--no-default-features`.
 Please bring your own randomness if you want to be safe.
 
-### RustCrypto AES
-
-Evecrypt currently implements AES only for x64 CPUs with a certain set of CPU instructions.
-To provide AES for other platforms the Evercrypt crate uses the [RustCrypto](https://github.com/RustCrypto/) AES implementation when using `--features rust-crypto-aes`.
-
 ## Platforms
 
 See above for a list of supported platforms.
