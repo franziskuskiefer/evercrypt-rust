@@ -10,7 +10,13 @@ fuzz_target!(|data: &[u8]| {
         AeadMode::Chacha20Poly1305,
     ];
     for &mode in modes.iter() {
-        let aead = Aead::init(mode).unwrap();
+        let aead = match Aead::init(mode) {
+            Ok(aead) => aead,
+            Err(_) => {
+                println!("{:?} is not available.", mode);
+                continue;
+            }
+        };
         let k = if data.len() >= aead.key_size() {
             data[0..aead.key_size()].to_vec()
         } else {
@@ -31,13 +37,25 @@ fuzz_target!(|data: &[u8]| {
 
     // Check keys
     for &mode in modes.iter() {
-        let aead = Aead::init(mode).unwrap();
+        let aead = match Aead::init(mode) {
+            Ok(aead) => aead,
+            Err(_) => {
+                println!("{:?} is not available.", mode);
+                continue;
+            }
+        };
         let _aead = aead.set_key(data);
     }
 
     // Check nonce
     for &mode in modes.iter() {
-        let mut aead = Aead::init(mode).unwrap();
+        let mut aead = match Aead::init(mode) {
+            Ok(aead) => aead,
+            Err(_) => {
+                println!("{:?} is not available.", mode);
+                continue;
+            }
+        };
         aead.set_random_key().unwrap();
         let _enc = aead.encrypt(data, data, &[]);
     }

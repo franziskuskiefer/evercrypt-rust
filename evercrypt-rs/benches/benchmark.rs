@@ -164,6 +164,10 @@ fn criterion_aead(c: &mut Criterion) {
     where
         F: FnMut(&[u8], &[u8], &[u8], Aead),
     {
+        if Aead::init(mode).is_err() {
+            println!("{:?} is not available.", mode);
+            return;
+        }
         c.bench_function(id, |b| {
             b.iter_batched(
                 || {
@@ -186,6 +190,10 @@ fn criterion_aead(c: &mut Criterion) {
     where
         F: FnMut(Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>),
     {
+        if Aead::init(mode).is_err() {
+            println!("{:?} is not available.", mode);
+            return;
+        }
         c.bench_function(id, |b| {
             b.iter_batched(
                 || {
@@ -359,6 +367,12 @@ fn criterion_aead_keys(c: &mut Criterion) {
 
     const PAYLOAD_MB: usize = PAYLOAD_SIZE / 1024 / 1024;
     const CHUNKS: usize = 100;
+
+    if Aead::init(Mode::Aes128Gcm).is_err() {
+        println!("{:?} is not available.", Mode::Aes128Gcm);
+        return;
+    }
+
     c.bench_function(
         &format!("AES128 GCM encrypt stateful {}x{}MB", CHUNKS, PAYLOAD_MB),
         |b| {

@@ -20,7 +20,13 @@ fn aead_keys() {
     fn run(chunks: usize, payload_size: usize) {
         let payload_mb: f64 = (payload_size as f64) / 1024. / 1024.;
         let total_mb: f64 = payload_mb * chunks as f64;
-        let aead = Aead::init(Mode::Aes128Gcm).unwrap();
+        let aead = match Aead::init(Mode::Aes128Gcm) {
+            Ok(aead) => aead,
+            Err(_) => {
+                println!("{:?} is not available.", Mode::Aes128Gcm);
+                return;
+            }
+        };
         let key = aead::key_gen(Mode::Aes128Gcm);
         let mut nonce = Vec::new();
         let mut data = Vec::new();
@@ -64,6 +70,29 @@ fn aead_keys() {
         }
         let end = Instant::now();
         assert_eq!(&ct1, &ct2);
+        let time = duration(end.duration_since(start));
+        println!("\t{} MB/s", total_mb / time);
+
+        // Stateless in place
+        let name = format!(
+            "AES128 GCM encrypt single-shot in place {}x{}MB",
+            chunks, payload_mb
+        );
+        println!("{}", name);
+        let mut in_place_tag = vec![];
+        let start = Instant::now();
+        for (chunk, chunk_nonce) in data.iter_mut().zip(nonce.iter()) {
+            in_place_tag = aead::encrypt_in_place(
+                Mode::Aes128Gcm,
+                &key,
+                chunk.as_mut_slice(),
+                chunk_nonce,
+                &aad,
+            )
+            .unwrap();
+        }
+        let end = Instant::now();
+        assert_eq!(&ct1[ct1.len() - 16..], &in_place_tag);
         let time = duration(end.duration_since(start));
         println!("\t{} MB/s", total_mb / time);
     }

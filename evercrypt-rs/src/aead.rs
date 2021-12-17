@@ -66,20 +66,6 @@ use serde::{Deserialize, Serialize};
 
 use evercrypt_sys::evercrypt_bindings::*;
 
-#[cfg(feature = "rust-crypto-aes")]
-use aes_gcm::aead::{Aead as RcAead, NewAead, Payload};
-#[cfg(feature = "rust-crypto-aes")]
-use aes_gcm::{aead::generic_array::GenericArray, Aes128Gcm, Aes256Gcm};
-
-/// Operating mode for AEAD.
-/// This allows enabling enabling RustCrypto AES as a fallback mode.
-#[derive(Clone, Copy, PartialEq)]
-enum OpMode {
-    Hacl = 0,
-    RustCryptoAes128 = 1,
-    RustCryptoAes256 = 2,
-}
-
 /// The AEAD Mode.
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[cfg_attr(feature = "serialization", derive(Serialize, Deserialize))]
@@ -111,6 +97,7 @@ impl From<Mode> for Spec_Agile_AEAD_alg {
 }
 
 /// Get the key size of the `Mode` in bytes.
+#[inline]
 pub const fn key_size(mode: Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 16,
@@ -120,6 +107,7 @@ pub const fn key_size(mode: Mode) -> usize {
 }
 
 /// Get the tag size of the `Mode` in bytes.
+#[inline]
 pub const fn tag_size(mode: Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 16,
@@ -129,6 +117,7 @@ pub const fn tag_size(mode: Mode) -> usize {
 }
 
 /// Get the nonce size of the `Mode` in bytes.
+#[inline]
 pub const fn nonce_size(mode: Mode) -> usize {
     match mode {
         Mode::Aes128Gcm => 12,
@@ -155,9 +144,6 @@ pub enum Error {
 pub struct Aead {
     mode: Mode,
     c_state: Option<*mut EverCrypt_AEAD_state_s>,
-    op_mode: OpMode,
-    #[allow(dead_code)] // key is only used when using rust-crypto
-    key: Vec<u8>,
 }
 
 /// Ciphertexts are byte vectors.
@@ -176,71 +162,25 @@ pub type Nonce = Vec<u8>;
 pub type Aad = [u8];
 
 // Check hardware support for HACL* AES implementation.
-fn hacl_aes_available() -> bool {
-    if cfg!(feature = "force-rust-crypto-aes") {
-        // With this config we force using the fallback AES implementation.
-        return false;
-    }
-    unsafe {
-        EverCrypt_AutoConfig2_has_pclmulqdq()
-            && EverCrypt_AutoConfig2_has_avx()
-            && EverCrypt_AutoConfig2_has_sse()
-            && EverCrypt_AutoConfig2_has_movbe()
-            && EverCrypt_AutoConfig2_has_aesni()
-    }
-}
-
-fn alg_is_aes(alg: Mode) -> bool {
-    matches!(alg, Mode::Aes128Gcm | Mode::Aes256Gcm)
-}
-
-fn op_mode(alg: Mode) -> Result<OpMode, Error> {
-    match alg {
-        Mode::Aes128Gcm | Mode::Aes256Gcm => {
-            if hacl_aes_available() {
-                Ok(OpMode::Hacl)
-            } else if cfg!(feature = "rust-crypto-aes") {
-                match alg {
-                    Mode::Aes128Gcm => Ok(OpMode::RustCryptoAes128),
-                    Mode::Aes256Gcm => Ok(OpMode::RustCryptoAes256),
-                    _ => panic!("Unreachable"),
-                }
-            } else {
-                Err(Error::InvalidAlgorithm)
-            }
-        }
-        Mode::Chacha20Poly1305 => Ok(OpMode::Hacl),
-    }
+unsafe fn hacl_aes_available() -> bool {
+    EverCrypt_AutoConfig2_has_pclmulqdq()
+        && EverCrypt_AutoConfig2_has_avx()
+        && EverCrypt_AutoConfig2_has_sse()
+        && EverCrypt_AutoConfig2_has_movbe()
+        && EverCrypt_AutoConfig2_has_aesni()
 }
 
 impl Aead {
-    fn set_key_(&mut self, k: Vec<u8>) -> Result<(), Error> {
-        match self.op_mode {
-            OpMode::Hacl => {
-                let state = unsafe {
-                    let mut state_ptr: *mut EverCrypt_AEAD_state_s = std::ptr::null_mut();
-                    let e = EverCrypt_AEAD_create_in(
-                        self.mode.into(),
-                        &mut state_ptr,
-                        k.to_vec().as_mut_ptr(),
-                    );
-                    if e != 0 {
-                        return Err(Error::InvalidInit);
-                    }
-                    state_ptr
-                };
-                self.c_state = Some(state);
-                self.key = k;
+    fn set_key_(&mut self, mut k: Vec<u8>) -> Result<(), Error> {
+        let state = unsafe {
+            let mut state_ptr: *mut EverCrypt_AEAD_state_s = std::ptr::null_mut();
+            let e = EverCrypt_AEAD_create_in(self.mode.into(), &mut state_ptr, k.as_mut_ptr());
+            if e != 0 {
+                return Err(Error::InvalidInit);
             }
-            OpMode::RustCryptoAes128 | OpMode::RustCryptoAes256 => {
-                if !cfg!(feature = "rust-crypto-aes") {
-                    return Err(Error::UnsupportedConfig);
-                }
-                // Fall back to software AES GCM implemented in RustCrypto
-                debug_assert!(alg_is_aes(self.mode));
-                self.key = k;
-            }
-        }
+            state_ptr
+        };
+        self.c_state = Some(state);
         Ok(())
     }
 
@@ -267,15 +207,18 @@ impl Aead {
     /// Initialize a new Aead object without a key.
     /// Use `set_key` to do so later.
     pub fn init(mode: Mode) -> Result<Self, Error> {
-        unsafe {
+        if unsafe {
             // Make sure this happened.
             EverCrypt_AutoConfig2_init();
+
+            // Make sure the algorithm is supported
+            (mode == Mode::Aes128Gcm || mode == Mode::Aes256Gcm) && !hacl_aes_available()
+        } {
+            return Err(Error::UnsupportedConfig);
         }
         Ok(Self {
             mode,
             c_state: None,
-            op_mode: op_mode(mode)?,
-            key: Vec::new(),
         })
     }
 
@@ -321,77 +264,6 @@ impl Aead {
         tag_size(self.mode)
     }
 
-    // Encryption using RustCrypto AES.
-    // Only available if the feature is enabled.
-    #[cfg(feature = "rust-crypto-aes")]
-    fn encrypt_rs(&self, msg: &[u8], iv: &[u8], aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
-        let ctxt_tag = match self.op_mode {
-            OpMode::RustCryptoAes128 => Aes128Gcm::new(GenericArray::from_slice(&self.key))
-                .encrypt((iv).into(), Payload { msg, aad }),
-            OpMode::RustCryptoAes256 => Aes256Gcm::new(GenericArray::from_slice(&self.key))
-                .encrypt((iv).into(), Payload { msg, aad }),
-            _ => return Err(Error::UnsupportedConfig),
-        };
-        match ctxt_tag {
-            Ok(mut c) => {
-                let tag = c.split_off(c.len() - self.tag_size());
-                debug_assert!(tag.len() == self.tag_size());
-                Ok((c, tag))
-            }
-            Err(_) => Err(Error::Encrypting),
-        }
-    }
-
-    // Decryption using RustCrytpo AES.
-    // Only available if the feature is enabled.
-    #[cfg(feature = "rust-crypto-aes")]
-    fn decrypt_rs(&self, ctxt: &[u8], tag: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
-        let mut p_in: Vec<u8> = vec![];
-        p_in.extend(ctxt);
-        p_in.extend(tag);
-        let msg = match self.op_mode {
-            OpMode::RustCryptoAes128 => Aes128Gcm::new(GenericArray::from_slice(&self.key))
-                .decrypt(
-                    (iv).into(),
-                    Payload {
-                        msg: &p_in[..],
-                        aad,
-                    },
-                ),
-            OpMode::RustCryptoAes256 => Aes256Gcm::new(GenericArray::from_slice(&self.key))
-                .decrypt(
-                    (iv).into(),
-                    Payload {
-                        msg: &p_in[..],
-                        aad,
-                    },
-                ),
-            _ => return Err(Error::UnsupportedConfig),
-        };
-        match msg {
-            Ok(c) => Ok(c),
-            Err(_) => Err(Error::InvalidCiphertext),
-        }
-    }
-
-    // Stub function for the default mode when RustCrypto support is not enabled.
-    #[cfg(not(feature = "rust-crypto-aes"))]
-    fn encrypt_rs(&self, _msg: &[u8], _iv: &[u8], _aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
-        Err(Error::UnsupportedConfig)
-    }
-
-    // Stub function for the default mode when RustCrypto support is not enabled.
-    #[cfg(not(feature = "rust-crypto-aes"))]
-    fn decrypt_rs(
-        &self,
-        _ctxt: &[u8],
-        _tag: &[u8],
-        _iv: &[u8],
-        _aad: &Aad,
-    ) -> Result<Vec<u8>, Error> {
-        Err(Error::UnsupportedConfig)
-    }
-
     /// Encrypt with the algorithm and key of this Aead.
     /// Returns `(ctxt, tag)` or an `Error`.
     pub fn encrypt(&self, msg: &[u8], iv: &[u8], aad: &Aad) -> Result<(Ciphertext, Tag), Error> {
@@ -399,27 +271,22 @@ impl Aead {
             return Err(Error::InvalidNonce);
         }
 
-        match self.op_mode {
-            OpMode::Hacl => {
-                let mut ctxt = vec![0u8; msg.len()];
-                let mut tag = vec![0u8; self.tag_size()];
-                unsafe {
-                    EverCrypt_AEAD_encrypt(
-                        self.c_state.unwrap(),
-                        iv.as_ptr() as _,
-                        self.nonce_size().try_into().unwrap(),
-                        aad.as_ptr() as _,
-                        aad.len() as u32,
-                        msg.as_ptr() as _,
-                        msg.len() as u32,
-                        ctxt.as_mut_ptr(),
-                        tag.as_mut_ptr(),
-                    );
-                }
-                Ok((ctxt, tag))
-            }
-            OpMode::RustCryptoAes128 | OpMode::RustCryptoAes256 => self.encrypt_rs(msg, iv, aad),
+        let mut ctxt = vec![0u8; msg.len()];
+        let mut tag = vec![0u8; self.tag_size()];
+        unsafe {
+            EverCrypt_AEAD_encrypt(
+                self.c_state.unwrap(),
+                iv.as_ptr() as _,
+                self.nonce_size().try_into().unwrap(),
+                aad.as_ptr() as _,
+                aad.len() as u32,
+                msg.as_ptr() as _,
+                msg.len() as u32,
+                ctxt.as_mut_ptr(),
+                tag.as_mut_ptr(),
+            );
         }
+        Ok((ctxt, tag))
     }
 
     /// Encrypt with the algorithm and key of this Aead.
@@ -430,67 +297,82 @@ impl Aead {
             return Err(Error::InvalidNonce);
         }
 
-        match self.op_mode {
-            OpMode::Hacl => {
-                // combined cipher text and tag
-                let mut ctxt = vec![0u8; msg.len() + self.tag_size()];
-                unsafe {
-                    EverCrypt_AEAD_encrypt(
-                        self.c_state.unwrap(),
-                        iv.as_ptr() as _,
-                        self.nonce_size().try_into().unwrap(),
-                        aad.as_ptr() as _,
-                        aad.len() as u32,
-                        msg.as_ptr() as _,
-                        msg.len() as u32,
-                        ctxt.as_mut_ptr(),
-                        ctxt.as_mut_ptr().offset(msg.len().try_into().unwrap()),
-                    );
-                }
-                Ok(ctxt)
-            }
-            OpMode::RustCryptoAes128 | OpMode::RustCryptoAes256 => {
-                let (mut ctxt, mut tag) = self.encrypt_rs(msg, iv, aad)?;
-                ctxt.append(&mut tag);
-                Ok(ctxt)
-            }
+        // combined cipher text and tag
+        let mut ctxt = vec![0u8; msg.len() + self.tag_size()];
+        unsafe {
+            EverCrypt_AEAD_encrypt(
+                self.c_state.unwrap(),
+                iv.as_ptr() as _,
+                self.nonce_size().try_into().unwrap(),
+                aad.as_ptr() as _,
+                aad.len() as u32,
+                msg.as_ptr() as _,
+                msg.len() as u32,
+                ctxt.as_mut_ptr(),
+                ctxt.as_mut_ptr().offset(msg.len().try_into().unwrap()),
+            );
         }
+        Ok(ctxt)
+    }
+
+    /// Encrypt with the algorithm and key of this Aead.
+    /// Returns the cipher text in the `payload` and a `tag` or an `Error`.
+    pub fn encrypt_in_place(&self, payload: &mut [u8], iv: &[u8], aad: &Aad) -> Result<Tag, Error> {
+        if iv.len() != self.nonce_size() {
+            return Err(Error::InvalidNonce);
+        }
+
+        // The tag
+        let mut tag = vec![0u8; self.tag_size()];
+        unsafe {
+            EverCrypt_AEAD_encrypt(
+                self.c_state.unwrap(),
+                iv.as_ptr() as _,
+                self.nonce_size().try_into().unwrap(),
+                aad.as_ptr() as _,
+                aad.len() as u32,
+                payload.as_ptr() as _,
+                payload.len() as u32,
+                payload.as_ptr() as _,
+                tag.as_mut_ptr(),
+            );
+        }
+        Ok(tag)
     }
 
     #[inline]
-    fn _decrypt(&self, ctxt: &[u8], tag: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
+    fn _decrypt_checks(&self, tag: &[u8], iv: &[u8]) -> Result<(), Error> {
         if iv.len() != 12 {
             return Err(Error::InvalidNonce);
         }
         if tag.len() != self.tag_size() {
             return Err(Error::InvalidTagSize);
         }
+        Ok(())
+    }
 
-        match self.op_mode {
-            OpMode::Hacl => {
-                let mut msg = vec![0u8; ctxt.len()];
-                let r = unsafe {
-                    EverCrypt_AEAD_decrypt(
-                        self.c_state.unwrap(),
-                        iv.as_ptr() as _,
-                        self.nonce_size().try_into().unwrap(),
-                        aad.as_ptr() as _,
-                        aad.len() as u32,
-                        ctxt.as_ptr() as _,
-                        ctxt.len() as u32,
-                        tag.as_ptr() as _,
-                        msg.as_mut_ptr(),
-                    )
-                };
-                if r as u32 != EverCrypt_Error_Success {
-                    Err(Error::InvalidCiphertext)
-                } else {
-                    Ok(msg)
-                }
-            }
-            OpMode::RustCryptoAes128 | OpMode::RustCryptoAes256 => {
-                self.decrypt_rs(ctxt, tag, iv, aad)
-            }
+    #[inline]
+    fn _decrypt(&self, ctxt: &[u8], tag: &[u8], iv: &[u8], aad: &Aad) -> Result<Vec<u8>, Error> {
+        self._decrypt_checks(tag, iv)?;
+
+        let mut msg = vec![0u8; ctxt.len()];
+        let r = unsafe {
+            EverCrypt_AEAD_decrypt(
+                self.c_state.unwrap(),
+                iv.as_ptr() as _,
+                self.nonce_size().try_into().unwrap(),
+                aad.as_ptr() as _,
+                aad.len() as u32,
+                ctxt.as_ptr() as _,
+                ctxt.len() as u32,
+                tag.as_ptr() as _,
+                msg.as_mut_ptr(),
+            )
+        };
+        if r as u32 != EverCrypt_Error_Success {
+            Err(Error::InvalidCiphertext)
+        } else {
+            Ok(msg)
         }
     }
 
@@ -513,6 +395,39 @@ impl Aead {
         let ctxt = &ctxt[..msg_len];
         self._decrypt(ctxt, tag, iv, aad)
     }
+
+    /// Decrypt with the algorithm and key of this Aead.
+    ///
+    /// Returns an `Error` if decryption failed. The decrypted `payload` is written
+    /// into `payload`.
+    pub fn decrypt_in_place(
+        &self,
+        payload: &mut [u8],
+        tag: &[u8],
+        iv: &[u8],
+        aad: &Aad,
+    ) -> Result<(), Error> {
+        self._decrypt_checks(tag, iv)?;
+
+        let r = unsafe {
+            EverCrypt_AEAD_decrypt(
+                self.c_state.unwrap(),
+                iv.as_ptr() as _,
+                self.nonce_size().try_into().unwrap(),
+                aad.as_ptr() as _,
+                aad.len() as u32,
+                payload.as_ptr() as _,
+                payload.len() as u32,
+                tag.as_ptr() as _,
+                payload.as_mut_ptr(),
+            )
+        };
+        if r as u32 != EverCrypt_Error_Success {
+            Err(Error::InvalidCiphertext)
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl Drop for Aead {
@@ -520,10 +435,6 @@ impl Drop for Aead {
         if let Some(c_state) = self.c_state {
             unsafe { EverCrypt_AEAD_free(c_state) }
         }
-        // This will probably be optimised out. But it's only best effort for
-        // now.
-        let zero_key: Vec<u8> = (0u8..self.key.len() as u8).collect();
-        let _ = std::mem::replace(&mut self.key, zero_key);
     }
 }
 
@@ -553,6 +464,18 @@ pub fn encrypt_combined(
     cipher.encrypt_combined(msg, iv, aad)
 }
 
+/// Single-shot API for in place AEAD encryption.
+pub fn encrypt_in_place(
+    alg: Mode,
+    k: &[u8],
+    payload: &mut [u8],
+    iv: &[u8],
+    aad: &Aad,
+) -> Result<Tag, Error> {
+    let cipher = Aead::new(alg, k)?;
+    cipher.encrypt_in_place(payload, iv, aad)
+}
+
 /// Single-shot API for AEAD decryption.
 pub fn decrypt(
     alg: Mode,
@@ -576,6 +499,19 @@ pub fn decrypt_combined(
 ) -> Result<Vec<u8>, Error> {
     let cipher = Aead::new(alg, k)?;
     cipher.decrypt_combined(ctxt, iv, aad)
+}
+
+/// Single-shot API for AEAD decryption in place.
+pub fn decrypt_in_place(
+    alg: Mode,
+    k: &[u8],
+    payload: &mut [u8],
+    tag: &[u8],
+    iv: &[u8],
+    aad: &Aad,
+) -> Result<(), Error> {
+    let cipher = Aead::new(alg, k)?;
+    cipher.decrypt_in_place(payload, tag, iv, aad)
 }
 
 /// Generate a random key.
