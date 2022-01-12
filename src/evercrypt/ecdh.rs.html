@@ -185,9 +185,9 @@
 
 <span class="doccomment">/// Derive the ECDH shared secret.</span>
 <span class="doccomment">/// Returns `Ok(p * s)` on the provided curve (`mode`) or an error.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>, <span class="ident">p</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">s</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>, <span class="ident">p</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">s</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">mode</span> {
-        <span class="ident">Mode::X25519</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Mode::X25519</span> =&gt; {
             <span class="kw">if</span> <span class="ident">p</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">32</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidPoint</span>);
             }
@@ -200,21 +200,21 @@
             <span class="ident">scalar</span>.<span class="ident">clone_from_slice</span>(<span class="ident">s</span>);
 
             <span class="kw">match</span> <span class="ident">x25519::dh</span>(<span class="kw-2">&amp;</span><span class="ident">point</span>, <span class="kw-2">&amp;</span><span class="ident">scalar</span>) {
-                <span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">r</span>.<span class="ident">to_vec</span>()),
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidPoint</span>),
+                <span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">r</span>.<span class="ident">to_vec</span>()),
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidPoint</span>),
             }
         }
-        <span class="ident">Mode::P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">p256::dh</span>(<span class="ident">p</span>, <span class="ident">s</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">r</span>.<span class="ident">to_vec</span>()),
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidPoint</span>),
+        <span class="ident">Mode::P256</span> =&gt; <span class="kw">match</span> <span class="ident">p256::dh</span>(<span class="ident">p</span>, <span class="ident">s</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">r</span>.<span class="ident">to_vec</span>()),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidPoint</span>),
         },
     }
 }
 
 <span class="doccomment">/// Returns `Ok(base_point * s)` on the provided curve (`mode`) or an error.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_base</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_base</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">mode</span> {
-        <span class="ident">Mode::X25519</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Mode::X25519</span> =&gt; {
             <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">32</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidScalar</span>);
             }
@@ -223,9 +223,9 @@
 
             <span class="prelude-val">Ok</span>(<span class="ident">x25519::dh_base</span>(<span class="kw-2">&amp;</span><span class="ident">scalar</span>).<span class="ident">to_vec</span>())
         }
-        <span class="ident">Mode::P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">p256::dh_base</span>(<span class="ident">s</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">r</span>.<span class="ident">to_vec</span>()),
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidPoint</span>),
+        <span class="ident">Mode::P256</span> =&gt; <span class="kw">match</span> <span class="ident">p256::dh_base</span>(<span class="ident">s</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">r</span>.<span class="ident">to_vec</span>()),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidPoint</span>),
         },
     }
 }
@@ -234,10 +234,10 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns the scalar key bytes as `u8` vector.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_gen</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_gen</span>(<span class="ident">mode</span>: <span class="ident">Mode</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">mode</span> {
-        <span class="ident">Mode::X25519</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">x25519::key_gen</span>().<span class="ident">to_vec</span>()),
-        <span class="ident">Mode::P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p256::key_gen</span>()
+        <span class="ident">Mode::X25519</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">x25519::key_gen</span>().<span class="ident">to_vec</span>()),
+        <span class="ident">Mode::P256</span> =&gt; <span class="ident">p256::key_gen</span>()
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::KeyGenError</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">to_vec</span>()),
     }

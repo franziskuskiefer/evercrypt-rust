@@ -126,7 +126,7 @@
 
 <span class="doccomment">/// Sign message `msg` with secret key `sk`.</span>
 <span class="doccomment">/// Returns a `Signature`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eddsa_sign</span>(<span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Signature</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eddsa_sign</span>(<span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Signature</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">64</span>];
     <span class="kw">unsafe</span> {
         <span class="ident">EverCrypt_Ed25519_sign</span>(
@@ -141,7 +141,7 @@
 
 <span class="doccomment">/// Verify signature `signature` on message `msg` with public key `pk`.</span>
 <span class="doccomment">/// Returns `true` if the signature is valid and `false` otherwise.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eddsa_verify</span>(<span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span>, <span class="ident">signature</span>: <span class="kw-2">&amp;</span><span class="ident">Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eddsa_verify</span>(<span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span>, <span class="ident">signature</span>: <span class="kw-2">&amp;</span><span class="ident">Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> {
     <span class="kw">unsafe</span> {
         <span class="ident">EverCrypt_Ed25519_verify</span>(
             <span class="ident">pk</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>,
@@ -153,7 +153,7 @@
 }
 
 <span class="doccomment">/// Compute the public `Point` for the given secret key `sk`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sk2pk</span>(<span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Point</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sk2pk</span>(<span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>) -&gt; <span class="ident">Point</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
     <span class="kw">unsafe</span> {
         <span class="ident">EverCrypt_Ed25519_secret_to_public</span>(<span class="ident">out</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">sk</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>);
@@ -163,7 +163,7 @@
 
 <span class="doccomment">/// Generate a random `Scalar`.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_gen</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Scalar</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_gen</span>() -&gt; <span class="ident">Scalar</span> {
     <span class="ident"><span class="kw">crate</span>::rand_util::random_array</span>()
 }
 </code></pre></div>
