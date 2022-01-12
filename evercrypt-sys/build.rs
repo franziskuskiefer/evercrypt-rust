@@ -263,6 +263,7 @@ fn create_bindings(hacl_dir: &Path, hacl_src_path_str: &str, home_dir: &Path) {
         .allowlist_function("Hacl_SHA3_.*")
         .allowlist_var("EverCrypt_Error_.*")
         .allowlist_var("Spec_.*")
+        .allowlist_type("Spec_.*")
         // Block everything we don't need or define ourselves.
         .blocklist_type("Hacl_Streaming_.*")
         .blocklist_type("EverCrypt_AEAD_state_s.*")
