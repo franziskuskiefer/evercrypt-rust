@@ -24,12 +24,10 @@ pub fn validate_pk(pk: &[u8]) -> Result<PublicKey, Error> {
     let uncompressed_point = if pk.len() < 65 {
         false
     } else {
-        unsafe {
-            Hacl_P256_decompression_not_compressed_form(pk.as_ptr() as _, public.as_mut_ptr())
-        }
+        unsafe { Hacl_P256_uncompressed_to_raw(pk.as_ptr() as _, public.as_mut_ptr()) }
     };
     let compressed_point = if !uncompressed_point && pk.len() >= 33 {
-        unsafe { Hacl_P256_decompression_compressed_form(pk.as_ptr() as _, public.as_mut_ptr()) }
+        unsafe { Hacl_P256_compressed_to_raw(pk.as_ptr() as _, public.as_mut_ptr()) }
     } else {
         false
     };
@@ -39,7 +37,7 @@ pub fn validate_pk(pk: &[u8]) -> Result<PublicKey, Error> {
             public.clone_from_slice(pk);
         }
     }
-    let valid = unsafe { Hacl_P256_verify_q(public.as_ptr() as _) };
+    let valid = unsafe { Hacl_P256_validate_public_key(public.as_ptr() as _) };
     if !uncompressed_point && !compressed_point && !valid {
         return Err(Error::InvalidPoint);
     }
@@ -60,7 +58,7 @@ pub fn validate_sk(sk: &[u8]) -> Result<Scalar, Error> {
     }
 
     // Ensure that the key is in range  [1, p-1]
-    let valid = unsafe { Hacl_P256_is_more_than_zero_less_than_order(private.as_ptr() as _) };
+    let valid = unsafe { Hacl_P256_validate_private_key(private.as_ptr() as _) };
     if !valid {
         return Err(Error::InvalidScalar);
     }
@@ -73,7 +71,7 @@ pub fn dh_base(s: &[u8]) -> Result<[u8; 64], Error> {
     let private = validate_sk(s)?;
 
     let mut out = [0u8; 64];
-    let success = unsafe { Hacl_P256_ecp256dh_i(out.as_mut_ptr(), private.as_ptr() as _) };
+    let success = unsafe { Hacl_P256_dh_initiator(out.as_mut_ptr(), private.as_ptr() as _) };
     if success {
         Ok(out)
     } else {
@@ -91,7 +89,7 @@ pub fn dh(p: &[u8], s: &[u8]) -> Result<[u8; 64], Error> {
 
     let mut out = [0u8; 64];
     let success = unsafe {
-        Hacl_P256_ecp256dh_r(
+        Hacl_P256_dh_responder(
             out.as_mut_ptr(),
             public.as_ptr() as _,
             private.as_ptr() as _,

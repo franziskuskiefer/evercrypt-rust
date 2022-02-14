@@ -919,28 +919,28 @@ extern "C" {
     ) -> bool;
 }
 extern "C" {
-    pub fn Hacl_P256_verify_q(pubKey: *mut u8) -> bool;
+    pub fn Hacl_P256_validate_public_key(pubKey: *mut u8) -> bool;
 }
 extern "C" {
-    pub fn Hacl_P256_decompression_not_compressed_form(b: *mut u8, result: *mut u8) -> bool;
+    pub fn Hacl_P256_validate_private_key(x: *mut u8) -> bool;
 }
 extern "C" {
-    pub fn Hacl_P256_decompression_compressed_form(b: *mut u8, result: *mut u8) -> bool;
+    pub fn Hacl_P256_uncompressed_to_raw(b: *mut u8, result: *mut u8) -> bool;
 }
 extern "C" {
-    pub fn Hacl_P256_compression_not_compressed_form(b: *mut u8, result: *mut u8);
+    pub fn Hacl_P256_compressed_to_raw(b: *mut u8, result: *mut u8) -> bool;
 }
 extern "C" {
-    pub fn Hacl_P256_compression_compressed_form(b: *mut u8, result: *mut u8);
+    pub fn Hacl_P256_raw_to_uncompressed(b: *mut u8, result: *mut u8);
 }
 extern "C" {
-    pub fn Hacl_P256_ecp256dh_i(result: *mut u8, scalar: *mut u8) -> bool;
+    pub fn Hacl_P256_raw_to_compressed(b: *mut u8, result: *mut u8);
 }
 extern "C" {
-    pub fn Hacl_P256_ecp256dh_r(result: *mut u8, pubKey: *mut u8, scalar: *mut u8) -> bool;
+    pub fn Hacl_P256_dh_initiator(result: *mut u8, scalar: *mut u8) -> bool;
 }
 extern "C" {
-    pub fn Hacl_P256_is_more_than_zero_less_than_order(x: *mut u8) -> bool;
+    pub fn Hacl_P256_dh_responder(result: *mut u8, pubKey: *mut u8, scalar: *mut u8) -> bool;
 }
 extern "C" {
     pub fn Hacl_SHA3_shake128_hacl(
