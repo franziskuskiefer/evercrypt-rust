@@ -1,3 +1,9 @@
+# 📦 Project Archived
+
+This project has been archived and is no longer under active development or maintenance. While the code may still be functional for some use cases, we recommend using [libcrux](https://github.com/cryspen/libcrux).
+
+---
+
 # Evercrypt & HACL Rust bindings
 
 ![Maturity Level][maturity-badge]
